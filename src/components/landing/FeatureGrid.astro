@@ -1,0 +1,303 @@
+---
+import Section from "../ui/Section.astro";
+import Icon from "../ui/Icon.astro";
+import { features } from "../../content/site/landing";
+import { getIcon } from "../../lib/icons";
+---
+
+<Section
+  id="features"
+  title="What mvmctl gives you"
+  description="A visual overview of the core building blocks: lifecycle control, host integration, and reproducible installs."
+>
+  <div class="grid" data-anim="feature-grid">
+    {
+      features.map((feature, index) => (
+        <article class={`card tone-${index + 1}`} data-anim="feature-card">
+          <div class="visual" aria-hidden="true">
+            <div class="icon-badge">
+              <Icon icon={getIcon(feature.icon)} size="1rem" class="icon" />
+            </div>
+            <span>{feature.stat}</span>
+          </div>
+          <h3>{feature.title}</h3>
+          <p>{feature.description}</p>
+          <ul>
+            {feature.bullets.map((bullet) => (
+              <li>{bullet}</li>
+            ))}
+          </ul>
+        </article>
+      ))
+    }
+  </div>
+</Section>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .card {
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 1rem;
+    background: linear-gradient(
+      180deg,
+      var(--color-surface-card-92-start),
+      var(--color-surface-card-95-end)
+    );
+    position: relative;
+    transition: border-color 250ms ease, transform 250ms ease;
+    min-width: 0;
+  }
+
+  .card::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: 1rem;
+    border: 1px solid transparent;
+    transition: border-color 250ms ease;
+    pointer-events: none;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: currentColor;
+  }
+
+  .card.tone-1 {
+    background: linear-gradient(180deg, var(--color-tone-green-start), var(--color-tone-green-end));
+    color: var(--color-tone-green-text);
+  }
+
+  .card.tone-1 .icon-badge {
+    background: var(--color-accent-green-16);
+    border-color: var(--color-accent-green-28);
+  }
+
+  .card.tone-1 .icon {
+    color: var(--color-accent-green);
+    filter: drop-shadow(0 0 8px var(--color-accent-green-24));
+  }
+
+  .card.tone-2 {
+    background: linear-gradient(180deg, var(--color-tone-blue-start), var(--color-tone-blue-end));
+    color: var(--color-tone-blue-text);
+  }
+
+  .card.tone-2 .icon-badge {
+    background: var(--color-accent-blue-16);
+    border-color: var(--color-accent-blue-28);
+  }
+
+  .card.tone-2 .icon {
+    color: var(--color-accent-blue);
+    filter: drop-shadow(0 0 8px var(--color-accent-blue-24));
+  }
+
+  .card.tone-3 {
+    background: linear-gradient(180deg, var(--color-tone-purple-start), var(--color-tone-purple-end));
+    color: var(--color-tone-purple-text);
+  }
+
+  .card.tone-3 .icon-badge {
+    background: var(--color-accent-lilac-16);
+    border-color: var(--color-accent-lilac-28);
+  }
+
+  .card.tone-3 .icon {
+    color: var(--color-accent-lilac);
+    filter: drop-shadow(0 0 8px var(--color-accent-lilac-24));
+  }
+
+  .card h3 {
+    margin: 1rem 0 0.5rem;
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .card p {
+    margin: 0;
+    color: var(--text-soft);
+    line-height: 1.6;
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .card ul {
+    margin: 1rem 0 0;
+    padding-left: 1rem;
+    display: grid;
+    gap: 0.5rem;
+    color: var(--color-text-list);
+    font-size: 1rem;
+    min-width: 0;
+  }
+
+  .card li {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .visual {
+    min-height: 5rem;
+    border: 1px solid var(--color-border-light);
+    border-radius: 1rem;
+    background: var(--color-overlay-dark-35);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 1rem;
+    min-width: 0;
+  }
+
+  .icon-badge {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .visual span {
+    color: currentColor;
+    font-size: 0.75rem;
+    letter-spacing: 0.01em;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .card.tone-1 p,
+  .card.tone-1 ul {
+    color: var(--color-tone-green-content);
+  }
+
+  .card.tone-1:hover {
+    border-color: var(--color-accent-green-55);
+  }
+
+  .card.tone-2 p,
+  .card.tone-2 ul {
+    color: var(--color-tone-blue-content);
+  }
+
+  .card.tone-2:hover {
+    border-color: var(--color-accent-blue-55);
+  }
+
+  .card.tone-3 p,
+  .card.tone-3 ul {
+    color: var(--color-tone-purple-content);
+  }
+
+  .card.tone-3:hover {
+    border-color: var(--color-accent-lilac-55);
+  }
+
+  @media (max-width: 980px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .grid {
+      gap: 0.75rem;
+    }
+
+    .card {
+      padding: 0.75rem;
+      border-radius: 0.75rem;
+    }
+
+    .card::after,
+    .visual {
+      border-radius: 0.75rem;
+    }
+
+    .visual {
+      min-height: 3.5rem;
+      padding: 0 0.75rem;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .icon-badge {
+      width: 1.75rem;
+      height: 1.75rem;
+    }
+
+    .card h3 {
+      margin: 0.75rem 0 0.5rem;
+      font-size: 0.75rem;
+      line-height: 1.35;
+    }
+
+    .card p,
+    .card ul {
+      font-size: 0.75rem;
+      line-height: 1.45;
+    }
+
+    .card ul {
+      margin-top: 0.75rem;
+      padding-left: 0.75rem;
+    }
+  }
+
+  @media (max-width: 180px) {
+    .grid {
+      gap: 0.5rem;
+    }
+
+    .card {
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+    }
+
+    .card::after,
+    .visual {
+      border-radius: 0.5rem;
+    }
+
+    .visual {
+      min-height: 2.75rem;
+      padding: 0.5rem;
+      gap: 0.25rem;
+    }
+
+    .icon-badge {
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 0.25rem;
+    }
+
+    .card h3 {
+      margin: 0.5rem 0 0.25rem;
+      font-size: 0.75rem;
+      line-height: 1.25;
+    }
+
+    .card p,
+    .card ul,
+    .visual span {
+      font-size: 0.75rem;
+      line-height: 1.3;
+    }
+
+    .card ul {
+      margin-top: 0.5rem;
+      padding-left: 0.5rem;
+      gap: 0.25rem;
+      list-style-position: inside;
+    }
+  }
+</style>

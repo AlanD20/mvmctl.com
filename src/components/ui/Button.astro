@@ -1,0 +1,129 @@
+---
+import Icon from "./Icon.astro";
+import type { IconName } from "../../lib/icons";
+import { getIcon } from "../../lib/icons";
+
+interface Props {
+  href: string;
+  label: string;
+  variant?: "primary" | "ghost";
+  external?: boolean;
+  iconLeft?: IconName;
+  iconRight?: boolean | IconName;
+}
+
+const {
+  href,
+  label,
+  variant = "primary",
+  external = false,
+  iconLeft,
+  iconRight = false,
+} = Astro.props;
+
+const rightIconName =
+  typeof iconRight === "string" ? iconRight : iconRight ? "arrowRight" : undefined;
+---
+
+<a
+  class={`btn ${variant}`}
+  data-anim="btn"
+  href={href}
+  target={external ? "_blank" : undefined}
+  rel={external ? "noopener noreferrer" : undefined}
+>
+  {iconLeft ? <Icon icon={getIcon(iconLeft)} size="0.75rem" class="btn-icon" /> : null}
+  <span>{label}</span>
+  {rightIconName ? <Icon icon={getIcon(rightIconName)} size="0.75rem" class="btn-icon btn-icon-right" /> : null}
+</a>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    gap: 0.5rem;
+    line-height: 1;
+    position: relative;
+    overflow: hidden;
+    transition:
+      transform 220ms ease,
+      border-color 220ms ease,
+      background-color 220ms ease,
+      color 220ms ease,
+      box-shadow 220ms ease;
+    white-space: normal;
+    max-width: 100%;
+    text-align: center;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+  }
+
+  .btn.primary {
+    background: var(--gradient-btn-primary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-accent-primary-45);
+    box-shadow: inset 0 0 0 1px var(--color-accent-primary-border-soft);
+  }
+
+  .btn.ghost {
+    color: var(--text);
+    border: 1px solid var(--border);
+    background: var(--color-surface-3);
+  }
+
+  .btn.ghost .btn-icon {
+    color: var(--color-text-ghost-icon);
+  }
+
+  .btn.primary:hover {
+    border-color: var(--color-accent-primary-border-hover);
+    background: var(--gradient-btn-primary-hover);
+    color: var(--color-text-primary);
+  }
+
+  .btn.primary:active,
+  .btn.primary:focus-visible {
+    border-color: var(--color-accent-primary-border-active);
+    background: var(--gradient-btn-primary-active);
+    color: var(--color-text-primary-soft);
+    outline: none;
+  }
+
+  .btn.ghost:hover,
+  .btn.ghost:focus-visible {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+    color: var(--color-text-primary);
+    outline: none;
+  }
+
+  .btn.ghost:active {
+    background: var(--color-surface-active);
+    border-color: var(--color-border-active);
+    color: var(--color-text-soft-bright);
+  }
+
+  .btn-icon {
+    color: currentColor;
+    opacity: 0.92;
+  }
+
+  .btn-icon-right {
+    transform: translateX(0);
+    transition: transform 220ms ease;
+  }
+
+  .btn:hover .btn-icon-right {
+    transform: translateX(3px);
+  }
+</style>

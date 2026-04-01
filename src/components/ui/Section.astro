@@ -1,0 +1,76 @@
+---
+interface Props {
+  id?: string;
+  title: string;
+  description?: string;
+}
+
+const { id, title, description } = Astro.props;
+---
+
+<section id={id} class="section" data-anim="section">
+  <header class="section-head" data-anim="section-head">
+    <h2>{title}</h2>
+    {description ? <p>{description}</p> : null}
+  </header>
+  <div class="section-body">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .section {
+    margin: 0 auto;
+    width: min(1100px, 92vw);
+    padding: 5rem 0;
+  }
+
+  .section + .section {
+    margin-top: 0;
+  }
+
+  .section-head {
+    max-width: 56ch;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-head h2 {
+    margin: 0;
+    font-size: clamp(1.5rem, 1.5vw + 1rem, 2.25rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .section-head p {
+    margin: 0.75rem 0 0;
+    color: var(--text-soft);
+    line-height: 1.65;
+  }
+
+  .section-body {
+    width: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .section-body > * {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  @media (max-width: 280px) {
+    .section {
+      width: calc(100vw - 1rem);
+      padding: 2.5rem 0;
+    }
+
+    .section-head,
+    .section-body {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+  }
+</style>

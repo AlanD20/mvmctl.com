@@ -1,0 +1,381 @@
+---
+import Section from "../ui/Section.astro";
+import CodeBlock from "../ui/CodeBlock.astro";
+import Button from "../ui/Button.astro";
+import Icon from "../ui/Icon.astro";
+import { installMethods } from "../../content/site/landing";
+import { getIcon } from "../../lib/icons";
+---
+
+<Section
+  id="install"
+  title="Install it your way"
+  description="Use tabs to switch install paths. Binary is the fastest route to first boot."
+>
+  <div class="terminal-shell" data-anim="install-grid" data-install-root>
+    <div class="tabs" data-anim="install-tabs" role="tablist" aria-label="Install options">
+      {
+        installMethods.map((method, index) => (
+          <button
+            class={`tab ${index === 0 ? "active" : ""}`}
+            role="tab"
+            aria-selected={index === 0 ? "true" : "false"}
+            aria-controls={`install-panel-${method.id}`}
+            id={`install-tab-${method.id}`}
+            data-install-tab
+            data-install-target={method.id}
+            type="button"
+          >
+            <Icon icon={getIcon(method.icon)} size="0.75rem" class="tab-icon" />
+            <span>{method.title}</span>
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="terminal-frame install-panels">
+      {
+        installMethods.map((method, index) => (
+          <article
+            class={`install-card ${index === 0 ? "active" : ""}`}
+            data-anim="install-card"
+            data-install-panel
+            data-install-id={method.id}
+            role="tabpanel"
+            id={`install-panel-${method.id}`}
+            aria-labelledby={`install-tab-${method.id}`}
+            hidden={index !== 0}
+          >
+            <h3>{method.title}</h3>
+            <p>{method.subtitle}</p>
+            <CodeBlock lines={method.steps} compact={true} />
+          </article>
+        ))
+      }
+    </div>
+  </div>
+  <div class="install-actions">
+    <Button href="/docs/" label="Full install documentation" iconLeft="book" iconRight={true} />
+    <Button href="https://github.com/AlanD20/mvmctl" label="Repository" variant="ghost" external={true} iconLeft="github" />
+  </div>
+</Section>
+
+<script>
+  const initLandingInstallTabs = () => {
+    const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-install-tab]"));
+    const panels = Array.from(document.querySelectorAll<HTMLElement>("[data-install-panel]"));
+
+    if (!tabs.length || !panels.length) {
+      return;
+    }
+
+    const activate = (targetId: string) => {
+      tabs.forEach((tab) => {
+        const active = tab.dataset.installTarget === targetId;
+        tab.classList.toggle("active", active);
+        tab.setAttribute("aria-selected", active ? "true" : "false");
+      });
+
+      const activePanel = panels.find((panel) => panel.dataset.installId === targetId);
+
+      panels.forEach((panel) => {
+        const active = panel.dataset.installId === targetId;
+        panel.classList.toggle("active", active);
+        panel.hidden = !active;
+        if (active) {
+          panel.style.opacity = "1";
+          panel.style.transform = "none";
+          panel
+            .querySelectorAll<HTMLElement>("[data-anim='code-block']")
+            .forEach((block) => {
+              block.style.opacity = "1";
+              block.style.transform = "none";
+            });
+          return;
+        }
+
+        panel.style.opacity = "0";
+      });
+
+      if (activePanel) {
+        const frame = document.querySelector<HTMLElement>(".terminal-frame.install-panels");
+        if (frame) {
+          frame.classList.remove("panel-animating");
+          window.requestAnimationFrame(() => {
+            frame.classList.add("panel-animating");
+          });
+        }
+      }
+    };
+
+    tabs.forEach((tab) => {
+      if (tab.dataset.tabsBound === "true") {
+        return;
+      }
+
+      tab.dataset.tabsBound = "true";
+      tab.addEventListener("click", () => {
+        if (tab.dataset.installTarget) {
+          activate(tab.dataset.installTarget);
+        }
+      });
+    });
+
+  };
+
+  let installInitFrame = 0;
+  const scheduleInstallTabsInit = () => {
+    if (installInitFrame) {
+      window.cancelAnimationFrame(installInitFrame);
+    }
+
+    installInitFrame = window.requestAnimationFrame(() => {
+      installInitFrame = 0;
+      initLandingInstallTabs();
+    });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", scheduleInstallTabsInit, { once: true });
+  } else {
+    scheduleInstallTabsInit();
+  }
+
+  if (document.documentElement.dataset.landingInstallTabsBound !== "true") {
+    document.documentElement.dataset.landingInstallTabsBound = "true";
+    document.addEventListener("astro:page-load", scheduleInstallTabsInit);
+  }
+</script>
+
+<style>
+  .terminal-shell {
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    transition: border-color 180ms ease;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  @media (max-width: 760px) {
+    .terminal-shell {
+      border-radius: 0.5rem;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .tabs {
+      overflow-x: visible;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      white-space: nowrap;
+      min-width: fit-content;
+      font-size: 0.75rem;
+      padding: 0.5rem 0.5rem;
+    }
+
+    .install-panels {
+      padding: 0.5rem 0.5rem;
+    }
+
+    .install-card {
+      padding: 0.5rem 0.25rem;
+    }
+
+    .install-card p {
+      font-size: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .install-card :global(.code-wrap) {
+      border-radius: 0.5rem;
+    }
+
+    .install-card :global(.code-top) {
+      padding: 0.5rem 0.75rem;
+    }
+
+    .install-card :global(pre) {
+      padding: 0.75rem 0.75rem;
+      overflow-x: auto;
+      max-width: 100%;
+    }
+
+    .install-card :global(code) {
+      font-size: 0.75rem;
+      line-height: 1.45;
+    }
+
+    .terminal-frame {
+      min-width: 0;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .tabs {
+      gap: 0;
+    }
+
+    .tab {
+      gap: 0.25rem;
+    }
+
+    .tab-icon {
+      width: 0.75rem;
+      height: 0.75rem;
+    }
+
+    .install-panels {
+      padding: 0.25rem 0.5rem;
+    }
+
+    .install-card {
+      padding: 0.5rem 0;
+    }
+
+    .install-card h3 {
+      font-size: 1rem;
+    }
+
+  }
+
+  .terminal-shell:hover {
+    border-color: var(--color-accent-primary-62);
+  }
+
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    margin-bottom: 0;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    overflow: hidden;
+    background: var(--color-surface-4);
+  }
+
+  .tab {
+    border: none;
+    border-right: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-soft);
+    padding: 0.5rem 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font: inherit;
+    cursor: pointer;
+    transition: border-color 220ms ease, color 220ms ease, background-color 220ms ease;
+  }
+
+  .tab:hover,
+  .tab:focus-visible {
+    color: var(--color-text-soft-bright-2);
+    background: var(--color-surface-selected-hover);
+    outline: none;
+  }
+
+  .tab.active,
+  .tab[aria-selected="true"] {
+    color: var(--color-text-primary);
+    background: var(--color-accent-primary-tab-active);
+  }
+
+  .tab.active .tab-icon,
+  .tab[aria-selected="true"] .tab-icon {
+    color: var(--color-text-primary);
+  }
+
+  .tab-icon {
+    color: var(--text-soft);
+  }
+
+  .install-panels {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    border: none;
+    border-radius: 0;
+    background: var(--color-surface-6);
+    padding: 0.5rem 0.75rem;
+    min-width: 0;
+  }
+
+  .terminal-frame {
+    margin-bottom: 0;
+    min-width: 0;
+  }
+
+  .terminal-frame.install-panels.panel-animating [data-install-panel].active {
+    animation: panel-fade-in 220ms ease;
+  }
+
+  @keyframes panel-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .install-card {
+    border: none;
+    border-radius: 0;
+    padding: 0.75rem 0.5rem;
+    background: transparent;
+    min-width: 0;
+  }
+
+  .install-card.active {
+    opacity: 1;
+  }
+
+  .install-card h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .install-card p {
+    margin: 0.5rem 0 1rem;
+    color: var(--text-soft);
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+  }
+
+  .install-card h3 {
+    color: var(--text);
+  }
+
+  .install-actions {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .install-actions :global(.btn.primary) {
+    background: var(--gradient-btn-primary);
+  }
+
+  .install-actions :global(.btn.ghost) {
+    border-color: var(--color-border-light);
+  }
+
+  .install-actions :global(.btn.primary:hover),
+  .install-actions :global(.btn.primary:focus-visible) {
+    background: var(--gradient-btn-primary-hover);
+  }
+
+  .install-actions :global(.btn.primary:active) {
+    background: var(--gradient-btn-primary-active);
+  }
+</style>

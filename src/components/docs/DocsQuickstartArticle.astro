@@ -1,0 +1,792 @@
+---
+import CodeBlock from "../ui/CodeBlock.astro";
+import Icon from "../ui/Icon.astro";
+import {
+  distroPackages,
+  docsMeta,
+  firstVm,
+  hostInit,
+  installMethods,
+  prerequisites,
+  troubleshooting,
+} from "../../content/site/docs";
+import { getIcon } from "../../lib/icons";
+---
+
+<article class='article' data-anim='docs-main'>
+  <section id='overview' class='doc-section' data-anchor-title='Overview'>
+    <p class='kicker'>mvmctl docs</p>
+    <h1>{docsMeta.title}</h1>
+    <p class='lead'>{docsMeta.intro}</p>
+  </section>
+
+  <section
+    id='prerequisites'
+    class='doc-section'
+    data-anchor-title='Before you begin'>
+    <h2>Before you begin</h2>
+    <p>
+      mvmctl is designed for Linux hosts running Firecracker. Install host
+      dependencies first.
+    </p>
+    <ul>
+      {prerequisites.map((item) => <li>{item}</li>)}
+    </ul>
+
+    <div class='terminal-shell' data-anim='docs-card-grid'>
+      <div
+        class='terminal-tabs'
+        role='tablist'
+        aria-label='Linux distro packages'
+        data-anim='docs-package-tabs'>
+        <button
+          class='terminal-tab package-tab active'
+          type='button'
+          role='tab'
+          aria-selected='true'
+          id='pkg-tab-ubuntu'
+          aria-controls='pkg-panel-ubuntu'
+          data-package-tab
+          data-package-target='ubuntu'>
+          <Icon icon={getIcon("ubuntu")} size='0.75rem' class='terminal-tab-icon package-icon' />
+          Ubuntu / Debian
+        </button>
+        <button
+          class='terminal-tab package-tab'
+          type='button'
+          role='tab'
+          aria-selected='false'
+          id='pkg-tab-arch'
+          aria-controls='pkg-panel-arch'
+          data-package-tab
+          data-package-target='arch'>
+          <Icon icon={getIcon("arch")} size='0.75rem' class='terminal-tab-icon package-icon' />
+          Arch
+        </button>
+      </div>
+
+      <div class='terminal-frame package-panels'>
+        <div
+          class='package-panel active'
+          data-package-panel
+          data-package-id='ubuntu'
+          role='tabpanel'
+          id='pkg-panel-ubuntu'
+          aria-labelledby='pkg-tab-ubuntu'>
+          <CodeBlock lines={distroPackages.ubuntu.command} compact={true} />
+        </div>
+
+        <div
+          class='package-panel'
+          data-package-panel
+          data-package-id='arch'
+          role='tabpanel'
+          id='pkg-panel-arch'
+          aria-labelledby='pkg-tab-arch'
+          hidden>
+          <CodeBlock lines={distroPackages.arch.command} compact={true} />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id='install' class='doc-section' data-anchor-title='Install mvm'>
+    <h2>Install mvm</h2>
+    <p>Choose an install path. Binary is the fastest setup for most users.</p>
+
+    <div class='terminal-shell' data-anim='docs-card-grid'>
+      <div
+        class='terminal-tabs'
+        role='tablist'
+        aria-label='Install options'
+        data-anim='docs-install-tabs'>
+        {
+          installMethods.map((method, index) => (
+            <button
+              class={`terminal-tab install-tab ${index === 0 ? "active" : ""}`}
+              type='button'
+              role='tab'
+              aria-selected={index === 0 ? "true" : "false"}
+              id={`docs-install-tab-${method.id ?? method.title.toLowerCase()}`}
+              aria-controls={`docs-install-panel-${method.id ?? method.title.toLowerCase()}`}
+              data-doc-install-tab
+              data-doc-install-target={method.id ?? method.title.toLowerCase()}>
+              {method.icon ? (
+                <Icon
+                  icon={getIcon(method.icon)}
+                  size='0.75rem'
+                  class='terminal-tab-icon'
+                />
+              ) : null}
+              {method.title}
+            </button>
+          ))
+        }
+      </div>
+
+      <div class='terminal-frame install-panels'>
+        {
+          installMethods.map((method, index) => (
+            <div
+              class={`install-panel ${index === 0 ? "active" : ""}`}
+              data-doc-install-panel
+              data-doc-install-id={method.id ?? method.title.toLowerCase()}
+              role='tabpanel'
+              id={`docs-install-panel-${method.id ?? method.title.toLowerCase()}`}
+              aria-labelledby={`docs-install-tab-${method.id ?? method.title.toLowerCase()}`}
+              hidden={index !== 0}>
+              {method.description ? (
+                <p class='method-desc'>{method.description}</p>
+              ) : null}
+              <CodeBlock lines={method.code} compact={true} />
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section
+    id='host-init'
+    class='doc-section'
+    data-anchor-title='Initialize host'>
+    <h2>{hostInit.title}</h2>
+    <p>{hostInit.description}</p>
+    <div class='inline-block important' data-anim='docs-notice'>
+      <CodeBlock lines={hostInit.code} compact={true} />
+    </div>
+  </section>
+
+  <section
+    id='first-vm'
+    class='doc-section'
+    data-anchor-title='Create your first VM'>
+    <h2>Create your first VM</h2>
+    <p>Run these commands in order:</p>
+    <div class='inline-block' data-anim='docs-quick'>
+      <CodeBlock lines={firstVm} compact={true} />
+    </div>
+  </section>
+
+  <section
+    id='troubleshooting'
+    class='doc-section'
+    data-anchor-title='Troubleshooting'>
+    <h2>Troubleshooting</h2>
+    {
+      troubleshooting.map((issue) => (
+        <div class='trouble-item' data-anim='docs-card'>
+          <h3>{issue.problem}</h3>
+          <CodeBlock lines={issue.fix} compact={true} />
+        </div>
+      ))
+    }
+  </section>
+</article>
+
+<script>
+  import { icons } from "../../lib/icons";
+
+  const initDocsTabs = () => {
+    const packageTabs = Array.from(
+      document.querySelectorAll<HTMLButtonElement>("[data-package-tab]"),
+    );
+    const packagePanels = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-package-panel]"),
+    );
+
+    const activatePackage = (id: string) => {
+      packageTabs.forEach((tab) => {
+        const active = tab.dataset.packageTarget === id;
+        tab.classList.toggle("active", active);
+        tab.setAttribute("aria-selected", active ? "true" : "false");
+      });
+
+      packagePanels.forEach((panel) => {
+        const active = panel.dataset.packageId === id;
+        panel.classList.toggle("active", active);
+        panel.hidden = !active;
+        if (active) {
+          panel.style.opacity = "1";
+          panel.style.transform = "none";
+          panel
+            .querySelectorAll<HTMLElement>("[data-anim='code-block']")
+            .forEach((block) => {
+              block.style.opacity = "1";
+              block.style.transform = "none";
+            });
+          return;
+        }
+
+        panel.style.opacity = "0";
+      });
+    };
+
+    packageTabs.forEach((tab) => {
+      if (tab.dataset.tabsBound === "true") {
+        return;
+      }
+
+      tab.dataset.tabsBound = "true";
+      tab.addEventListener("click", () => {
+        if (tab.dataset.packageTarget) {
+          activatePackage(tab.dataset.packageTarget);
+        }
+      });
+    });
+
+    const installTabs = Array.from(
+      document.querySelectorAll<HTMLButtonElement>("[data-doc-install-tab]"),
+    );
+    const installPanels = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-doc-install-panel]"),
+    );
+
+    const activateInstall = (id: string) => {
+      installTabs.forEach((tab) => {
+        const active = tab.dataset.docInstallTarget === id;
+        tab.classList.toggle("active", active);
+        tab.setAttribute("aria-selected", active ? "true" : "false");
+      });
+
+      installPanels.forEach((panel) => {
+        const active = panel.dataset.docInstallId === id;
+        panel.classList.toggle("active", active);
+        panel.hidden = !active;
+        if (active) {
+          panel.style.opacity = "1";
+          panel.style.transform = "none";
+          panel
+            .querySelectorAll<HTMLElement>("[data-anim='code-block']")
+            .forEach((block) => {
+              block.style.opacity = "1";
+              block.style.transform = "none";
+            });
+          return;
+        }
+
+        panel.style.opacity = "0";
+      });
+    };
+
+    installTabs.forEach((tab) => {
+      if (tab.dataset.tabsBound === "true") {
+        return;
+      }
+
+      tab.dataset.tabsBound = "true";
+      tab.addEventListener("click", () => {
+        if (tab.dataset.docInstallTarget) {
+          activateInstall(tab.dataset.docInstallTarget);
+        }
+      });
+    });
+
+  };
+
+  const initHeadingAnchors = () => {
+    const setHeadingIcon = (
+      slot: HTMLElement,
+      iconName: "link" | "check" | "info",
+    ) => {
+      const [width, height, , , pathData] = icons[iconName].icon;
+      const pathList = Array.isArray(pathData) ? pathData : [pathData];
+
+      while (slot.firstChild) {
+        slot.removeChild(slot.firstChild);
+      }
+
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      svg.setAttribute("width", "12");
+      svg.setAttribute("height", "12");
+      svg.setAttribute("fill", "currentColor");
+      svg.setAttribute("aria-hidden", "true");
+
+      pathList.forEach((pathItem) => {
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", pathItem);
+        svg.appendChild(path);
+      });
+
+      slot.appendChild(svg);
+    };
+
+    let announcer = document.getElementById("heading-copy-status");
+    if (!(announcer instanceof HTMLParagraphElement)) {
+      announcer = document.createElement("p");
+      announcer.id = "heading-copy-status";
+      announcer.className = "sr-only";
+      announcer.setAttribute("aria-live", "polite");
+      announcer.setAttribute("aria-atomic", "true");
+      document.body.appendChild(announcer);
+    }
+
+    const sections = Array.from(
+      document.querySelectorAll<HTMLElement>(".doc-section[id]"),
+    );
+    sections.forEach((section) => {
+      const heading = section.querySelector<HTMLElement>("h1, h2, h3");
+      if (!heading || heading.dataset.headingCopyBound === "true") {
+        return;
+      }
+
+      heading.dataset.headingCopyBound = "true";
+      const sectionId = section.id;
+      const sectionLabel = section.dataset.anchorTitle ?? sectionId;
+
+      const wrap = document.createElement("span");
+      wrap.className = "heading-anchor-wrap";
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "heading-anchor-btn";
+      btn.setAttribute("aria-label", `Copy link to ${sectionLabel}`);
+
+      const icon = document.createElement("span");
+      icon.className = "heading-anchor-icon";
+      setHeadingIcon(icon, "link");
+
+      btn.appendChild(icon);
+      btn.addEventListener("click", async () => {
+        const currentPath = window.location.pathname;
+        const docsPath = currentPath.startsWith("/docs")
+          ? currentPath
+          : "/docs/";
+        const link = `${window.location.origin}${docsPath}#${sectionId}`;
+
+        try {
+          if (!window.isSecureContext) {
+            throw new Error("Clipboard API requires secure context");
+          }
+
+          if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
+            throw new Error("Clipboard API not available");
+          }
+
+          await navigator.clipboard.writeText(link);
+          setHeadingIcon(icon, "check");
+          btn.classList.add("copied");
+          announcer.textContent = `Copied link to ${sectionLabel}.`;
+        } catch {
+          setHeadingIcon(icon, "info");
+          btn.classList.add("failed");
+          announcer.textContent = `Could not copy link to ${sectionLabel}.`;
+        }
+
+        window.setTimeout(() => {
+          setHeadingIcon(icon, "link");
+          btn.classList.remove("copied", "failed");
+        }, 1100);
+      });
+
+      wrap.appendChild(btn);
+      heading.appendChild(wrap);
+    });
+  };
+
+  const initDocsQuickstart = () => {
+    initDocsTabs();
+    initHeadingAnchors();
+  };
+
+  let docsInitFrame = 0;
+  const scheduleDocsQuickstart = () => {
+    if (docsInitFrame) {
+      window.cancelAnimationFrame(docsInitFrame);
+    }
+
+    docsInitFrame = window.requestAnimationFrame(() => {
+      docsInitFrame = 0;
+      initDocsQuickstart();
+    });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", scheduleDocsQuickstart, {
+      once: true,
+    });
+  } else {
+    scheduleDocsQuickstart();
+  }
+
+  if (document.documentElement.dataset.docsQuickstartBound !== "true") {
+    document.documentElement.dataset.docsQuickstartBound = "true";
+    document.addEventListener("astro:page-load", scheduleDocsQuickstart);
+  }
+</script>
+
+<style>
+  .doc-section {
+    position: relative;
+    border-bottom: none;
+    scroll-margin-top: calc(var(--header-height) + 4rem);
+  }
+
+  .doc-section::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 0.5px;
+    margin: 2rem 0;
+    background: var(--border);
+  }
+
+  .doc-section:last-child {
+    padding-bottom: 0;
+  }
+
+  .doc-section:last-child::after {
+    display: none;
+  }
+
+  .kicker {
+    margin: 0;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: var(--text-soft);
+  }
+
+  h1 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+    font-size: clamp(2rem, 1.25vw + 1.25rem, 2.5rem);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+  }
+
+  @media (max-width: 680px) {
+    h1 {
+      font-size: clamp(1.5rem, 6.2vw, 2rem);
+      line-height: 1.12;
+      gap: 0.5rem;
+    }
+  }
+
+  @media (max-width: 420px) {
+    h1 {
+      font-size: clamp(1.25rem, 7.4vw, 1.5rem);
+      line-height: 1.16;
+      gap: 0.25rem;
+    }
+  }
+
+  @media (max-width: 280px) {
+    h1 {
+      font-size: clamp(1rem, 8.6vw, 1.25rem);
+      line-height: 1.2;
+      gap: 0.25rem;
+    }
+  }
+
+  .lead {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-soft);
+    line-height: 1.68;
+  }
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    color: currentColor;
+    line-height: 1.65;
+  }
+
+  .kicker,
+  .lead {
+    color: var(--text-soft);
+  }
+
+  :global(.heading-anchor-wrap) {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.25rem;
+    transform: none;
+    vertical-align: baseline;
+    flex: 0 0 auto;
+  }
+
+  h2 :global(.heading-anchor-wrap),
+  h1 :global(.heading-anchor-wrap),
+  h3 :global(.heading-anchor-wrap) {
+    transform: translateY(0.02em);
+  }
+
+  :global(.heading-anchor-btn) {
+    border: 1px solid var(--color-border-strong);
+    border-radius: 0.25rem;
+    background: var(--color-surface-4);
+    color: var(--text-soft);
+    width: 1.5rem;
+    height: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex: 0 0 auto;
+    font-size: 0.75rem;
+    line-height: 1;
+    transition:
+      transform 180ms ease,
+      color 180ms ease,
+      border-color 180ms ease,
+      background-color 180ms ease;
+  }
+
+  :global(.heading-anchor-btn:hover),
+  :global(.heading-anchor-btn:focus-visible) {
+    border-color: var(--color-accent-primary-74);
+    color: var(--color-accent-primary);
+    background: var(--color-surface-4);
+    transform: scale(1.04);
+    outline: none;
+  }
+
+  :global(.heading-anchor-btn.copied) {
+    border-color: var(--color-accent-primary-82);
+    background: var(--color-accent-primary-18);
+    color: var(--color-accent-primary);
+  }
+
+  :global(.heading-anchor-btn.failed) {
+    border-color: var(--color-accent-warm-82);
+    color: var(--color-accent-warm);
+    background: var(--color-accent-warm-17);
+  }
+
+  :global(.heading-anchor-icon) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    line-height: 1;
+    color: inherit;
+  }
+
+  :global(.heading-anchor-icon svg) {
+    width: 0.75rem;
+    height: 0.75rem;
+    display: block;
+    flex: 0 0 auto;
+  }
+
+  :global(.sr-only) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .method-desc {
+    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+    padding: 0 0.5rem;
+    color: currentColor;
+  }
+
+  ul {
+    margin: 0.5rem 0 0;
+    padding-left: 1rem;
+    display: grid;
+    gap: 1rem;
+    color: var(--text-soft);
+    text-underline-offset: 0.5rem;
+  }
+
+  .terminal-shell {
+    margin-top: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    transition: border-color 180ms ease;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .terminal-shell:hover {
+    border-color: var(--color-accent-primary-68);
+  }
+
+  .terminal-tabs {
+    margin-top: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0.5rem 0.5rem 0 0;
+    overflow: hidden;
+    background: var(--color-surface-4);
+  }
+
+  .terminal-tab {
+    border: none;
+    border-right: 1px solid var(--border);
+    border-radius: 0;
+    padding: 0.5rem 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    color: var(--text-soft);
+    font: inherit;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition:
+      border-color 170ms ease,
+      color 170ms ease,
+      background-color 170ms ease;
+  }
+
+  .terminal-tab:hover,
+  .terminal-tab:focus-visible {
+    color: var(--color-text-soft-bright-2);
+    background: var(--color-surface-selected-hover);
+    outline: none;
+  }
+
+  .package-icon {
+    color: currentColor;
+    opacity: 0.94;
+  }
+
+  .terminal-tab:last-child {
+    border-right: none;
+  }
+
+  .terminal-tab-icon {
+    color: var(--color-accent-primary);
+  }
+
+  .terminal-tab.active,
+  .terminal-tab.install-tab.active,
+  .terminal-tab[aria-selected="true"],
+  .terminal-tab.install-tab[aria-selected="true"] {
+    color: var(--color-text-primary);
+    background: var(--color-accent-primary-tab-active);
+  }
+
+  .terminal-tab.active .terminal-tab-icon,
+  .terminal-tab.install-tab.active .terminal-tab-icon,
+  .terminal-tab[aria-selected="true"] .terminal-tab-icon,
+  .terminal-tab.install-tab[aria-selected="true"] .terminal-tab-icon {
+    color: var(--color-text-primary);
+  }
+
+  .terminal-frame {
+    border: none;
+    border-radius: 0 0 0.5rem 0.5rem;
+    background: var(--color-surface-5);
+    padding: 0.5rem;
+    margin-bottom: 0;
+    min-width: 0;
+  }
+
+  .package-panel,
+  .install-panel,
+  .inline-block,
+  .trouble-item {
+    margin-top: 0.5rem;
+  }
+
+  .trouble-item {
+    padding-top: 0.75rem;
+  }
+
+  @media (max-width: 760px) {
+    .doc-section {
+      padding: 1rem 0;
+    }
+
+    .terminal-shell {
+      border-radius: 0.5rem;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .terminal-tabs {
+      overflow-x: visible;
+      flex-wrap: wrap;
+    }
+
+    .terminal-tab {
+      white-space: nowrap;
+      min-width: fit-content;
+      font-size: 0.75rem;
+      padding: 0.5rem 0.5rem;
+    }
+
+    .terminal-frame {
+      padding: 0.5rem;
+      min-width: 0;
+    }
+
+    .terminal-frame :global(.code-top) {
+      padding: 0.5rem 0.75rem;
+    }
+
+    .terminal-frame :global(pre) {
+      padding: 0.75rem 0.75rem;
+      overflow-x: auto;
+      max-width: 100%;
+    }
+
+    .terminal-frame :global(code) {
+      font-size: 0.75rem;
+      line-height: 1.45;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .terminal-tab {
+      font-size: 0.75rem;
+      padding: 0.5rem 0.5rem;
+      gap: 0.25rem;
+    }
+
+    .terminal-tab-icon {
+      width: 0.75rem;
+      height: 0.75rem;
+    }
+
+    .terminal-frame {
+      padding: 0.25rem;
+    }
+
+    .method-desc {
+      font-size: 0.75rem;
+      padding: 0 0.25rem;
+    }
+  }
+</style>
