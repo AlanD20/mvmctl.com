@@ -25,7 +25,7 @@ export const navLinks = [
 
 export const hero = {
   badge: "MVMCTL · CONTAINER SPEED, VM ISOLATION",
-  title: "Manage microVMs with one focused CLI.",
+  title: "Manage microVMs with one focused CLI",
   description:
     "mvmctl is the modern way to run microVMs — get the startup speed of containers with the security and isolation of traditional VMs. Built for developers who need lightweight, fast-booting virtual machines without the overhead.",
   primaryCta: { href: "#install", label: "Install mvm" },
