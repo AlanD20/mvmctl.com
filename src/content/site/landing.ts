@@ -33,16 +33,16 @@ export const hero = {
   tertiaryCta: { href: "https://github.com/AlanD20/mvmctl", label: "GitHub" },
   metrics: [
     { label: "Install paths", value: "4", icon: "download" as IconName },
-    { label: "Core command groups", value: "8+", icon: "layers" as IconName },
+    { label: "Command groups", value: "14", icon: "layers" as IconName },
     { label: "Primary platform", value: "Linux", icon: "server" as IconName },
   ],
   commandPreview: [
-    "# one-time host setup",
-    "sudo mvm host init",
+    "# interactive host setup",
+    "mvm init",
     "mvm kernel fetch",
     "mvm image fetch ubuntu-24.04",
     "mvm vm create --name myvm --image ubuntu-24.04",
-    "mvm vm ssh --name myvm",
+    "mvm ssh --name myvm",
   ],
 } as const;
 

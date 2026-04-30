@@ -23,6 +23,9 @@ importers:
       gsap:
         specifier: ^3.14.2
         version: 3.14.2
+      shiki:
+        specifier: ^4.0.2
+        version: 4.0.2
     devDependencies:
       '@astrojs/check':
         specifier: ^0.9.8

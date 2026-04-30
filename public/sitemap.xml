@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://mvmctl.dev/</loc>
+    <loc>https://mvmctl.aland20.com/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://mvmctl.dev/feature</loc>
+    <loc>https://mvmctl.aland20.com/feature</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://mvmctl.dev/install</loc>
+    <loc>https://mvmctl.aland20.com/install</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://mvmctl.dev/docs/</loc>
+    <loc>https://mvmctl.aland20.com/docs/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

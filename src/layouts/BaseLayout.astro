@@ -17,9 +17,7 @@ const normalizePath = (path: string) => {
   return trimmed === "" ? "/" : trimmed;
 };
 const currentPath = normalizePath(Astro.url.pathname);
-const defaultSiteUrl = "https://mvmctl.dev";
-const configuredSite = Astro.site?.toString();
-const siteUrl = configuredSite && configuredSite.length > 0 ? configuredSite : defaultSiteUrl;
+const siteUrl = Astro.site?.toString() ?? "https://mvmctl.aland20.com";
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).toString();
 const imageUrl = new URL(image, siteUrl).toString();
 const isDocsPage = currentPath.startsWith("/docs");

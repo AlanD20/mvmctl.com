@@ -1,4 +1,5 @@
 ---
+import { codeToHtml } from "shiki";
 import Icon from "./Icon.astro";
 import { getIcon } from "../../lib/icons";
 
@@ -9,6 +10,18 @@ interface Props {
 }
 
 const { lines, caption, compact = false } = Astro.props;
+const code = lines.join("\n");
+
+let highlighted: string;
+try {
+  highlighted = await codeToHtml(code, {
+    lang: "bash",
+    theme: "vitesse-dark",
+  });
+} catch {
+  // Fallback: wrap in <code> if shiki fails
+  highlighted = `<pre class="shiki fallback"><code>${code}</code></pre>`;
+}
 ---
 
 <div class={`code-wrap ${compact ? "compact" : ""}`}>
@@ -19,7 +32,7 @@ const { lines, caption, compact = false } = Astro.props;
     </div>
     <div class="code-top-actions"></div>
   </div>
-  <pre data-anim="code-block"><code>{lines.join("\n")}</code></pre>
+  <div set:html={highlighted} class="code-body" data-anim="code-block" />
 </div>
 
 <style>
@@ -86,21 +99,71 @@ const { lines, caption, compact = false } = Astro.props;
     min-width: fit-content;
   }
 
+  .code-caption {
+    margin: 0;
+    color: var(--color-text-code-muted);
+    font-size: 0.75rem;
+    letter-spacing: 0;
+    line-height: 1;
+  }
+
+  .code-body {
+    color: var(--color-text-code);
+    transition: color 180ms ease;
+  }
+
+  .code-body :global(pre) {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+    opacity: 1;
+    background: transparent !important;
+  }
+
+  .code-wrap.compact .code-body :global(pre) {
+    padding: 0.75rem 1rem;
+  }
+
+  .code-body :global(code) {
+    font-family: "Geist Mono", "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 0.75rem;
+    line-height: 1.55;
+    color: currentColor;
+    white-space: pre;
+    opacity: 1;
+  }
+
+  /* Shiki theme: keep inline colors, just ensure transparent bg */
+  .code-body :global(.shiki) {
+    background: transparent !important;
+  }
+
+  .code-body :global(.shiki .line) {
+    /* keep shiki's inline style colors — no override */
+  }
+
+  .code-wrap:hover .code-top-label,
+  .code-wrap:hover .code-caption,
+  .code-wrap:hover .code-terminal-icon {
+    color: var(--color-text-code-hover);
+  }
+
+  .code-wrap:hover .code-body {
+    color: var(--color-text-code-bright);
+  }
+
   @media (max-width: 560px) {
     .code-wrap.compact.with-copy .code-top {
       padding: 0.5rem 0.75rem;
       gap: 0.5rem;
     }
-
     .code-wrap.compact.with-copy .code-top-label {
       width: auto;
     }
-
     .code-wrap.compact.with-copy .code-top-actions {
       width: auto;
       justify-content: flex-end;
     }
-
     .code-wrap.compact.with-copy .code-caption {
       line-height: 1.25;
       white-space: nowrap;
@@ -115,57 +178,12 @@ const { lines, caption, compact = false } = Astro.props;
       padding: 0.25rem 0.5rem;
       gap: 0.25rem;
     }
-
     .code-wrap.compact.with-copy .code-top-label {
       gap: 0.25rem;
     }
-
     .code-wrap.compact.with-copy .code-caption {
       font-size: 0.75rem;
       line-height: 1.1;
     }
-  }
-
-  .code-caption {
-    margin: 0;
-    color: var(--color-text-code-muted);
-    font-size: 0.75rem;
-    letter-spacing: 0;
-    line-height: 1;
-  }
-
-  pre[data-anim="code-block"] {
-    color: var(--color-text-code);
-    transition: color 180ms ease;
-  }
-
-  pre {
-    margin: 0;
-    padding: 1rem;
-    overflow-x: auto;
-    opacity: 1;
-  }
-
-  .code-wrap.compact pre {
-    padding: 0.75rem 1rem;
-  }
-
-  code {
-    font-family: "Geist Mono", "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
-    font-size: 0.75rem;
-    line-height: 1.55;
-    color: currentColor;
-    white-space: pre;
-    opacity: 1;
-  }
-
-  .code-wrap:hover .code-top-label,
-  .code-wrap:hover .code-caption,
-  .code-wrap:hover .code-terminal-icon {
-    color: var(--color-text-code-hover);
-  }
-
-  .code-wrap:hover pre[data-anim="code-block"] {
-    color: var(--color-text-code-bright);
   }
 </style>

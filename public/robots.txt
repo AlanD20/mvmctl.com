@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://mvmctl.dev/sitemap.xml
+Sitemap: https://mvmctl.aland20.com/sitemap.xml

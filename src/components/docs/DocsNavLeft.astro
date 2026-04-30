@@ -4,20 +4,30 @@ import { docsNav } from "../../content/site/docs";
 import { getIcon } from "../../lib/icons";
 ---
 
+
 <aside class="left-nav" data-anim="docs-sidebar">
   <p class="title">Getting started</p>
   <nav aria-label="Documentation sections">
     <ul>
-      {
-        docsNav.map((item) => (
-          <li>
-            <a href={`#${item.id}`} data-docs-left-link>
-              <Icon icon={getIcon(item.icon)} size="0.75rem" class="icon" />
-              <span>{item.label}</span>
-            </a>
-          </li>
-        ))
-      }
+      {docsNav.map((item) => (
+        <li class={item.children ? "has-children" : ""}>
+          <a href={`#${item.id}`} data-docs-left-link>
+            <Icon icon={getIcon(item.icon)} size="0.75rem" class="icon" />
+            <span>{item.label}</span>
+          </a>
+          {item.children ? (
+            <ul class="nav-sublist">
+              {item.children.map((child) => (
+                <li>
+                  <a href={`#${child.id}`} data-docs-left-link class="sub-link">
+                    <span>{child.label}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </li>
+      ))}
     </ul>
   </nav>
 </aside>
@@ -44,7 +54,14 @@ import { getIcon } from "../../lib/icons";
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 1rem;
+    gap: 0.35rem;
+  }
+
+  .nav-sublist {
+    padding-left: 1.25rem !important;
+    margin-top: 0.2rem !important;
+    gap: 0.15rem !important;
+    border-left: 1px solid var(--border);
   }
 
   a {
@@ -52,13 +69,14 @@ import { getIcon } from "../../lib/icons";
     color: var(--text-soft);
     border-left: 2px solid transparent;
     border-radius: 0.5rem;
-    padding: 0.5rem;
+    padding: 0.4rem 0.5rem;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     font-size: 0.75rem;
     transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
     text-underline-offset: 0.5rem;
+    width: 100%;
   }
 
   a:hover,
@@ -68,8 +86,22 @@ import { getIcon } from "../../lib/icons";
     border-left-color: var(--color-accent-primary-62);
   }
 
+  .sub-link {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    color: var(--color-text-subtle-2);
+    border-left: none;
+  }
+
+  .sub-link:hover {
+    color: var(--text);
+    border-left: none;
+    background: transparent;
+  }
+
   .icon {
     color: var(--color-text-subtle);
+    flex-shrink: 0;
   }
 
   @media (max-width: 980px) {
@@ -109,8 +141,12 @@ import { getIcon } from "../../lib/icons";
     }
 
     .left-nav ul {
-      gap: 0.75rem;
+      gap: 0.5rem;
       min-width: 0;
+    }
+
+    .nav-sublist {
+      gap: 0.25rem !important;
     }
 
     .left-nav a {
@@ -144,17 +180,8 @@ import { getIcon } from "../../lib/icons";
         padding: 0.5rem;
         box-sizing: border-box;
       }
-
-      .left-nav ul {
-        gap: 0.5rem;
-      }
-
-      .left-nav a {
-        font-size: 0.75rem;
-        padding: 0.25rem;
-        gap: 0.25rem;
-        max-width: 100%;
-      }
+      .left-nav ul { gap: 0.5rem; }
+      .left-nav a { font-size: 0.75rem; padding: 0.25rem; gap: 0.25rem; max-width: 100%; }
     }
   }
 </style>

@@ -26,6 +26,10 @@ import { docsToc } from "../../content/site/docs";
     align-self: start;
     border-left: 1px solid var(--border);
     padding-left: 1rem;
+
+    /* Stay pinned to viewport even at the bottom of the page */
+    max-height: calc(100vh - var(--header-height) - 5rem);
+    overflow-y: auto;
   }
 
   .right-toc p {

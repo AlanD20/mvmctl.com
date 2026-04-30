@@ -197,39 +197,104 @@ export const setupDocsSpy = () => {
   const links = Array.from(
     document.querySelectorAll<HTMLAnchorElement>("[data-docs-left-link], [data-docs-toc-link]"),
   );
-  const sections = Array.from(document.querySelectorAll<HTMLElement>("main section[id]"));
 
-  if (!links.length || !sections.length) {
+  if (!links.length) {
     return;
   }
 
-  sections.forEach((section) => {
-    ScrollTrigger.create({
-      trigger: section,
-      start: () => `top ${getAnchorOffset() + 140}px`,
-      end: () => `bottom ${getAnchorOffset() + 140}px`,
-      onToggle: (self) => {
-        if (self.isActive) {
-          links.forEach((link) => {
-            const target = link.getAttribute("href")?.replace("#", "");
-            link.classList.toggle("active", target === section.id);
-          });
-        }
-      },
-    });
-  });
+  const isNestedLink = (link: HTMLAnchorElement) => link.classList.contains("nested");
+  const getThreshold = () => getAnchorOffset() + 80;
 
-  ScrollTrigger.create({
-    trigger: document.body,
-    start: "bottom bottom-=40",
-    onEnter: () => {
-      const lastId = sections[sections.length - 1]?.id;
-      links.forEach((link) => {
-        const target = link.getAttribute("href")?.replace("#", "");
-        link.classList.toggle("active", target === lastId);
+  const scrollRightNav = (link: HTMLAnchorElement) => {
+    if (!link.classList.contains("active")) return;
+    if (!link.closest(".right-toc")) return;
+    const toc = link.closest<HTMLElement>(".right-toc");
+    if (!toc) return;
+    const lr = link.getBoundingClientRect();
+    const tr = toc.getBoundingClientRect();
+    if (lr.bottom > tr.bottom || lr.top < tr.top) {
+      link.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  };
+
+  const updateSpy = () => {
+    const threshold = getThreshold();
+    const scrollBottom = window.scrollY + window.innerHeight;
+    const docHeight = document.documentElement.scrollHeight;
+    const nearBottom = scrollBottom >= docHeight - 150;
+
+    /* Find active h2 section — the most recent one whose top is above threshold */
+    const sections = Array.from(document.querySelectorAll<HTMLElement>("main section[id]"));
+    const activeSection = sections
+      .map((section) => ({ section, top: section.getBoundingClientRect().top }))
+      .filter(({ top }) => top <= threshold)
+      .sort((a, b) => b.top - a.top)[0]?.section;
+
+    /* Find active h3 — only within the active section */
+    let finalH3: HTMLElement | null = null;
+    if (activeSection) {
+      const sectionH3s = Array.from(activeSection.querySelectorAll<HTMLElement>("h3[id]"));
+      finalH3 = sectionH3s
+        .map((h3) => ({ h3, top: h3.getBoundingClientRect().top }))
+        .filter(({ top }) => top <= threshold)
+        .sort((a, b) => b.top - a.top)[0]?.h3 ?? null;
+    }
+    /* Near-bottom fallback for h3 */
+    if (!finalH3 && nearBottom && activeSection) {
+      const sectionH3s = Array.from(activeSection.querySelectorAll<HTMLElement>("h3[id]"));
+      finalH3 = sectionH3s[sectionH3s.length - 1] ?? null;
+    }
+
+    /* Near-bottom fallback for section */
+    const finalSection = activeSection || (nearBottom ? sections[sections.length - 1] : null);
+
+    links.forEach((link) => {
+      const target = link.getAttribute("href")?.replace("#", "");
+      const isNested = isNestedLink(link);
+
+      if (isNested) {
+        const shouldBeActive = finalH3 ? target === finalH3.id : false;
+        link.classList.toggle("active", shouldBeActive);
+        if (shouldBeActive) scrollRightNav(link);
+      } else {
+        const shouldBeActive = finalSection ? target === finalSection.id : false;
+        link.classList.toggle("active", shouldBeActive);
+        if (shouldBeActive) scrollRightNav(link);
+      }
+    });
+  };
+
+  let ticking = false;
+  const onScroll = () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        updateSpy();
+        ticking = false;
       });
-    },
-  });
+      ticking = true;
+    }
+  };
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  updateSpy(); // Initial call
+
+  /* Handle hash-based navigation on load */
+  const activateFromHash = () => {
+    const hash = window.location.hash.replace("#", "");
+    if (!hash) return;
+    const el = document.getElementById(hash);
+    if (!el) return;
+
+    links.forEach((link) => {
+      const target = link.getAttribute("href")?.replace("#", "");
+      if (target === hash) {
+        link.classList.add("active");
+        scrollRightNav(link);
+      }
+    });
+  };
+
+  window.setTimeout(activateFromHash, 180);
 };
 
 export const setupDocsAnchorOffsets = () => {
@@ -256,7 +321,10 @@ export const setupDocsAnchorOffsets = () => {
       }
 
       event.preventDefault();
-      const top = section.getBoundingClientRect().top + window.scrollY - getAnchorOffset();
+      /* Read the section's own scroll-margin-top so JS matches CSS exactly */
+      const smt = getComputedStyle(section).scrollMarginTop;
+      const offset = smt ? parseFloat(smt) : 76;
+      const top = section.getBoundingClientRect().top + window.scrollY - offset;
       window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
       window.history.pushState(null, "", `#${id}`);
     });

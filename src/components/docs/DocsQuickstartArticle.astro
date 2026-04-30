@@ -1,186 +1,417 @@
 ---
 import CodeBlock from "../ui/CodeBlock.astro";
+import Callout from "../ui/Callout.astro";
+import Note from "../ui/Note.astro";
 import Icon from "../ui/Icon.astro";
 import {
   distroPackages,
   docsMeta,
-  firstVm,
-  hostInit,
   installMethods,
   prerequisites,
   troubleshooting,
+  hostInitSections,
+  firstVmSections,
+  vmCreateExplanation,
+  vmCreateFlagLines,
+  vmCreateExamples,
+  sshExplanation,
+  consoleExplanation,
+  logsExplanation,
+  snapshotExplanation,
+  vmRmExplanation,
+  vmInspectExplanation,
+  imageSections,
+  kernelSections,
+  binarySections,
+  keySections,
+  networkSections,
+  configSections,
+  dependencySections,
+  cloudInitSections,
 } from "../../content/site/docs";
 import { getIcon } from "../../lib/icons";
 ---
 
 <article class='article' data-anim='docs-main'>
+  <!-- OVERVIEW -->
   <section id='overview' class='doc-section' data-anchor-title='Overview'>
     <p class='kicker'>mvmctl docs</p>
     <h1>{docsMeta.title}</h1>
     <p class='lead'>{docsMeta.intro}</p>
   </section>
 
-  <section
-    id='prerequisites'
-    class='doc-section'
-    data-anchor-title='Before you begin'>
+  <!-- PREREQUISITES -->
+  <section id='prerequisites' class='doc-section' data-anchor-title='Before you begin'>
     <h2>Before you begin</h2>
     <p>
-      mvmctl is designed for Linux hosts for microVM management. Install host
-      dependencies first.
+      mvmctl runs on Linux only — Firecracker requires KVM, which is not available on macOS or Windows.
+      Make sure your system meets these requirements before installing.
     </p>
     <ul>
-      {prerequisites.map((item) => <li>{item}</li>)}
+      {prerequisites.map((item) => <li set:html={item} />)}
     </ul>
 
+    <h3>System packages</h3>
+    <p>mvmctl depends on a few system tools for networking, image handling, and cloud-init:</p>
+
     <div class='terminal-shell' data-anim='docs-card-grid'>
-      <div
-        class='terminal-tabs'
-        role='tablist'
-        aria-label='Linux distro packages'
-        data-anim='docs-package-tabs'>
-        <button
-          class='terminal-tab package-tab active'
-          type='button'
-          role='tab'
-          aria-selected='true'
-          id='pkg-tab-ubuntu'
-          aria-controls='pkg-panel-ubuntu'
-          data-package-tab
-          data-package-target='ubuntu'>
+      <div class='terminal-tabs' role='tablist' aria-label='Linux distro packages' data-anim='docs-package-tabs'>
+        <button class='terminal-tab package-tab active' type='button' role='tab' aria-selected='true'
+          id='pkg-tab-ubuntu' aria-controls='pkg-panel-ubuntu'
+          data-package-tab data-package-target='ubuntu'>
           <Icon icon={getIcon("ubuntu")} size='0.75rem' class='terminal-tab-icon package-icon' />
           Ubuntu / Debian
         </button>
-        <button
-          class='terminal-tab package-tab'
-          type='button'
-          role='tab'
-          aria-selected='false'
-          id='pkg-tab-arch'
-          aria-controls='pkg-panel-arch'
-          data-package-tab
-          data-package-target='arch'>
+        <button class='terminal-tab package-tab' type='button' role='tab' aria-selected='false'
+          id='pkg-tab-arch' aria-controls='pkg-panel-arch'
+          data-package-tab data-package-target='arch'>
           <Icon icon={getIcon("arch")} size='0.75rem' class='terminal-tab-icon package-icon' />
           Arch
         </button>
       </div>
-
       <div class='terminal-frame package-panels'>
-        <div
-          class='package-panel active'
-          data-package-panel
-          data-package-id='ubuntu'
-          role='tabpanel'
-          id='pkg-panel-ubuntu'
-          aria-labelledby='pkg-tab-ubuntu'>
+        <div class='package-panel active' data-package-panel data-package-id='ubuntu' role='tabpanel'
+          id='pkg-panel-ubuntu' aria-labelledby='pkg-tab-ubuntu'>
           <CodeBlock lines={distroPackages.ubuntu.command} compact={true} />
         </div>
-
-        <div
-          class='package-panel'
-          data-package-panel
-          data-package-id='arch'
-          role='tabpanel'
-          id='pkg-panel-arch'
-          aria-labelledby='pkg-tab-arch'
-          hidden>
+        <div class='package-panel' data-package-panel data-package-id='arch' role='tabpanel'
+          id='pkg-panel-arch' aria-labelledby='pkg-tab-arch' hidden>
           <CodeBlock lines={distroPackages.arch.command} compact={true} />
         </div>
       </div>
     </div>
+
+    <Callout text="On Ubuntu 24.04+, you may need <code>--break-system-packages</code> with <code>pip install</code>. Use the binary or pipx install instead." />
   </section>
 
+  <!-- INSTALL -->
   <section id='install' class='doc-section' data-anchor-title='Install mvm'>
     <h2>Install mvm</h2>
-    <p>Choose an install path. Binary is the fastest setup for most users.</p>
+    <p>Four ways to install. The <strong>prebuilt binary</strong> is the fastest — no Python runtime needed.</p>
 
     <div class='terminal-shell' data-anim='docs-card-grid'>
-      <div
-        class='terminal-tabs'
-        role='tablist'
-        aria-label='Install options'
-        data-anim='docs-install-tabs'>
-        {
-          installMethods.map((method, index) => (
-            <button
-              class={`terminal-tab install-tab ${index === 0 ? "active" : ""}`}
-              type='button'
-              role='tab'
-              aria-selected={index === 0 ? "true" : "false"}
-              id={`docs-install-tab-${method.id ?? method.title.toLowerCase()}`}
-              aria-controls={`docs-install-panel-${method.id ?? method.title.toLowerCase()}`}
-              data-doc-install-tab
-              data-doc-install-target={method.id ?? method.title.toLowerCase()}>
-              {method.icon ? (
-                <Icon
-                  icon={getIcon(method.icon)}
-                  size='0.75rem'
-                  class='terminal-tab-icon'
-                />
-              ) : null}
-              {method.title}
-            </button>
-          ))
-        }
+      <div class='terminal-tabs' role='tablist' aria-label='Install options' data-anim='docs-install-tabs'>
+        {installMethods.map((method, index) => (
+          <button class={`terminal-tab install-tab ${index === 0 ? "active" : ""}`} type='button' role='tab'
+            aria-selected={index === 0 ? "true" : "false"}
+            id={`docs-install-tab-${method.id}`}
+            aria-controls={`docs-install-panel-${method.id}`}
+            data-doc-install-tab data-doc-install-target={method.id}>
+            {method.icon ? <Icon icon={getIcon(method.icon)} size='0.75rem' class='terminal-tab-icon' /> : null}
+            {method.title}
+          </button>
+        ))}
       </div>
-
       <div class='terminal-frame install-panels'>
-        {
-          installMethods.map((method, index) => (
-            <div
-              class={`install-panel ${index === 0 ? "active" : ""}`}
-              data-doc-install-panel
-              data-doc-install-id={method.id ?? method.title.toLowerCase()}
-              role='tabpanel'
-              id={`docs-install-panel-${method.id ?? method.title.toLowerCase()}`}
-              aria-labelledby={`docs-install-tab-${method.id ?? method.title.toLowerCase()}`}
-              hidden={index !== 0}>
-              {method.description ? (
-                <p class='method-desc'>{method.description}</p>
-              ) : null}
-              <CodeBlock lines={method.code} compact={true} />
-            </div>
-          ))
-        }
+        {installMethods.map((method, index) => (
+          <div class={`install-panel ${index === 0 ? "active" : ""}`}
+            data-doc-install-panel data-doc-install-id={method.id}
+            role='tabpanel' id={`docs-install-panel-${method.id}`}
+            aria-labelledby={`docs-install-tab-${method.id}`}
+            hidden={index !== 0}>
+            {method.description ? <p class='method-desc'>{method.description}</p> : null}
+            <CodeBlock lines={method.code} compact={true} />
+          </div>
+        ))}
       </div>
     </div>
+
+    <Callout text='After installing, run <code>mvm --help</code> to verify. If "command not found", ensure <code>/usr/local/bin</code> is in your <code>PATH</code>.' />
   </section>
 
-  <section
-    id='host-init'
-    class='doc-section'
-    data-anchor-title='Initialize host'>
-    <h2>{hostInit.title}</h2>
-    <p>{hostInit.description}</p>
-    <div class='inline-block important' data-anim='docs-notice'>
-      <CodeBlock lines={hostInit.code} compact={true} />
-    </div>
+  <!-- HOST INIT -->
+  <section id='host-initialize' class='doc-section' data-anchor-title='Initialize host'>
+    <h2>Initialize host</h2>
+    <p>
+      Before creating any VMs, your host needs one-time setup: KVM module loading, IP forwarding,
+      the <code>mvm</code> group, sudoers permissions, and bridge networking. This is what <code>mvm init</code>
+      handles for you.
+    </p>
+
+    {hostInitSections.map((section) => (
+      <div class="sub-section">
+        <h3>{section.title}</h3>
+        {section.description ? <p set:html={section.description} /> : null}
+        {section.code ? (
+          <div class='inline-block' data-anim='docs-card'>
+            <CodeBlock lines={section.code} compact={true} />
+          </div>
+        ) : null}
+        {section.items ? (
+          <ul>{section.items.map((item) => <li set:html={item} />)}</ul>
+        ) : null}
+        {section.callout ? <Callout text={section.callout} /> : null}
+      </div>
+    ))}
   </section>
 
-  <section
-    id='first-vm'
-    class='doc-section'
-    data-anchor-title='Create your first VM'>
+  <!-- FIRST VM -->
+  <section id='first-vm' class='doc-section' data-anchor-title='Create your first VM'>
     <h2>Create your first VM</h2>
-    <p>Run these commands in order:</p>
-    <div class='inline-block' data-anim='docs-quick'>
-      <CodeBlock lines={firstVm} compact={true} />
-    </div>
+    <p>
+      This walkthrough takes you from zero to a running microVM: generate an SSH key,
+      download a kernel and OS image, boot the VM, connect, and clean up.
+    </p>
+
+    {firstVmSections.map((section) => (
+      <div class="sub-section">
+        <h3>{section.title}</h3>
+        <p set:html={section.description} />
+        <div class='inline-block' data-anim='docs-quick'>
+          <CodeBlock lines={section.code} compact={true} />
+        </div>
+        {section.callouts ? section.callouts.map((g) => <Callout text={g} />) : null}
+      </div>
+    ))}
   </section>
 
-  <section
-    id='troubleshooting'
-    class='doc-section'
-    data-anchor-title='Troubleshooting'>
+  <!-- VM CREATE -->
+  <section id='vm-create' class='doc-section' data-anchor-title='mvm vm create'>
+    <h2>mvm vm create</h2>
+    <p>{vmCreateExplanation.whatItDoes}</p>
+
+    <h3 id='vm-create-flags'>All flags</h3>
+    <div class='inline-block' data-anim='docs-card'>
+      <CodeBlock lines={vmCreateFlagLines} compact={true} />
+    </div>
+
+    <h3>Examples</h3>
+    {vmCreateExamples.map((ex) => (
+      <div class="sub-section">
+        <p><strong>{ex.title}</strong></p>
+        <div class='inline-block' data-anim='docs-card'>
+          <CodeBlock lines={ex.code} compact={true} />
+        </div>
+        <Note text={ex.note} />
+      </div>
+    ))}
+    {vmCreateExplanation.callouts.map((g) => <Callout text={g} />)}
+  </section>
+
+  <!-- VM LIFECYCLE -->
+  <section id='vm-lifecycle' class='doc-section' data-anchor-title='VM Lifecycle'>
+    <h2>VM Lifecycle</h2>
+    <p>Once your VM is created, these commands let you interact with, inspect, snapshot, and tear it down.</p>
+
+    <!-- SSH -->
+    <h3 id='vm-lifecycle-ssh'>mvm ssh</h3>
+    <p>{sshExplanation.whatItDoes}</p>
+    {sshExplanation.examples.map((ex) => (
+      <div class='inline-block' data-anim='docs-card'><CodeBlock lines={[ex.code]} compact={true} /><Note text={ex.note} /></div>
+    ))}
+    {sshExplanation.callouts.map((g) => <Callout text={g} />)}
+
+    <!-- Console -->
+    <h3 id='vm-lifecycle-console'>mvm console</h3>
+    <p>{consoleExplanation.whatItDoes}</p>
+    {consoleExplanation.examples.map((ex) => (
+      <div class='inline-block' data-anim='docs-card'><CodeBlock lines={[ex.code]} compact={true} /><Note text={ex.note} /></div>
+    ))}
+    {consoleExplanation.callouts.map((g) => <Callout text={g} />)}
+
+    <!-- Logs -->
+    <h3 id='vm-lifecycle-logs'>mvm logs</h3>
+    <p>{logsExplanation.whatItDoes}</p>
+    {logsExplanation.examples.map((ex) => (
+      <div class='inline-block' data-anim='docs-card'><CodeBlock lines={[ex.code]} compact={true} /><Note text={ex.note} /></div>
+    ))}
+    {logsExplanation.callouts.map((g) => <Callout text={g} />)}
+
+    <!-- Snapshots -->
+    <h3 id='vm-lifecycle-snapshot'>mvm vm snapshot / load</h3>
+    <p>{snapshotExplanation.whatItDoes}</p>
+    {snapshotExplanation.examples.map((ex) => (
+      <div class='inline-block' data-anim='docs-card'><CodeBlock lines={[ex.code]} compact={true} /><Note text={ex.note} /></div>
+    ))}
+    {snapshotExplanation.callouts.map((g) => <Callout text={g} />)}
+
+    <!-- Inspect -->
+    <h3>mvm vm ls / inspect</h3>
+    <p>{vmInspectExplanation.whatItDoes}</p>
+    {vmInspectExplanation.examples.map((ex) => (
+      <div class='inline-block' data-anim='docs-card'><CodeBlock lines={[ex.code]} compact={true} /><Note text={ex.note} /></div>
+    ))}
+
+    <!-- Remove -->
+    <h3 id='vm-lifecycle-rm'>mvm vm rm / prune</h3>
+    <p>{vmRmExplanation.whatItDoes}</p>
+    {vmRmExplanation.examples.map((ex) => (
+      <div class='inline-block' data-anim='docs-card'><CodeBlock lines={[ex.code]} compact={true} /><Note text={ex.note} /></div>
+    ))}
+    {vmRmExplanation.callouts.map((g) => <Callout text={g} />)}
+  </section>
+
+  <!-- RESOURCE MANAGEMENT -->
+  <section id='resource-management' class='doc-section' data-anchor-title='Resource Management'>
+    <h2>Resource Management</h2>
+    <p>
+      mvmctl manages four resource types: OS images (root filesystems), kernels (vmlinux binaries),
+      Firecracker/jailer binaries, and SSH keys.
+    </p>
+
+    <!-- Images -->
+    <h3 id='resource-management-image'>mvm image</h3>
+    {imageSections.map((s) => (
+      <div class="sub-section">
+        <p><strong>{s.title}</strong></p>
+        {s.description ? <p set:html={s.description} /> : null}
+        {s.items ? <ul>{s.items.map((item) => <li set:html={item} />)}</ul> : null}
+        {s.code ? <div class='inline-block' data-anim='docs-card'><CodeBlock lines={s.code} compact={true} /></div> : null}
+        {s.callout ? <Callout text={s.callout} /> : null}
+      </div>
+    ))}
+
+    <!-- Kernels -->
+    <h3 id='resource-management-kernel'>mvm kernel</h3>
+    {kernelSections.map((s) => (
+      <div class="sub-section">
+        <p><strong>{s.title}</strong></p>
+        {s.description ? <p set:html={s.description} /> : null}
+        {s.code ? <div class='inline-block' data-anim='docs-card'><CodeBlock lines={s.code} compact={true} /></div> : null}
+        {s.callout ? <Callout text={s.callout} /> : null}
+      </div>
+    ))}
+
+    <!-- Binaries -->
+    <h3 id='resource-management-bin'>mvm bin</h3>
+    {binarySections.map((s) => (
+      <div class="sub-section">
+        <p><strong>{s.title}</strong></p>
+        {s.description ? <p set:html={s.description} /> : null}
+        {s.code ? <div class='inline-block' data-anim='docs-card'><CodeBlock lines={s.code} compact={true} /></div> : null}
+        {s.callout ? <Callout text={s.callout} /> : null}
+      </div>
+    ))}
+
+    <!-- Keys -->
+    <h3 id='resource-management-key'>mvm key</h3>
+    {keySections.map((s) => (
+      <div class="sub-section">
+        <p><strong>{s.title}</strong></p>
+        {s.description ? <p set:html={s.description} /> : null}
+        {s.code ? <div class='inline-block' data-anim='docs-card'><CodeBlock lines={s.code} compact={true} /></div> : null}
+        {s.callout ? <Callout text={s.callout} /> : null}
+      </div>
+    ))}
+  </section>
+
+  <!-- NETWORK -->
+  <section id='network-management' class='doc-section' data-anchor-title='Network Management'>
+    <h2>Network Management</h2>
+    <p>
+      mvmctl uses Linux bridge/TAP networking with iptables NAT. Each named network is
+      a separate bridge with its own subnet.
+    </p>
+
+    {networkSections.map((s) => (
+      <div class="sub-section">
+        <h3>{s.title}</h3>
+        {s.description ? <p set:html={s.description} /> : null}
+        {s.code ? <div class='inline-block' data-anim='docs-card'><CodeBlock lines={s.code} compact={true} /></div> : null}
+        {s.callout ? <Callout text={s.callout} /> : null}
+        {s.note ? <Note text={s.note} /> : null}
+      </div>
+    ))}
+  </section>
+
+  <!-- CONFIGURATION -->
+  <section id='configuration' class='doc-section' data-anchor-title='Configuration'>
+    <h2>Configuration</h2>
+
+    {configSections.map((s) => (
+      <div class="sub-section">
+        <h3>{s.title}</h3>
+        {s.description ? <p set:html={s.description} /> : null}
+        {s.items ? <ol>{s.items.map((item) => <li set:html={item} />)}</ol> : null}
+        {s.code ? <div class='inline-block' data-anim='docs-card'><CodeBlock lines={s.code} compact={true} /></div> : null}
+        {s.callout ? <Callout text={s.callout} /> : null}
+      </div>
+    ))}
+  </section>
+
+  <!-- DEPENDENCIES -->
+  <section id='dependencies' class='doc-section' data-anchor-title='Dependencies'>
+    <h2>Dependencies</h2>
+    <p>
+      mvmctl depends on several system binaries. Most are common Linux utilities;
+      this reference covers what each is for and which package provides it.
+    </p>
+
+    {dependencySections.map((s) => (
+      <div class="sub-section">
+        <h3>{s.title}</h3>
+        {s.description ? <p set:html={s.description} /> : null}
+        {s.headers && s.rows ? (
+          <div class="table-wrap">
+            <table class="dep-table">
+              <thead><tr>{s.headers.map((h) => <th>{h}</th>)}</tr></thead>
+              <tbody>{s.rows.map((row) => <tr>{row.map((cell) => <td><code>{cell}</code></td>)}</tr>)}</tbody>
+            </table>
+          </div>
+        ) : null}
+        {s.code ? <div class='inline-block' data-anim='docs-card'><CodeBlock lines={s.code} compact={true} /></div> : null}
+        {s.items ? <ul>{s.items.map((item) => <li set:html={item} />)}</ul> : null}
+        {s.callout ? <Callout text={s.callout} /> : null}
+      </div>
+    ))}
+  </section>
+
+  <!-- CLOUD-INIT -->
+  <section id='cloud-init' class='doc-section' data-anchor-title='Cloud-Init'>
+    <h2>Cloud-Init</h2>
+    <p>
+      Cloud-init configures your VM on first boot: users, SSH keys, networking, startup scripts.
+      mvmctl handles this automatically.
+    </p>
+
+    {cloudInitSections.map((s) => (
+      <div class="sub-section">
+        <h3>{s.title}</h3>
+        {s.description ? <p set:html={s.description} /> : null}
+        {s.items ? <ul>{s.items.map((item) => <li set:html={item} />)}</ul> : null}
+        {s.callout ? <Callout text={s.callout} /> : null}
+      </div>
+    ))}
+  </section>
+
+  <!-- TROUBLESHOOTING -->
+  <section id='troubleshooting' class='doc-section' data-anchor-title='Troubleshooting'>
     <h2>Troubleshooting</h2>
-    {
-      troubleshooting.map((issue) => (
-        <div class='trouble-item' data-anim='docs-card'>
-          <h3>{issue.problem}</h3>
+    <p>Common issues, what causes them, and how to fix them:</p>
+
+    {troubleshooting.map((issue) => (
+      <div class='trouble-item' data-anim='docs-card'>
+        <h3>{issue.problem}</h3>
+        <div class='inline-block' data-anim='docs-card'>
           <CodeBlock lines={issue.fix} compact={true} />
         </div>
-      ))
-    }
+        {issue.note ? <Note text={issue.note} /> : null}
+      </div>
+    ))}
+
+    <h3>Debug mode</h3>
+    <p>Enable debug logging to see what mvmctl is doing under the hood:</p>
+    <div class='inline-block' data-anim='docs-card'>
+      <CodeBlock lines={[
+        "# Persistent:",
+        "mvm config set debug.enabled true",
+        "",
+        "# Single command:",
+        "MVM_LOG_LEVEL=DEBUG mvm vm create --name myvm --image ubuntu-24.04",
+      ]} compact={true} />
+    </div>
+    <Callout text='Debug output is verbose. Switch it back off: <code>mvm config set debug.enabled false</code>.' />
+
+    <h3>Getting help</h3>
+    <p>
+      Still stuck? <a href="https://github.com/AlanD20/mvmctl/issues" rel="noopener noreferrer" target="_blank">Open an issue on GitHub</a>
+      with:
+    </p>
+    <ul>
+      <li>The exact command you ran</li>
+      <li>Full error output (run with <code>MVM_LOG_LEVEL=DEBUG</code>)</li>
+      <li>Your OS and <code>mvm --version</code></li>
+    </ul>
   </section>
 </article>
 
@@ -188,232 +419,77 @@ import { getIcon } from "../../lib/icons";
   import { icons } from "../../lib/icons";
 
   const initDocsTabs = () => {
-    const packageTabs = Array.from(
-      document.querySelectorAll<HTMLButtonElement>("[data-package-tab]"),
-    );
-    const packagePanels = Array.from(
-      document.querySelectorAll<HTMLElement>("[data-package-panel]"),
-    );
-
+    const packageTabs = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-package-tab]"));
+    const packagePanels = Array.from(document.querySelectorAll<HTMLElement>("[data-package-panel]"));
     const activatePackage = (id: string) => {
-      packageTabs.forEach((tab) => {
-        const active = tab.dataset.packageTarget === id;
-        tab.classList.toggle("active", active);
-        tab.setAttribute("aria-selected", active ? "true" : "false");
-      });
-
-      packagePanels.forEach((panel) => {
-        const active = panel.dataset.packageId === id;
-        panel.classList.toggle("active", active);
-        panel.hidden = !active;
-        if (active) {
-          panel.style.opacity = "1";
-          panel.style.transform = "none";
-          panel
-            .querySelectorAll<HTMLElement>("[data-anim='code-block']")
-            .forEach((block) => {
-              block.style.opacity = "1";
-              block.style.transform = "none";
-            });
-          return;
-        }
-
-        panel.style.opacity = "0";
-      });
+      packageTabs.forEach((tab) => { const a = tab.dataset.packageTarget === id; tab.classList.toggle("active", a); tab.setAttribute("aria-selected", a ? "true" : "false"); });
+      packagePanels.forEach((panel) => { const a = panel.dataset.packageId === id; panel.classList.toggle("active", a); panel.hidden = !a; });
     };
+    packageTabs.forEach((tab) => { if (tab.dataset.tabsBound === "true") return; tab.dataset.tabsBound = "true"; tab.addEventListener("click", () => { if (tab.dataset.packageTarget) activatePackage(tab.dataset.packageTarget); }); });
 
-    packageTabs.forEach((tab) => {
-      if (tab.dataset.tabsBound === "true") {
-        return;
-      }
-
-      tab.dataset.tabsBound = "true";
-      tab.addEventListener("click", () => {
-        if (tab.dataset.packageTarget) {
-          activatePackage(tab.dataset.packageTarget);
-        }
-      });
-    });
-
-    const installTabs = Array.from(
-      document.querySelectorAll<HTMLButtonElement>("[data-doc-install-tab]"),
-    );
-    const installPanels = Array.from(
-      document.querySelectorAll<HTMLElement>("[data-doc-install-panel]"),
-    );
-
+    const installTabs = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-doc-install-tab]"));
+    const installPanels = Array.from(document.querySelectorAll<HTMLElement>("[data-doc-install-panel]"));
     const activateInstall = (id: string) => {
-      installTabs.forEach((tab) => {
-        const active = tab.dataset.docInstallTarget === id;
-        tab.classList.toggle("active", active);
-        tab.setAttribute("aria-selected", active ? "true" : "false");
-      });
-
-      installPanels.forEach((panel) => {
-        const active = panel.dataset.docInstallId === id;
-        panel.classList.toggle("active", active);
-        panel.hidden = !active;
-        if (active) {
-          panel.style.opacity = "1";
-          panel.style.transform = "none";
-          panel
-            .querySelectorAll<HTMLElement>("[data-anim='code-block']")
-            .forEach((block) => {
-              block.style.opacity = "1";
-              block.style.transform = "none";
-            });
-          return;
-        }
-
-        panel.style.opacity = "0";
-      });
+      installTabs.forEach((tab) => { const a = tab.dataset.docInstallTarget === id; tab.classList.toggle("active", a); tab.setAttribute("aria-selected", a ? "true" : "false"); });
+      installPanels.forEach((panel) => { const a = panel.dataset.docInstallId === id; panel.classList.toggle("active", a); panel.hidden = !a; });
     };
-
-    installTabs.forEach((tab) => {
-      if (tab.dataset.tabsBound === "true") {
-        return;
-      }
-
-      tab.dataset.tabsBound = "true";
-      tab.addEventListener("click", () => {
-        if (tab.dataset.docInstallTarget) {
-          activateInstall(tab.dataset.docInstallTarget);
-        }
-      });
-    });
-
+    installTabs.forEach((tab) => { if (tab.dataset.tabsBound === "true") return; tab.dataset.tabsBound = "true"; tab.addEventListener("click", () => { if (tab.dataset.docInstallTarget) activateInstall(tab.dataset.docInstallTarget); }); });
   };
 
   const initHeadingAnchors = () => {
-    const setHeadingIcon = (
-      slot: HTMLElement,
-      iconName: "link" | "check" | "info",
-    ) => {
+    const setHeadingIcon = (slot: HTMLElement, iconName: "link" | "check" | "info") => {
       const [width, height, , , pathData] = icons[iconName].icon;
       const pathList = Array.isArray(pathData) ? pathData : [pathData];
-
-      while (slot.firstChild) {
-        slot.removeChild(slot.firstChild);
-      }
-
+      while (slot.firstChild) slot.removeChild(slot.firstChild);
       const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-      svg.setAttribute("width", "12");
-      svg.setAttribute("height", "12");
-      svg.setAttribute("fill", "currentColor");
-      svg.setAttribute("aria-hidden", "true");
-
-      pathList.forEach((pathItem) => {
-        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        path.setAttribute("d", pathItem);
-        svg.appendChild(path);
-      });
-
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`); svg.setAttribute("width", "12"); svg.setAttribute("height", "12"); svg.setAttribute("fill", "currentColor"); svg.setAttribute("aria-hidden", "true");
+      pathList.forEach((d) => { const p = document.createElementNS("http://www.w3.org/2000/svg", "path"); p.setAttribute("d", d); svg.appendChild(p); });
       slot.appendChild(svg);
     };
-
     let announcer = document.getElementById("heading-copy-status");
     if (!(announcer instanceof HTMLParagraphElement)) {
-      announcer = document.createElement("p");
-      announcer.id = "heading-copy-status";
-      announcer.className = "sr-only";
-      announcer.setAttribute("aria-live", "polite");
-      announcer.setAttribute("aria-atomic", "true");
-      document.body.appendChild(announcer);
+      announcer = document.createElement("p"); announcer.id = "heading-copy-status"; announcer.className = "sr-only";
+      announcer.setAttribute("aria-live", "polite"); announcer.setAttribute("aria-atomic", "true"); document.body.appendChild(announcer);
     }
-
-    const sections = Array.from(
-      document.querySelectorAll<HTMLElement>(".doc-section[id]"),
-    );
-    sections.forEach((section) => {
-      const heading = section.querySelector<HTMLElement>("h1, h2, h3");
-      if (!heading || heading.dataset.headingCopyBound === "true") {
-        return;
-      }
-
+    const addCopyButton = (heading: HTMLElement, targetId: string, label: string) => {
+      if (heading.dataset.headingCopyBound === "true") return;
       heading.dataset.headingCopyBound = "true";
-      const sectionId = section.id;
-      const sectionLabel = section.dataset.anchorTitle ?? sectionId;
-
-      const wrap = document.createElement("span");
-      wrap.className = "heading-anchor-wrap";
-
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "heading-anchor-btn";
-      btn.setAttribute("aria-label", `Copy link to ${sectionLabel}`);
-
-      const icon = document.createElement("span");
-      icon.className = "heading-anchor-icon";
-      setHeadingIcon(icon, "link");
-
-      btn.appendChild(icon);
+      const wrap = document.createElement("span"); wrap.className = "heading-anchor-wrap";
+      const btn = document.createElement("button"); btn.type = "button"; btn.className = "heading-anchor-btn";
+      btn.setAttribute("aria-label", `Copy link to ${label}`);
+      const icon = document.createElement("span"); icon.className = "heading-anchor-icon";
+      setHeadingIcon(icon, "link"); btn.appendChild(icon);
       btn.addEventListener("click", async () => {
-        const currentPath = window.location.pathname;
-        const docsPath = currentPath.startsWith("/docs")
-          ? currentPath
-          : "/docs/";
-        const link = `${window.location.origin}${docsPath}#${sectionId}`;
-
+        const link = `${window.location.origin}${window.location.pathname.startsWith("/docs") ? window.location.pathname : "/docs/"}#${targetId}`;
         try {
-          if (!window.isSecureContext) {
-            throw new Error("Clipboard API requires secure context");
-          }
-
-          if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
-            throw new Error("Clipboard API not available");
-          }
-
+          if (!window.isSecureContext) throw new Error("Clipboard requires secure context");
+          if (!navigator.clipboard) throw new Error("Clipboard unavailable");
           await navigator.clipboard.writeText(link);
-          setHeadingIcon(icon, "check");
-          btn.classList.add("copied");
-          announcer.textContent = `Copied link to ${sectionLabel}.`;
-        } catch {
-          setHeadingIcon(icon, "info");
-          btn.classList.add("failed");
-          announcer.textContent = `Could not copy link to ${sectionLabel}.`;
-        }
-
-        window.setTimeout(() => {
-          setHeadingIcon(icon, "link");
-          btn.classList.remove("copied", "failed");
-        }, 1100);
+          setHeadingIcon(icon, "check"); btn.classList.add("copied"); announcer.textContent = `Copied link to ${label}.`;
+        } catch { setHeadingIcon(icon, "info"); btn.classList.add("failed"); announcer.textContent = `Could not copy link to ${label}.`; }
+        setTimeout(() => { setHeadingIcon(icon, "link"); btn.classList.remove("copied", "failed"); }, 1100);
       });
+      wrap.appendChild(btn); heading.appendChild(wrap);
+    };
 
-      wrap.appendChild(btn);
-      heading.appendChild(wrap);
+    /* Add copy buttons to section-level headings (h1/h2 inside .doc-section) */
+    Array.from(document.querySelectorAll<HTMLElement>(".doc-section[id]")).forEach((section) => {
+      const heading = section.querySelector<HTMLElement>("h1, h2, h3");
+      if (!heading) return;
+      addCopyButton(heading, section.id, section.dataset.anchorTitle ?? section.id);
+    });
+
+    /* Add copy buttons to standalone h3[id] elements (sub-section anchors) */
+    Array.from(document.querySelectorAll<HTMLElement>("h3[id]")).forEach((h3) => {
+      addCopyButton(h3, h3.id, h3.textContent?.trim() ?? h3.id);
     });
   };
 
-  const initDocsQuickstart = () => {
-    initDocsTabs();
-    initHeadingAnchors();
-  };
-
-  let docsInitFrame = 0;
-  const scheduleDocsQuickstart = () => {
-    if (docsInitFrame) {
-      window.cancelAnimationFrame(docsInitFrame);
-    }
-
-    docsInitFrame = window.requestAnimationFrame(() => {
-      docsInitFrame = 0;
-      initDocsQuickstart();
-    });
-  };
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", scheduleDocsQuickstart, {
-      once: true,
-    });
-  } else {
-    scheduleDocsQuickstart();
-  }
-
-  if (document.documentElement.dataset.docsQuickstartBound !== "true") {
-    document.documentElement.dataset.docsQuickstartBound = "true";
-    document.addEventListener("astro:page-load", scheduleDocsQuickstart);
-  }
+  const init = () => { initDocsTabs(); initHeadingAnchors(); };
+  let frame = 0;
+  const schedule = () => { if (frame) cancelAnimationFrame(frame); frame = requestAnimationFrame(() => { frame = 0; init(); }); };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", schedule, { once: true }); else schedule();
+  if (!document.documentElement.dataset.docsQuickstartBound) { document.documentElement.dataset.docsQuickstartBound = "true"; document.addEventListener("astro:page-load", schedule); }
 </script>
 
 <style>
@@ -421,23 +497,46 @@ import { getIcon } from "../../lib/icons";
     position: relative;
     border-bottom: none;
     scroll-margin-top: calc(var(--header-height) + 4rem);
+    padding: 0.5rem 0;
   }
 
+  /* h3 anchors (lifecycle sub-sections, resource types) need scroll room too */
+  h3[id] {
+    scroll-margin-top: calc(var(--header-height) + 4rem);
+  }
   .doc-section::after {
     content: "";
     display: block;
     width: 100%;
-    height: 0.5px;
-    margin: 2rem 0;
-    background: var(--border);
+    height: 1px;
+    margin: 2.5rem 0 1rem;
+    background: linear-gradient(
+      90deg,
+      var(--border) 0%,
+      var(--border) 40%,
+      transparent 100%
+    );
   }
+  .doc-section:last-child { padding-bottom: 0; }
+  .doc-section:last-child::after { display: none; }
 
-  .doc-section:last-child {
-    padding-bottom: 0;
+  .sub-section {
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+    padding: 1rem 1rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--color-surface-3);
+    transition: border-color 180ms ease;
   }
-
-  .doc-section:last-child::after {
-    display: none;
+  .sub-section:hover {
+    border-color: var(--color-accent-primary-45);
+  }
+  .sub-section:first-of-type {
+    margin-top: 1rem;
+  }
+  .sub-section:last-of-type {
+    margin-bottom: 0.5rem;
   }
 
   .kicker {
@@ -453,340 +552,121 @@ import { getIcon } from "../../lib/icons";
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin: 0.5rem 0;
+    margin: 0.75rem 0;
     font-size: clamp(2rem, 1.25vw + 1.25rem, 2.5rem);
     font-weight: 600;
     line-height: 1.08;
     letter-spacing: -0.03em;
   }
-
-  @media (max-width: 680px) {
-    h1 {
-      font-size: clamp(1.5rem, 6.2vw, 2rem);
-      line-height: 1.12;
-      gap: 0.5rem;
-    }
-  }
-
-  @media (max-width: 420px) {
-    h1 {
-      font-size: clamp(1.25rem, 7.4vw, 1.5rem);
-      line-height: 1.16;
-      gap: 0.25rem;
-    }
-  }
-
-  @media (max-width: 280px) {
-    h1 {
-      font-size: clamp(1rem, 8.6vw, 1.25rem);
-      line-height: 1.2;
-      gap: 0.25rem;
-    }
-  }
+  @media (max-width: 680px) { h1 { font-size: clamp(1.5rem, 6.2vw, 2rem); line-height: 1.12; gap: 0.5rem; } }
+  @media (max-width: 420px) { h1 { font-size: clamp(1.25rem, 7.4vw, 1.5rem); line-height: 1.16; gap: 0.25rem; } }
 
   .lead {
-    margin: 0;
+    margin: 0 0 1.25rem;
     font-size: 1rem;
     color: var(--text-soft);
-    line-height: 1.68;
+    line-height: 1.75;
+    max-width: 65ch;
   }
 
   h2 {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin: 0 0 0.5rem;
-    font-size: 1.25rem;
+    margin: 0 0 0.75rem;
+    font-size: 1.35rem;
     font-weight: 600;
     letter-spacing: -0.01em;
+    line-height: 1.3;
   }
 
   h3 {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin: 0 0 0.5rem;
+    margin: 1.75rem 0 0.5rem;
     font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--color-text-muted);
+    border-left: 2px solid var(--color-accent-primary-45);
+    padding-left: 0.75rem;
+  }
+  .sub-section h3 {
+    margin-top: 0;
+    border-left: none;
+    padding-left: 0;
+    color: inherit;
     font-weight: 600;
+    font-size: 1.05rem;
   }
 
   p {
-    margin: 0;
+    margin: 0 0 0.75rem;
     color: currentColor;
-    line-height: 1.65;
+    line-height: 1.75;
+    max-width: 72ch;
+  }
+  p:last-child {
+    margin-bottom: 0;
   }
 
-  .kicker,
-  .lead {
-    color: var(--text-soft);
-  }
+  .kicker, .lead { color: var(--text-soft); }
 
-  :global(.heading-anchor-wrap) {
-    display: inline-flex;
-    align-items: center;
-    margin-left: 0.25rem;
-    transform: none;
-    vertical-align: baseline;
-    flex: 0 0 auto;
-  }
-
-  h2 :global(.heading-anchor-wrap),
-  h1 :global(.heading-anchor-wrap),
-  h3 :global(.heading-anchor-wrap) {
-    transform: translateY(0.02em);
-  }
-
-  :global(.heading-anchor-btn) {
-    border: 1px solid var(--color-border-strong);
-    border-radius: 0.25rem;
-    background: var(--color-surface-4);
-    color: var(--text-soft);
-    width: 1.5rem;
-    height: 1.5rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    flex: 0 0 auto;
-    font-size: 0.75rem;
-    line-height: 1;
-    transition:
-      transform 180ms ease,
-      color 180ms ease,
-      border-color 180ms ease,
-      background-color 180ms ease;
-  }
-
-  :global(.heading-anchor-btn:hover),
-  :global(.heading-anchor-btn:focus-visible) {
-    border-color: var(--color-accent-primary-74);
-    color: var(--color-accent-primary);
-    background: var(--color-surface-4);
-    transform: scale(1.04);
-    outline: none;
-  }
-
-  :global(.heading-anchor-btn.copied) {
-    border-color: var(--color-accent-primary-82);
-    background: var(--color-accent-primary-18);
-    color: var(--color-accent-primary);
-  }
-
-  :global(.heading-anchor-btn.failed) {
-    border-color: var(--color-accent-warm-82);
-    color: var(--color-accent-warm);
-    background: var(--color-accent-warm-17);
-  }
-
-  :global(.heading-anchor-icon) {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1rem;
-    height: 1rem;
-    line-height: 1;
-    color: inherit;
-  }
-
-  :global(.heading-anchor-icon svg) {
-    width: 0.75rem;
-    height: 0.75rem;
-    display: block;
-    flex: 0 0 auto;
-  }
-
-  :global(.sr-only) {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  .method-desc {
-    margin-bottom: 0.5rem;
-    font-size: 0.75rem;
-    padding: 0 0.5rem;
-    color: currentColor;
-  }
+  .method-desc { margin-bottom: 0.5rem; font-size: 0.75rem; padding: 0 0.5rem; color: currentColor; }
 
   ul {
     margin: 0.5rem 0 0;
-    padding-left: 1rem;
+    padding-left: 1.25rem;
     display: grid;
-    gap: 1rem;
+    gap: 0.6rem;
     color: var(--text-soft);
     text-underline-offset: 0.5rem;
+    line-height: 1.6;
   }
-
-  .terminal-shell {
-    margin-top: 1rem;
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    overflow: hidden;
-    transition: border-color 180ms ease;
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-  }
-
-  .terminal-shell:hover {
-    border-color: var(--color-accent-primary-68);
-  }
-
-  .terminal-tabs {
-    margin-top: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0;
-    border: none;
-    border-bottom: 1px solid var(--border);
-    border-radius: 0.5rem 0.5rem 0 0;
-    overflow: hidden;
-    background: var(--color-surface-4);
-  }
-
-  .terminal-tab {
-    border: none;
-    border-right: 1px solid var(--border);
-    border-radius: 0;
-    padding: 0.5rem 0.75rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: transparent;
+  ol {
+    margin: 0.5rem 0 0;
+    padding-left: 1.5rem;
+    display: grid;
+    gap: 0.4rem;
     color: var(--text-soft);
-    font: inherit;
-    font-size: 0.75rem;
-    cursor: pointer;
-    transition:
-      border-color 170ms ease,
-      color 170ms ease,
-      background-color 170ms ease;
+    line-height: 1.7;
+  }
+  li {
+    max-width: 72ch;
   }
 
-  .terminal-tab:hover,
-  .terminal-tab:focus-visible {
-    color: var(--color-text-soft-bright-2);
-    background: var(--color-surface-selected-hover);
-    outline: none;
-  }
+  code { font-family: "Geist Mono", "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace; color: var(--color-text-code-bright); background: var(--color-surface-2); padding: 0.1em 0.3em; border-radius: 0.25rem; font-size: 0.8em; }
 
-  .package-icon {
-    color: currentColor;
-    opacity: 0.94;
-  }
+  .table-wrap { width: 100%; overflow-x: auto; margin-top: 0.75rem; }
+  .dep-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; color: var(--text-soft); min-width: 500px; }
+  .dep-table th, .dep-table td { text-align: left; padding: 0.4rem 0.6rem; border: 1px solid var(--border); vertical-align: top; }
+  .dep-table th { font-weight: 600; color: var(--text); background: var(--color-surface-4); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+  .dep-table td code { white-space: nowrap; font-size: 0.75rem; background: transparent; padding: 0; color: var(--color-text-code); }
 
-  .terminal-tab:last-child {
-    border-right: none;
-  }
-
-  .terminal-tab-icon {
-    color: var(--color-accent-primary);
-  }
-
-  .terminal-tab.active,
-  .terminal-tab.install-tab.active,
-  .terminal-tab[aria-selected="true"],
-  .terminal-tab.install-tab[aria-selected="true"] {
-    color: var(--color-text-primary);
-    background: var(--color-accent-primary-tab-active);
-  }
-
-  .terminal-tab.active .terminal-tab-icon,
-  .terminal-tab.install-tab.active .terminal-tab-icon,
-  .terminal-tab[aria-selected="true"] .terminal-tab-icon,
-  .terminal-tab.install-tab[aria-selected="true"] .terminal-tab-icon {
-    color: var(--color-text-primary);
-  }
-
-  .terminal-frame {
-    border: none;
-    border-radius: 0 0 0.5rem 0.5rem;
-    background: var(--color-surface-5);
-    padding: 0.5rem;
-    margin-bottom: 0;
-    min-width: 0;
-  }
-
-  .package-panel,
-  .install-panel,
-  .inline-block,
-  .trouble-item {
-    margin-top: 0.5rem;
-  }
-
-  .trouble-item {
-    padding-top: 0.75rem;
-  }
+  .terminal-shell { margin-top: 1rem; border: 1px solid var(--border); border-radius: 0.5rem; overflow: hidden; transition: border-color 180ms ease; width: 100%; max-width: 100%; min-width: 0; }
+  .terminal-shell:hover { border-color: var(--color-accent-primary-68); }
+  .terminal-tabs { margin-top: 0; display: flex; flex-wrap: wrap; gap: 0; border: none; border-bottom: 1px solid var(--border); border-radius: 0.5rem 0.5rem 0 0; overflow: hidden; background: var(--color-surface-4); }
+  .terminal-tab { border: none; border-right: 1px solid var(--border); border-radius: 0; padding: 0.5rem 0.75rem; display: inline-flex; align-items: center; gap: 0.5rem; background: transparent; color: var(--text-soft); font: inherit; font-size: 0.75rem; cursor: pointer; transition: border-color 170ms ease, color 170ms ease, background-color 170ms ease; }
+  .terminal-tab:hover, .terminal-tab:focus-visible { color: var(--color-text-soft-bright-2); background: var(--color-surface-selected-hover); outline: none; }
+  .terminal-tab:last-child { border-right: none; }
+  .terminal-tab-icon { color: var(--color-accent-primary); }
+  .terminal-tab.active, .terminal-tab[aria-selected="true"] { color: var(--color-text-primary); background: var(--color-accent-primary-tab-active); }
+  .terminal-tab.active .terminal-tab-icon, .terminal-tab[aria-selected="true"] .terminal-tab-icon { color: var(--color-text-primary); }
+  .terminal-frame { border: none; border-radius: 0 0 0.5rem 0.5rem; background: var(--color-surface-5); padding: 0.5rem; margin-bottom: 0; min-width: 0; }
+  .package-panel, .install-panel, .inline-block, .trouble-item { margin-top: 0.5rem; }
+  .trouble-item { padding-top: 0.75rem; }
 
   @media (max-width: 760px) {
-    .doc-section {
-      padding: 1rem 0;
-    }
-
-    .terminal-shell {
-      border-radius: 0.5rem;
-      width: 100%;
-      min-width: 0;
-    }
-
-    .terminal-tabs {
-      overflow-x: visible;
-      flex-wrap: wrap;
-    }
-
-    .terminal-tab {
-      white-space: nowrap;
-      min-width: fit-content;
-      font-size: 0.75rem;
-      padding: 0.5rem 0.5rem;
-    }
-
-    .terminal-frame {
-      padding: 0.5rem;
-      min-width: 0;
-    }
-
-    .terminal-frame :global(.code-top) {
-      padding: 0.5rem 0.75rem;
-    }
-
-    .terminal-frame :global(pre) {
-      padding: 0.75rem 0.75rem;
-      overflow-x: auto;
-      max-width: 100%;
-    }
-
-    .terminal-frame :global(code) {
-      font-size: 0.75rem;
-      line-height: 1.45;
-    }
-  }
-
-  @media (max-width: 560px) {
-    .terminal-tab {
-      font-size: 0.75rem;
-      padding: 0.5rem 0.5rem;
-      gap: 0.25rem;
-    }
-
-    .terminal-tab-icon {
-      width: 0.75rem;
-      height: 0.75rem;
-    }
-
-    .terminal-frame {
-      padding: 0.25rem;
-    }
-
-    .method-desc {
-      font-size: 0.75rem;
-      padding: 0 0.25rem;
-    }
+    .doc-section { padding: 1rem 0; }
+    .terminal-shell { border-radius: 0.5rem; width: 100%; min-width: 0; }
+    .terminal-tabs { overflow-x: visible; flex-wrap: wrap; }
+    .terminal-tab { white-space: nowrap; min-width: fit-content; font-size: 0.75rem; padding: 0.5rem 0.5rem; }
+    .terminal-frame { padding: 0.5rem; min-width: 0; }
+    .terminal-frame :global(.code-top) { padding: 0.5rem 0.75rem; }
+    .terminal-frame :global(pre) { padding: 0.75rem 0.75rem; overflow-x: auto; max-width: 100%; }
+    .terminal-frame :global(code) { font-size: 0.75rem; line-height: 1.45; }
+    .dep-table { font-size: 0.7rem; }
+    .dep-table th, .dep-table td { padding: 0.3rem 0.4rem; }
   }
 </style>

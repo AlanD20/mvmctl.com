@@ -1,0 +1,44 @@
+---
+import Icon from "./Icon.astro";
+import { getIcon } from "../../lib/icons";
+
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+---
+
+<div class="callout" data-anim="docs-notice">
+  <Icon icon={getIcon("info")} size="0.75rem" class="callout-icon" />
+  <span set:html={text} />
+</div>
+
+<style>
+  .callout {
+    margin-top: 0.75rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border: 1px solid var(--color-accent-warm-13);
+    border-radius: 0.5rem;
+    background: var(--color-accent-warm-08);
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--text-soft);
+  }
+  .callout :global(code) {
+    color: var(--color-text-code-bright);
+    background: rgba(0,0,0,0.2);
+    padding: 0.1em 0.3em;
+    border-radius: 0.25rem;
+    font-size: 0.85em;
+  }
+  .callout-icon {
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+    color: var(--color-accent-warm);
+    width: 0.85rem;
+    height: 0.85rem;
+  }
+</style>
