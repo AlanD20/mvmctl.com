@@ -13,9 +13,10 @@ export type CommandBlock = {
 };
 
 export type DocsNavItem = {
-  id: string;
+  id?: string;
   label: string;
   icon: IconName;
+  href?: string;
   children?: readonly DocsNavItem[];
 };
 
@@ -77,9 +78,10 @@ export const docsNav: readonly DocsNavItem[] = [
   { id: "dependencies", label: "Dependencies", icon: "chip" },
   { id: "cloud-init", label: "Cloud-Init", icon: "layers" },
   { id: "troubleshooting", label: "Troubleshooting", icon: "spanner" },
+  { href: "/docs/api/", label: "API Reference", icon: "terminal" },
 ] as const;
 
-export const docsToc: readonly TocItem[] = [
+export const docsQuickstartToc: readonly TocItem[] = [
   { id: "overview", label: "Overview" },
   { id: "prerequisites", label: "Before you begin" },
   { id: "install", label: "Install mvm" },
@@ -103,6 +105,65 @@ export const docsToc: readonly TocItem[] = [
   { id: "dependencies", label: "Dependencies" },
   { id: "cloud-init", label: "Cloud-Init" },
   { id: "troubleshooting", label: "Troubleshooting" },
+] as const;
+
+export const docsApiToc: readonly TocItem[] = [
+  { id: "api-overview", label: "Overview" },
+  { id: "api-import-pattern", label: "Import Pattern" },
+  { id: "api-module-overview", label: "Module Overview" },
+  { id: "api-data-models", label: "Data Models" },
+  { id: "api-model-vmstatus", label: "VMStatus", level: 3 },
+  { id: "api-model-vminstanceitem", label: "VMInstanceItem", level: 3 },
+  { id: "api-model-networkitem", label: "NetworkItem", level: 3 },
+  { id: "api-model-imageitem", label: "ImageItem", level: 3 },
+  { id: "api-model-kernelitem", label: "KernelItem", level: 3 },
+  { id: "api-model-binaryitem", label: "BinaryItem", level: 3 },
+  { id: "api-model-sshkeyitem", label: "SSHKeyItem", level: 3 },
+  { id: "api-error-handling", label: "Error Handling" },
+  { id: "api-vm-operation", label: "VMOperation", level: 3 },
+  { id: "api-network-operation", label: "NetworkOperation", level: 3 },
+  { id: "api-image-operation", label: "ImageOperation", level: 3 },
+  { id: "api-kernel-operation", label: "KernelOperation", level: 3 },
+  { id: "api-key-operation", label: "KeyOperation", level: 3 },
+  { id: "api-binary-operation", label: "BinaryOperation", level: 3 },
+  { id: "api-host-operation", label: "HostOperation", level: 3 },
+  { id: "api-cache-operation", label: "CacheOperation", level: 3 },
+  { id: "api-ssh-operation", label: "SSHOperation", level: 3 },
+  { id: "api-init-operation", label: "InitOperation", level: 3 },
+  { id: "api-end-to-end", label: "End-to-End Example" },
+] as const;
+
+export const apiDocsNav: readonly DocsNavItem[] = [
+  { href: "/docs/", label: "Documentation", icon: "book" },
+  { id: "api-overview", label: "Overview", icon: "terminal" },
+  { id: "api-import-pattern", label: "Import Pattern", icon: "terminal" },
+  { id: "api-module-overview", label: "Module Overview", icon: "terminal" },
+  {
+    id: "api-data-models",
+    label: "Data Models",
+    icon: "archive",
+    children: [
+      { id: "api-model-vmstatus", label: "VMStatus", icon: "archive" },
+      { id: "api-model-vminstanceitem", label: "VMInstanceItem", icon: "archive" },
+      { id: "api-model-networkitem", label: "NetworkItem", icon: "archive" },
+      { id: "api-model-imageitem", label: "ImageItem", icon: "archive" },
+      { id: "api-model-kernelitem", label: "KernelItem", icon: "archive" },
+      { id: "api-model-binaryitem", label: "BinaryItem", icon: "archive" },
+      { id: "api-model-sshkeyitem", label: "SSHKeyItem", icon: "archive" },
+    ],
+  },
+  { id: "api-error-handling", label: "Error Handling", icon: "spanner" },
+  { id: "api-vm-operation", label: "VMOperation", icon: "terminal" },
+  { id: "api-network-operation", label: "NetworkOperation", icon: "terminal" },
+  { id: "api-image-operation", label: "ImageOperation", icon: "terminal" },
+  { id: "api-kernel-operation", label: "KernelOperation", icon: "terminal" },
+  { id: "api-key-operation", label: "KeyOperation", icon: "terminal" },
+  { id: "api-binary-operation", label: "BinaryOperation", icon: "terminal" },
+  { id: "api-host-operation", label: "HostOperation", icon: "terminal" },
+  { id: "api-cache-operation", label: "CacheOperation", icon: "terminal" },
+  { id: "api-ssh-operation", label: "SSHOperation", icon: "terminal" },
+  { id: "api-init-operation", label: "InitOperation", icon: "terminal" },
+  { id: "api-end-to-end", label: "End-to-End Example", icon: "play" },
 ] as const;
 
 /* ───────────────────────────────────────────────────────────────
@@ -628,8 +689,8 @@ export const networkSections = [
   },
   {
     title: "The default network",
-    description: `The default network is called <strong>${NET_NAME}</strong> and uses <strong>${NET_SUBNET}</strong> (gateway: ${NET_GATEWAY}). It is auto-created the first time you run <code>mvm vm create</code> or <code>sudo mvm host init</code>.`,
-    callout: 'The default network name is <code>net</code>, NOT <code>default</code>. If you see references to "mvm-default" bridge, that is the bridge device name derived from the network name.',
+    description: `The default network is called <strong>${NET_NAME}</strong> and uses <strong>${NET_SUBNET}</strong> (gateway: ${NET_GATEWAY}). It is created automatically the first time you run <code>sudo mvm host init</code> — no manual network setup needed for basic use.`,
+    callout: `The default network name is <code>${NET_NAME}</code>. The bridge device is named <code>mvm-${NET_NAME}</code> (<code>mvm-net</code>), following the convention <code>mvm-&lt;network-name&gt;</code>.`,
   },
   {
     title: "Network commands",
@@ -875,6 +936,75 @@ export const cloudInitSections = [
     callout: undefined,
   },
 ];
+
+/* ───────────────────────────────────────────────────────────────
+   SECTION INTROS & CALLOUTS
+   ─────────────────────────────────────────────────────────────── */
+
+export const prerequisitesIntro =
+  'mvmctl runs on Linux only — Firecracker requires KVM, which is not available on macOS or Windows. Make sure your system meets these requirements before installing.';
+
+export const prerequisitesSubIntro =
+  'mvmctl depends on a few system tools for networking, image handling, and cloud-init:';
+
+export const prerequisitesCallout =
+  'On Ubuntu 24.04+, you may need <code>--break-system-packages</code> with <code>pip install</code>. Use the binary or pipx install instead.';
+
+export const installIntro =
+  'Four ways to install. The <strong>prebuilt binary</strong> is the fastest — no Python runtime needed.';
+
+export const installCallout =
+  'After installing, run <code>mvm --help</code> to verify. If "command not found", ensure <code>/usr/local/bin</code> is in your <code>PATH</code>.';
+
+export const hostInitIntro =
+  'Before creating any VMs, your host needs one-time setup: KVM module loading, IP forwarding, the <code>mvm</code> group, sudoers permissions, and bridge networking. This is what <code>mvm init</code> handles for you.';
+
+export const firstVmIntro =
+  'This walkthrough takes you from zero to a running microVM: generate an SSH key, download a kernel and OS image, boot the VM, connect, and clean up.';
+
+export const vmLifecycleIntro =
+  'Once your VM is created, these commands let you interact with, inspect, snapshot, and tear it down.';
+
+export const resourceManagementIntro =
+  'mvmctl manages four resource types: OS images (root filesystems), kernels (vmlinux binaries), Firecracker/jailer binaries, and SSH keys.';
+
+export const networkIntro =
+  'mvmctl uses Linux bridge/TAP networking with iptables NAT. Each named network is a separate bridge with its own subnet.';
+
+export const dependenciesIntro =
+  'mvmctl depends on several system binaries. Most are common Linux utilities; this reference covers what each is for and which package provides it.';
+
+export const cloudInitIntro =
+  'Cloud-init configures your VM on first boot: users, SSH keys, networking, startup scripts. mvmctl handles this automatically.';
+
+export const troubleshootingIntro =
+  'Common issues, what causes them, and how to fix them:';
+
+export const debugMode = {
+  title: 'Debug mode',
+  description:
+    'Enable debug logging to see what mvmctl is doing under the hood:',
+  code: [
+    '# Persistent:',
+    'mvm config set debug.enabled true',
+    '',
+    '# Single command:',
+    'MVM_LOG_LEVEL=DEBUG mvm vm create --name myvm --image ubuntu-24.04',
+  ],
+  callout:
+    'Debug output is verbose. Switch it back off: <code>mvm config set debug.enabled false</code>.',
+} as const;
+
+export const helpSection = {
+  title: 'Getting help',
+  description:
+    'Still stuck? <a href="https://github.com/AlanD20/mvmctl/issues" rel="noopener noreferrer" target="_blank">Open an issue on GitHub</a> with:',
+  items: [
+    'The exact command you ran',
+    'Full error output (run with <code>MVM_LOG_LEVEL=DEBUG</code>)',
+    'Your OS and <code>mvm --version</code>',
+  ],
+} as const;
 
 /* ───────────────────────────────────────────────────────────────
    TROUBLESHOOTING

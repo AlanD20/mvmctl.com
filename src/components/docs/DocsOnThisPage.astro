@@ -1,5 +1,11 @@
 ---
-import { docsToc } from "../../content/site/docs";
+import type { TocItem } from "../../content/site/docs";
+
+interface Props {
+  toc: readonly TocItem[];
+}
+
+const { toc } = Astro.props;
 ---
 
 <aside class="right-toc" data-anim="docs-right-toc">
@@ -7,7 +13,7 @@ import { docsToc } from "../../content/site/docs";
   <nav aria-label="On this page links">
     <ul>
       {
-        docsToc.map((item) => (
+        toc.map((item) => (
           <li>
             <a href={`#${item.id}`} class={item.level === 3 ? "nested" : ""} data-docs-toc-link>
               {item.label}

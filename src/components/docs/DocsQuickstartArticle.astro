@@ -28,6 +28,21 @@ import {
   configSections,
   dependencySections,
   cloudInitSections,
+  prerequisitesIntro,
+  prerequisitesSubIntro,
+  prerequisitesCallout,
+  installIntro,
+  installCallout,
+  hostInitIntro,
+  firstVmIntro,
+  vmLifecycleIntro,
+  resourceManagementIntro,
+  networkIntro,
+  dependenciesIntro,
+  cloudInitIntro,
+  troubleshootingIntro,
+  debugMode,
+  helpSection,
 } from "../../content/site/docs";
 import { getIcon } from "../../lib/icons";
 ---
@@ -43,16 +58,13 @@ import { getIcon } from "../../lib/icons";
   <!-- PREREQUISITES -->
   <section id='prerequisites' class='doc-section' data-anchor-title='Before you begin'>
     <h2>Before you begin</h2>
-    <p>
-      mvmctl runs on Linux only — Firecracker requires KVM, which is not available on macOS or Windows.
-      Make sure your system meets these requirements before installing.
-    </p>
+    <p set:html={prerequisitesIntro} />
     <ul>
       {prerequisites.map((item) => <li set:html={item} />)}
     </ul>
 
     <h3>System packages</h3>
-    <p>mvmctl depends on a few system tools for networking, image handling, and cloud-init:</p>
+    <p set:html={prerequisitesSubIntro} />
 
     <div class='terminal-shell' data-anim='docs-card-grid'>
       <div class='terminal-tabs' role='tablist' aria-label='Linux distro packages' data-anim='docs-package-tabs'>
@@ -81,13 +93,13 @@ import { getIcon } from "../../lib/icons";
       </div>
     </div>
 
-    <Callout text="On Ubuntu 24.04+, you may need <code>--break-system-packages</code> with <code>pip install</code>. Use the binary or pipx install instead." />
+    <Callout text={prerequisitesCallout} />
   </section>
 
   <!-- INSTALL -->
   <section id='install' class='doc-section' data-anchor-title='Install mvm'>
     <h2>Install mvm</h2>
-    <p>Four ways to install. The <strong>prebuilt binary</strong> is the fastest — no Python runtime needed.</p>
+    <p set:html={installIntro} />
 
     <div class='terminal-shell' data-anim='docs-card-grid'>
       <div class='terminal-tabs' role='tablist' aria-label='Install options' data-anim='docs-install-tabs'>
@@ -116,17 +128,13 @@ import { getIcon } from "../../lib/icons";
       </div>
     </div>
 
-    <Callout text='After installing, run <code>mvm --help</code> to verify. If "command not found", ensure <code>/usr/local/bin</code> is in your <code>PATH</code>.' />
+    <Callout text={installCallout} />
   </section>
 
   <!-- HOST INIT -->
   <section id='host-initialize' class='doc-section' data-anchor-title='Initialize host'>
     <h2>Initialize host</h2>
-    <p>
-      Before creating any VMs, your host needs one-time setup: KVM module loading, IP forwarding,
-      the <code>mvm</code> group, sudoers permissions, and bridge networking. This is what <code>mvm init</code>
-      handles for you.
-    </p>
+    <p set:html={hostInitIntro} />
 
     {hostInitSections.map((section) => (
       <div class="sub-section">
@@ -148,10 +156,7 @@ import { getIcon } from "../../lib/icons";
   <!-- FIRST VM -->
   <section id='first-vm' class='doc-section' data-anchor-title='Create your first VM'>
     <h2>Create your first VM</h2>
-    <p>
-      This walkthrough takes you from zero to a running microVM: generate an SSH key,
-      download a kernel and OS image, boot the VM, connect, and clean up.
-    </p>
+    <p set:html={firstVmIntro} />
 
     {firstVmSections.map((section) => (
       <div class="sub-section">
@@ -191,7 +196,7 @@ import { getIcon } from "../../lib/icons";
   <!-- VM LIFECYCLE -->
   <section id='vm-lifecycle' class='doc-section' data-anchor-title='VM Lifecycle'>
     <h2>VM Lifecycle</h2>
-    <p>Once your VM is created, these commands let you interact with, inspect, snapshot, and tear it down.</p>
+    <p set:html={vmLifecycleIntro} />
 
     <!-- SSH -->
     <h3 id='vm-lifecycle-ssh'>mvm ssh</h3>
@@ -244,10 +249,7 @@ import { getIcon } from "../../lib/icons";
   <!-- RESOURCE MANAGEMENT -->
   <section id='resource-management' class='doc-section' data-anchor-title='Resource Management'>
     <h2>Resource Management</h2>
-    <p>
-      mvmctl manages four resource types: OS images (root filesystems), kernels (vmlinux binaries),
-      Firecracker/jailer binaries, and SSH keys.
-    </p>
+    <p set:html={resourceManagementIntro} />
 
     <!-- Images -->
     <h3 id='resource-management-image'>mvm image</h3>
@@ -298,10 +300,7 @@ import { getIcon } from "../../lib/icons";
   <!-- NETWORK -->
   <section id='network-management' class='doc-section' data-anchor-title='Network Management'>
     <h2>Network Management</h2>
-    <p>
-      mvmctl uses Linux bridge/TAP networking with iptables NAT. Each named network is
-      a separate bridge with its own subnet.
-    </p>
+    <p set:html={networkIntro} />
 
     {networkSections.map((s) => (
       <div class="sub-section">
@@ -332,10 +331,7 @@ import { getIcon } from "../../lib/icons";
   <!-- DEPENDENCIES -->
   <section id='dependencies' class='doc-section' data-anchor-title='Dependencies'>
     <h2>Dependencies</h2>
-    <p>
-      mvmctl depends on several system binaries. Most are common Linux utilities;
-      this reference covers what each is for and which package provides it.
-    </p>
+    <p set:html={dependenciesIntro} />
 
     {dependencySections.map((s) => (
       <div class="sub-section">
@@ -359,10 +355,7 @@ import { getIcon } from "../../lib/icons";
   <!-- CLOUD-INIT -->
   <section id='cloud-init' class='doc-section' data-anchor-title='Cloud-Init'>
     <h2>Cloud-Init</h2>
-    <p>
-      Cloud-init configures your VM on first boot: users, SSH keys, networking, startup scripts.
-      mvmctl handles this automatically.
-    </p>
+    <p set:html={cloudInitIntro} />
 
     {cloudInitSections.map((s) => (
       <div class="sub-section">
@@ -377,7 +370,7 @@ import { getIcon } from "../../lib/icons";
   <!-- TROUBLESHOOTING -->
   <section id='troubleshooting' class='doc-section' data-anchor-title='Troubleshooting'>
     <h2>Troubleshooting</h2>
-    <p>Common issues, what causes them, and how to fix them:</p>
+    <p set:html={troubleshootingIntro} />
 
     {troubleshooting.map((issue) => (
       <div class='trouble-item' data-anim='docs-card'>
@@ -389,28 +382,17 @@ import { getIcon } from "../../lib/icons";
       </div>
     ))}
 
-    <h3>Debug mode</h3>
-    <p>Enable debug logging to see what mvmctl is doing under the hood:</p>
+    <h3>{debugMode.title}</h3>
+    <p set:html={debugMode.description} />
     <div class='inline-block' data-anim='docs-card'>
-      <CodeBlock lines={[
-        "# Persistent:",
-        "mvm config set debug.enabled true",
-        "",
-        "# Single command:",
-        "MVM_LOG_LEVEL=DEBUG mvm vm create --name myvm --image ubuntu-24.04",
-      ]} compact={true} />
+      <CodeBlock lines={debugMode.code} compact={true} />
     </div>
-    <Callout text='Debug output is verbose. Switch it back off: <code>mvm config set debug.enabled false</code>.' />
+    <Callout text={debugMode.callout} />
 
-    <h3>Getting help</h3>
-    <p>
-      Still stuck? <a href="https://github.com/AlanD20/mvmctl/issues" rel="noopener noreferrer" target="_blank">Open an issue on GitHub</a>
-      with:
-    </p>
+    <h3>{helpSection.title}</h3>
+    <p set:html={helpSection.description} />
     <ul>
-      <li>The exact command you ran</li>
-      <li>Full error output (run with <code>MVM_LOG_LEVEL=DEBUG</code>)</li>
-      <li>Your OS and <code>mvm --version</code></li>
+      {helpSection.items.map((item) => <li set:html={item} />)}
     </ul>
   </section>
 </article>

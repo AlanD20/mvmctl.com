@@ -1,19 +1,19 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import DocsNavLeft from "../../components/docs/DocsNavLeft.astro";
-import DocsQuickstartArticle from "../../components/docs/DocsQuickstartArticle.astro";
+import DocsApiArticle from "../../components/docs/DocsApiArticle.astro";
 import DocsOnThisPage from "../../components/docs/DocsOnThisPage.astro";
-import { docsQuickstartToc } from "../../content/site/docs";
+import { docsApiToc, apiDocsNav } from "../../content/site/docs";
 ---
 
 <BaseLayout
-  title="mvmctl docs · Installation, quick start, and command reference"
-  description="Documentation for mvmctl — the microVM manager for Linux. Installation, prerequisites, host initialization, quick start guide, VM lifecycle, resource management, networking, cloud-init, configuration, and troubleshooting."
+  title="mvmctl API Reference · Python API documentation"
+  description="Python API reference for mvmctl — import the API directly to build automation scripts, GUIs, or TUIs without going through the CLI."
 >
   <div class="docs-shell">
-    <DocsNavLeft />
-    <DocsQuickstartArticle />
-    <DocsOnThisPage toc={docsQuickstartToc} />
+    <DocsNavLeft items={apiDocsNav} />
+    <DocsApiArticle />
+    <DocsOnThisPage toc={docsApiToc} />
   </div>
 </BaseLayout>
 

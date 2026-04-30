@@ -1,33 +1,44 @@
 ---
 import Icon from "../ui/Icon.astro";
-import { docsNav } from "../../content/site/docs";
+import { docsNav, type DocsNavItem } from "../../content/site/docs";
 import { getIcon } from "../../lib/icons";
----
 
+interface Props {
+  items?: readonly DocsNavItem[];
+}
+
+const { items = docsNav } = Astro.props;
+---
 
 <aside class="left-nav" data-anim="docs-sidebar">
   <p class="title">Getting started</p>
   <nav aria-label="Documentation sections">
     <ul>
-      {docsNav.map((item) => (
-        <li class={item.children ? "has-children" : ""}>
-          <a href={`#${item.id}`} data-docs-left-link>
-            <Icon icon={getIcon(item.icon)} size="0.75rem" class="icon" />
-            <span>{item.label}</span>
-          </a>
-          {item.children ? (
-            <ul class="nav-sublist">
-              {item.children.map((child) => (
-                <li>
-                  <a href={`#${child.id}`} data-docs-left-link class="sub-link">
-                    <span>{child.label}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </li>
-      ))}
+      {items.map((item) => {
+        const linkHref = item.href || (item.id ? `#${item.id}` : "#");
+        return (
+          <li class={item.children ? "has-children" : ""}>
+            <a href={linkHref} data-docs-left-link>
+              <Icon icon={getIcon(item.icon)} size="0.75rem" class="icon" />
+              <span>{item.label}</span>
+            </a>
+            {item.children ? (
+              <ul class="nav-sublist">
+                {item.children.map((child) => {
+                  const childHref = child.href || (child.id ? `#${child.id}` : "#");
+                  return (
+                    <li>
+                      <a href={childHref} data-docs-left-link class="sub-link">
+                        <span>{child.label}</span>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : null}
+          </li>
+        );
+      })}
     </ul>
   </nav>
 </aside>
@@ -176,7 +187,7 @@ import { getIcon } from "../../lib/icons";
       .left-nav {
         left: 0.5rem;
         right: 0.5rem;
-        max-width: calc(100vw - 1rem);
+        max-width: calc(100vw - 1.5rem);
         padding: 0.5rem;
         box-sizing: border-box;
       }

@@ -1,0 +1,435 @@
+---
+import CodeBlock from "../ui/CodeBlock.astro";
+import Note from "../ui/Note.astro";
+import { apiSections } from "../../content/site/api";
+---
+
+<article class='article' data-anim='docs-main'>
+  <section id='api-overview' class='doc-section' data-anchor-title='API Reference'>
+    <p class='kicker'>mvmctl docs</p>
+    <h1>API Reference</h1>
+    <p class='lead'>Every CLI command maps 1:1 to a static method on an <code>*Operation</code> class in <code>mvmctl.api.*</code>. Import the API directly to build automation scripts, GUIs, or TUIs without going through the CLI.</p>
+  </section>
+
+  {
+    apiSections.map((section) => {
+      const id = section.id;
+
+      switch (section.type) {
+        case "intro":
+          return (
+            <section id={id} class='doc-section' data-anchor-title={section.title}>
+              <h2>{section.title}</h2>
+              <p set:html={section.content} />
+            </section>
+          );
+
+        case "sub-intro":
+          return (
+            <div class='sub-intro'>
+              <p set:html={section.content} />
+            </div>
+          );
+
+        case "code":
+          return (
+            <section id={id} class='doc-section' data-anchor-title={section.title}>
+              <h2>{section.title}</h2>
+              <div class='inline-block' data-anim='docs-card'>
+                <CodeBlock lines={section.code.code} compact={true} />
+              </div>
+            </section>
+          );
+
+        case "import-pattern":
+          return (
+            <section id={id} class='doc-section' data-anchor-title={section.title}>
+              <h2>{section.title}</h2>
+              <p set:html={section.avoidNote || ''} />
+              <h3>Correct import</h3>
+              <div class='inline-block' data-anim='docs-card'>
+                <CodeBlock lines={section.importCode.code} compact={true} />
+              </div>
+              <h3>Avoid deep imports</h3>
+              <div class='inline-block' data-anim='docs-card'>
+                <CodeBlock lines={section.avoidCode.code} compact={true} />
+              </div>
+            </section>
+          );
+
+        case "module-table":
+          return (
+            <section id={id} class='doc-section' data-anchor-title={section.title}>
+              <h2>{section.title}</h2>
+              <div class="table-wrap">
+                <table class="api-table">
+                  <thead>
+                    <tr>
+                      <th>Operation Class</th>
+                      <th>Responsibility</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {section.rows.map(([cls, desc]) => (
+                      <tr>
+                        <td><code>{cls}</code></td>
+                        <td>{desc}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          );
+
+        case "model-group":
+          return (
+            <section id={id} class='doc-section' data-anchor-title={section.title}>
+              <h2>{section.title}</h2>
+              {section.models.map((model) => (
+                <div class="sub-section">
+                  <h3 id={`api-model-${model.name.toLowerCase()}`}>{model.title} <span class="model-name">{model.name}</span></h3>
+                  {model.description ? <p set:html={model.description} /> : null}
+                  <div class="table-wrap">
+                    <table class="api-table">
+                      <thead>
+                        <tr>
+                          <th>Field</th>
+                          <th>Type</th>
+                          <th>Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {model.fields.map((f) => (
+                          <tr>
+                            <td class="param-col"><code>{f.field}</code></td>
+                            <td><code>{f.type}</code></td>
+                            <td>{f.description}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  {model.resolvedFields ? (
+                    <>
+                      <p><strong>Resolved relations</strong> (populated on request):</p>
+                      <div class="table-wrap">
+                        <table class="api-table">
+                          <thead>
+                            <tr>
+                              <th>Field</th>
+                              <th>Type</th>
+                              <th>Description</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {model.resolvedFields.map((f) => (
+                              <tr>
+                                <td class="param-col"><code>{f.field}</code></td>
+                                <td><code>{f.type}</code></td>
+                                <td>{f.description}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
+                  ) : null}
+                </div>
+              ))}
+            </section>
+          );
+
+        case "exception-tree":
+          return (
+            <section id={id} class='doc-section' data-anchor-title={section.title}>
+              <h2>{section.title}</h2>
+              <p>All exceptions derive from <code>mvmctl.exceptions.MVMError</code>.</p>
+              <div class="exception-tree">{section.tree.map((line) => `${line}\n`).join("")}</div>
+              {section.example ? (
+                <>
+                  <h3>Example</h3>
+                  <div class='inline-block' data-anim='docs-card'>
+                    <CodeBlock lines={section.example.code} compact={true} />
+                  </div>
+                </>
+              ) : null}
+            </section>
+          );
+
+        case "operation-group":
+          return (
+            <section id={id} class='doc-section' data-anchor-title={section.title}>
+              <h2>{section.title}</h2>
+              {section.operations.map((op) => (
+                <div class="operation-group">
+                  {op.description ? <p set:html={op.description} /> : null}
+                  {op.methods.map((method) => (
+                    <div class="sub-section api-method">
+                      <p class="sig-label"><code>{method.signature}</code></p>
+                      <p>{method.description}</p>
+                      {method.parameters ? (
+                        <>
+                          <p><strong>Parameters</strong></p>
+                          <div class="table-wrap">
+                            <table class="api-table">
+                              <thead>
+                                <tr>
+                                  <th>Parameter</th>
+                                  <th>Type</th>
+                                  <th>Default</th>
+                                  <th>Description</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {method.parameters.map((p) => (
+                                  <tr>
+                                    <td class="param-col"><code>{p.param}</code></td>
+                                    <td><code>{p.type}</code></td>
+                                    <td><code>{p.default}</code></td>
+                                    <td>{p.description}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </>
+                      ) : null}
+                      {method.returns ? <p><strong>Returns:</strong> {method.returns}</p> : null}
+                      {method.raises ? <p><strong>Raises:</strong> {method.raises}</p> : null}
+                      {method.example ? (
+                        <>
+                          <p><strong>Example</strong></p>
+                          <div class='inline-block' data-anim='docs-card'>
+                            <CodeBlock lines={method.example} compact={true} />
+                          </div>
+                        </>
+                      ) : null}
+                      {method.note ? <Note text={method.note} /> : null}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </section>
+          );
+
+        case "e2e-example":
+          return (
+            <section id={id} class='doc-section' data-anchor-title={section.title}>
+              <h2>{section.title}</h2>
+              <p set:html={section.description} />
+              <div class='inline-block' data-anim='docs-card'>
+                <CodeBlock lines={section.code.code} compact={true} />
+              </div>
+            </section>
+          );
+
+        default:
+          return null;
+      }
+    })
+  }
+</article>
+
+<script>
+  import { icons } from "../../lib/icons";
+
+  const setHeadingIcon = (slot: HTMLElement, iconName: "link" | "check" | "info") => {
+    const [width, height, , , pathData] = icons[iconName].icon;
+    const pathList = Array.isArray(pathData) ? pathData : [pathData];
+    while (slot.firstChild) slot.removeChild(slot.firstChild);
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`); svg.setAttribute("width", "12"); svg.setAttribute("height", "12"); svg.setAttribute("fill", "currentColor"); svg.setAttribute("aria-hidden", "true");
+    pathList.forEach((d) => { const p = document.createElementNS("http://www.w3.org/2000/svg", "path"); p.setAttribute("d", d); svg.appendChild(p); });
+    slot.appendChild(svg);
+  };
+  let announcer = document.getElementById("heading-copy-status");
+  if (!(announcer instanceof HTMLParagraphElement)) {
+    announcer = document.createElement("p"); announcer.id = "heading-copy-status"; announcer.className = "sr-only";
+    announcer.setAttribute("aria-live", "polite"); announcer.setAttribute("aria-atomic", "true"); document.body.appendChild(announcer);
+  }
+  const addCopyButton = (heading: HTMLElement, targetId: string, label: string) => {
+    if (heading.dataset.headingCopyBound === "true") return;
+    heading.dataset.headingCopyBound = "true";
+    const wrap = document.createElement("span"); wrap.className = "heading-anchor-wrap";
+    const btn = document.createElement("button"); btn.type = "button"; btn.className = "heading-anchor-btn";
+    btn.setAttribute("aria-label", `Copy link to ${label}`);
+    const icon = document.createElement("span"); icon.className = "heading-anchor-icon";
+    setHeadingIcon(icon, "link"); btn.appendChild(icon);
+    btn.addEventListener("click", async () => {
+      const link = `${window.location.origin}${window.location.pathname.startsWith("/docs") ? window.location.pathname : "/docs/"}#${targetId}`;
+      try {
+        if (!window.isSecureContext) throw new Error("Clipboard requires secure context");
+        if (!navigator.clipboard) throw new Error("Clipboard unavailable");
+        await navigator.clipboard.writeText(link);
+        setHeadingIcon(icon, "check"); btn.classList.add("copied"); announcer.textContent = `Copied link to ${label}.`;
+      } catch { setHeadingIcon(icon, "info"); btn.classList.add("failed"); announcer.textContent = `Could not copy link to ${label}.`; }
+      setTimeout(() => { setHeadingIcon(icon, "link"); btn.classList.remove("copied", "failed"); }, 1100);
+    });
+    wrap.appendChild(btn); heading.appendChild(wrap);
+  };
+
+  const init = () => {
+    Array.from(document.querySelectorAll<HTMLElement>(".doc-section[id]")).forEach((section) => {
+      const heading = section.querySelector<HTMLElement>("h1, h2, h3");
+      if (!heading) return;
+      addCopyButton(heading, section.id, section.dataset.anchorTitle ?? section.id);
+    });
+    Array.from(document.querySelectorAll<HTMLElement>("h3[id]")).forEach((h3) => {
+      addCopyButton(h3, h3.id, h3.textContent?.trim() ?? h3.id);
+    });
+  };
+  let frame = 0;
+  const schedule = () => { if (frame) cancelAnimationFrame(frame); frame = requestAnimationFrame(() => { frame = 0; init(); }); };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", schedule, { once: true }); else schedule();
+  if (!document.documentElement.dataset.docsApiBound) { document.documentElement.dataset.docsApiBound = "true"; document.addEventListener("astro:page-load", schedule); }
+</script>
+
+<style>
+  .doc-section {
+    position: relative;
+    border-bottom: none;
+    scroll-margin-top: calc(var(--header-height) + 4rem);
+    padding: 0.5rem 0;
+  }
+  .doc-section::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 1px;
+    margin: 2.5rem 0 1rem;
+    background: linear-gradient(90deg, var(--border) 0%, var(--border) 40%, transparent 100%);
+  }
+  .doc-section:last-child { padding-bottom: 0; }
+  .doc-section:last-child::after { display: none; }
+
+  .sub-intro p {
+    margin: 0 0 0.75rem;
+    color: var(--text-soft);
+    line-height: 1.75;
+  }
+
+  .sub-section {
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+    padding: 1rem 1rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--color-surface-3);
+    transition: border-color 180ms ease;
+  }
+  .sub-section:hover { border-color: var(--color-accent-primary-45); }
+  .sub-section:first-of-type { margin-top: 1rem; }
+  .sub-section:last-of-type { margin-bottom: 0.5rem; }
+
+  .api-method { margin-bottom: 1.5rem; }
+  .api-method:last-child { margin-bottom: 0; }
+  .api-method p { margin: 0.5rem 0; }
+  .sig-label { font-weight: 600; color: var(--color-text-primary); }
+
+  .kicker {
+    margin: 0;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: var(--text-soft);
+  }
+  h1 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+    font-size: clamp(2rem, 1.25vw + 1.25rem, 2.5rem);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+  }
+  @media (max-width: 680px) { h1 { font-size: clamp(1.5rem, 6.2vw, 2rem); line-height: 1.12; } }
+  @media (max-width: 420px) { h1 { font-size: clamp(1.25rem, 7.4vw, 1.5rem); line-height: 1.16; } }
+  .lead {
+    margin: 0 0 1.25rem;
+    font-size: 1rem;
+    color: var(--text-soft);
+    line-height: 1.75;
+    max-width: 65ch;
+  }
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.75rem;
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1.75rem 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--color-text-muted);
+    border-left: 2px solid var(--color-accent-primary-45);
+    padding-left: 0.75rem;
+  }
+  .sub-section h3 {
+    margin-top: 0;
+    border-left: none;
+    padding-left: 0;
+    color: inherit;
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+  p {
+    margin: 0 0 0.75rem;
+    color: currentColor;
+    line-height: 1.75;
+    max-width: 72ch;
+  }
+  p:last-child { margin-bottom: 0; }
+  .kicker, .lead { color: var(--text-soft); }
+  code { font-family: "Geist Mono", "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace; color: var(--color-text-code-bright); background: var(--color-surface-2); padding: 0.1em 0.3em; border-radius: 0.25rem; font-size: 0.8em; }
+
+  .table-wrap { width: 100%; overflow-x: auto; margin-top: 0.75rem; }
+  .api-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; color: var(--text-soft); min-width: 400px; }
+  .api-table th, .api-table td { text-align: left; padding: 0.4rem 0.6rem; border: 1px solid var(--border); vertical-align: top; }
+  .api-table th { font-weight: 600; color: var(--text); background: var(--color-surface-4); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+  .api-table td code { white-space: nowrap; font-size: 0.75rem; background: transparent; padding: 0; color: var(--color-text-code); }
+  .api-table .param-col { white-space: nowrap; }
+
+  .model-name {
+    font-family: "Geist Mono", monospace;
+    font-size: 0.8rem;
+    color: var(--color-text-code-bright);
+    background: var(--color-surface-2);
+    padding: 0.1em 0.3em;
+    border-radius: 0.25rem;
+  }
+
+  .exception-tree {
+    font-family: "Geist Mono", monospace;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    color: var(--text-soft);
+    padding: 0.75rem 1rem;
+    background: var(--color-surface-3);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .operation-group {
+    margin-top: 0.5rem;
+  }
+
+  @media (max-width: 760px) {
+    .doc-section { padding: 1rem 0; }
+    .api-table { font-size: 0.7rem; }
+    .api-table th, .api-table td { padding: 0.3rem 0.4rem; }
+  }
+</style>
