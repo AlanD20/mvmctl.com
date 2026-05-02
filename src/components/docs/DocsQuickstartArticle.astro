@@ -20,6 +20,7 @@ import {
   snapshotExplanation,
   vmRmExplanation,
   vmInspectExplanation,
+  vmPsExplanation,
   imageSections,
   kernelSections,
   binarySections,
@@ -229,6 +230,13 @@ import { getIcon } from "../../lib/icons";
       <div class='inline-block' data-anim='docs-card'><CodeBlock lines={[ex.code]} compact={true} /><Note text={ex.note} /></div>
     ))}
     {snapshotExplanation.callouts.map((g) => <Callout text={g} />)}
+
+    <!-- vm ps -->
+    <h3>mvm vm ps</h3>
+    <p>{vmPsExplanation.whatItDoes}</p>
+    {vmPsExplanation.examples.map((ex) => (
+      <div class='inline-block' data-anim='docs-card'><CodeBlock lines={[ex.code]} compact={true} /><Note text={ex.note} /></div>
+    ))}
 
     <!-- Inspect -->
     <h3>mvm vm ls / inspect</h3>

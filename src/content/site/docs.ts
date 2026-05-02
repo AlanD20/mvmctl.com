@@ -181,12 +181,12 @@ export const distroPackages = {
   ubuntu: {
     title: "Ubuntu / Debian packages",
     id: "ubuntu-packages",
-    command: ["sudo apt-get install -y iproute2 iptables genisoimage qemu-utils"],
+    command: ["sudo apt-get install -y iproute2 iptables cloud-image-utils qemu-utils"],
   },
   arch: {
     title: "Arch packages",
     id: "arch-packages",
-    command: ["sudo pacman -S --needed iproute2 iptables libisoburn qemu-base"],
+    command: ["sudo pacman -S --needed iproute2 iptables cloud-utils qemu-base"],
   },
 } as const;
 
@@ -290,7 +290,7 @@ export const firstVmSections = [
       "mvm key set-default test",
       "",
       "# 2. Download Firecracker-optimized kernel (~30s)",
-      "mvm kernel fetch",
+      "mvm kernel fetch --type firecracker",
       "",
       "# 3. Download an Ubuntu 24.04 image",
       "mvm image fetch ubuntu-24.04",
@@ -299,7 +299,7 @@ export const firstVmSections = [
       "mvm vm create --name myvm --image ubuntu-24.04",
       "",
       "# 5. Wait for cloud-init to finish (~30-60s)",
-      "mvm logs --name myvm --type boot --follow",
+      "mvm logs myvm --follow",
       "",
       "# 6. SSH into the VM",
       "mvm ssh --name myvm",
@@ -311,7 +311,7 @@ export const firstVmSections = [
       "mvm vm rm --name myvm --force",
     ],
     callouts: [
-      'Cloud-init takes 30-60 seconds on first boot. The VM <strong>is running</strong> during this time — it is just running startup scripts. Watch progress with <code>mvm logs --type boot --follow</code>.',
+      'Cloud-init takes 30-60 seconds on first boot. The VM <strong>is running</strong> during this time — it is just running startup scripts. Watch progress with <code>mvm logs myvm --follow</code>.',
       'You need at least one SSH key set up before creating a VM. Without a default key (<code>mvm key set-default</code>), pass <code>--ssh-key</code> explicitly.',
       'Images are several hundred MB. Ensure at least 2 GB free in <code>~/.cache/mvmctl/</code>.',
     ],
@@ -337,27 +337,29 @@ export const vmCreateExplanation = {
 };
 
 export const vmCreateFlagLines: readonly string[] = [
-  "--name, -n NAME           VM name (required). Used to identify the VM in all commands.",
-  "--image IMAGE             Image ID or path (required). E.g. ubuntu-24.04, or /path/to/custom.ext4",
-  "--kernel PATH             Path to vmlinux kernel binary. Auto-detected from defaults if omitted.",
-  "--vcpus N                 vCPU count. Default: 1.",
-  "--mem, --memory N         Memory in MiB. Default: 512.",
-  "--disk-size, -s SIZE      Rootfs disk size (e.g. 1G, 512M). Default: from config.",
-  "--ssh-key KEY             SSH public key name or path, e.g. 'mykey' or ~/.ssh/id_ed25519.pub",
-  "--user USER               Default SSH user for cloud-init. Default: from config.",
-  "--ip ADDRESS              Static guest IP, e.g. 172.27.0.42. Default: auto-assigned.",
-  "--network, --net NAME     Named network to attach to. Default: 'net'.",
-  "--mac ADDRESS             Custom MAC address. Auto-generated if omitted.",
-  "--cloud-init-mode MODE    One of: inject (default), iso, net, off.",
-  "--user-data PATH          Path to custom cloud-init user-data file.",
-  "--nocloud-net-port PORT   Port for nocloud-net HTTP server (0=auto-assign).",
-  "--enable-pci/--no-enable-pci  Enable PCI device support.",
-  "--no-console              Disable serial console.",
-  "--lsm-flags FLAGS         Linux Security Module flags for kernel cmdline.",
-  "--firecracker-bin PATH    Path to firecracker binary. Env var: MVM_FIRECRACKER_BIN.",
+  "--name, -n NAME            VM name (required). Used to identify the VM in all commands.",
+  "--image IMAGE              Image name or ID (e.g. ubuntu-24.04). Required unless --image-path given.",
+  "--image-path PATH          Direct path to rootfs image file (overrides --image).",
+  "--kernel KERNEL            Kernel short ID or path. Auto-detected from defaults if omitted.",
+  "--kernel-path PATH         Direct path to vmlinux kernel file (overrides --kernel).",
+  "--vcpus, --cpus N          vCPU count. Default: 1.",
+  "--mem, --memory N          Memory in MiB. Default: 512.",
+  "--disk-size, -s SIZE       Rootfs disk size (e.g. 1G, 512M or 1024M). Default: from config.",
+  "--ssh-key KEY              SSH public key name or path, e.g. 'mykey' or ~/.ssh/id_ed25519.pub",
+  "--user USER                Default SSH user for cloud-init. Default: from config.",
+  "--ip ADDRESS               Static guest IP, e.g. 172.27.0.42. Default: auto-assigned.",
+  "--network, --net NAME      Named network to attach to. Default: 'net'.",
+  "--mac ADDRESS              Custom MAC address. Auto-generated if omitted.",
+  "--cloud-init-mode MODE     One of: off (default), inject, iso, net.",
+  "--user-data PATH           Path to custom cloud-init user-data file.",
+  "--nocloud-net-port PORT    Port for nocloud-net HTTP server (0=auto-assign).",
+  "--enable-pci/--no-enable-pci   Enable PCI device support.",
+  "--no-console               Disable serial console.",
+  "--lsm-flags FLAGS          Linux Security Module flags for kernel cmdline.",
+  "--firecracker-bin PATH     Path to firecracker binary. Env var: MVM_FIRECRACKER_BIN.",
   "--enable-logging/--no-enable-logging  Enable Firecracker logging.",
   "--enable-metrics/--no-enable-metrics  Enable Firecracker metrics.",
-  "--skip-cleanup            Skip cleanup on failure (for debugging).",
+  "--skip-cleanup             Skip cleanup on failure (for debugging).",
 ];
 
 export const vmCreateExamples = [
@@ -451,7 +453,7 @@ export const sshExplanation = {
 export const consoleExplanation = {
   whatItDoes: 'Attaches a PTY-based serial console to a VM using a vsock relay. No network stack required. Works even if the VM has no IP or cloud-init failed.',
   callouts: [
-    'Press <code>Ctrl+O</code> then <code>Enter</code> to detach from the console session. This does <strong>not</strong> shut down the VM.',
+    'Press <code>Ctrl+X</code> then <code>D</code> to detach from the console session. This does <strong>not</strong> shut down the VM.',
     'The console relay runs as a background process. If it crashes, use <code>mvm console --kill</code> then re-attach.',
     'Use <code>--state</code> to check if the relay is running without attaching. Handy for scripting.',
     'Requires the <code>vhost_vsock</code> kernel module. Check with <code>lsmod | grep vsock</code>.',
@@ -464,17 +466,17 @@ export const consoleExplanation = {
 };
 
 export const logsExplanation = {
-  whatItDoes: 'View or stream VM logs. Two types: <code>boot</code> (serial console output — kernel boot messages, cloud-init, login prompts) and <code>os</code> (Firecracker process stderr/stdout).',
+  whatItDoes: 'View or stream VM logs. Two types: boot (serial console — kernel boot messages, cloud-init, login prompts) and OS (Firecracker process stderr/stdout).',
   callouts: [
-    '<code>--type boot</code> is what you want 90% of the time. Shows the VM\'s serial console output.',
-    '<code>--type os</code> shows Firecracker process logs. Use when the VM fails to start entirely.',
-    '<code>--follow</code> streams logs in real-time (like <code>tail -f</code>). Press <code>Ctrl+C</code> to stop.',
+    '<code>--follow</code> / <code>-f</code> streams logs in real-time (like <code>tail -f</code>). Press <code>Ctrl+C</code> to stop.',
+    'Use <code>--os</code> to show Firecracker process logs instead of serial console output.',
+    'Use <code>--lines</code> / <code>-n</code> to limit output to the last N lines.',
     'Log files are in <code>~/.cache/mvmctl/vms/&lt;vm-sha&gt;/</code> as <code>firecracker.console.log</code> and <code>firecracker.log</code>.',
   ],
   examples: [
-    { code: "mvm logs --name myvm --type boot --follow", note: 'Watch the VM boot in real-time. Best for checking if cloud-init finished.' },
-    { code: "mvm logs --name myvm --type os", note: 'Check Firecracker stderr — useful if the VM failed to start.' },
-    { code: "mvm logs --name myvm --type boot", note: 'View the full boot log (static, not following).' },
+    { code: "mvm logs myvm --follow", note: 'Watch the VM boot in real-time. Best for checking if cloud-init finished.' },
+    { code: "mvm logs myvm --os", note: 'Check Firecracker stderr — useful if the VM failed to start.' },
+    { code: "mvm logs myvm", note: 'View the full boot log (static, not following).' },
   ],
 };
 
@@ -486,8 +488,8 @@ export const snapshotExplanation = {
     'Snapshots are stored in <code>~/.cache/mvmctl/vms/&lt;vm-sha&gt;/snapshots/</code>.',
   ],
   examples: [
-    { code: "mvm vm snapshot --name myvm", note: 'Snapshot a running VM.' },
-    { code: "mvm vm load --name myvm", note: 'Restore the VM from its latest snapshot.' },
+    { code: "mvm vm snapshot myvm <mem_file> <state_file>", note: 'Snapshot a running VM. Requires memory and state file paths.' },
+    { code: "mvm vm load myvm <mem_file> <state_file>", note: 'Restore the VM from memory and state files.' },
   ],
 };
 
@@ -495,22 +497,29 @@ export const vmRmExplanation = {
   whatItDoes: 'Stops the Firecracker process, removes iptables rules, kills the nocloud-net server, and deletes the VM state directory.',
   callouts: [
     'Without <code>--force</code>, the command asks for confirmation. Use <code>--force</code> in scripts.',
-    '<code>mvm vm prune</code> removes all stopped VMs at once. Asks for confirmation by default.',
+    '<code>mvm cache prune vm</code> removes all stopped VMs at once. Asks for confirmation by default.',
     'Removing a VM frees its IP lease, making it available for new VMs.',
     'Stopped VMs (crashed or killed) still show in <code>mvm vm ls</code> until removed with <code>rm</code> or <code>prune</code>.',
   ],
   examples: [
-    { code: "mvm vm rm --name myvm", note: 'Remove a VM with confirmation.' },
-    { code: "mvm vm rm --name myvm --force", note: 'Remove without asking (script-friendly).' },
-    { code: "mvm vm prune", note: 'Remove all stopped VMs at once.' },
+    { code: "mvm vm rm myvm", note: 'Remove a VM with confirmation.' },
+    { code: "mvm vm rm myvm --force", note: 'Remove without asking (script-friendly).' },
+    { code: "mvm cache prune vm", note: 'Remove all stopped VMs at once.' },
   ],
 };
 
 export const vmInspectExplanation = {
   whatItDoes: 'Shows detailed VM information: SHA256 hash ID, IP address, network, kernel path, image path, resources, creation time, and current state.',
   examples: [
-    { code: "mvm vm inspect --name myvm", note: 'Show all details for a VM.' },
+    { code: "mvm vm inspect myvm", note: 'Show all details for a VM.' },
     { code: "mvm vm ls", note: 'List all VMs with brief info (name, IP, status).' },
+  ],
+};
+
+export const vmPsExplanation = {
+  whatItDoes: 'List only running VMs (active Firecracker processes). Shows name, status, IP, resources, and image/kernel IDs.',
+  examples: [
+    { code: "mvm vm ps", note: 'Show only VMs that are currently running or starting.' },
   ],
 };
 
@@ -555,20 +564,22 @@ export const imageSections = [
   {
     title: "Importing custom images",
     description:
-      'Have a custom ext4 rootfs (e.g., from Packer)? Import it into the cache:',
+      'Have a custom rootfs (e.g., from Packer)? Import it into the cache:',
     code: [
-      "mvm image import /path/to/my-custom-image.ext4",
+      "mvm image import my-custom-image /path/to/my-custom-image.ext4",
       "mvm image ls                     # Verify it shows up",
       "mvm image set-default my-custom-image",
     ],
-    callout: 'The image must be ext4 in a raw disk image. QCOW2, VMDK, etc. need conversion first: <code>qemu-img convert -O raw input.qcow2 output.raw</code>.',
+    callout: 'Syntax: <code>mvm image import NAME SOURCE_PATH</code>. Supports ext4 raw images, qcow2, and tar-rootfs archives natively — no manual conversion needed.',
   },
   {
     title: "Managing images",
     code: [
-      "mvm image ls                     # List all cached images",
-      "mvm image set-default ubuntu-24.04   # Set default for new VMs",
-      "mvm image rm <image-id>          # Remove a cached image (full or short SHA)",
+      "mvm image ls                          # List all cached images",
+      "mvm image inspect <id>                # Show detailed image info",
+      "mvm image set-default <id>            # Set default for new VMs",
+      "mvm image rm <id>                     # Remove a cached image (full or short SHA)",
+      "mvm image warm <id>                   # Pre-decompress to ready pool for fast VM creation",
     ],
   },
 ];
@@ -583,7 +594,7 @@ export const kernelSections = [
     title: "Firecracker-optimized kernel (recommended)",
     description:
       'A pre-built kernel from the Firecracker CI pipeline. Minimally configured for fast boot — no PCI, no ACPI. Downloads in ~30 seconds.',
-    code: ["mvm kernel fetch", "# Downloads the latest Firecracker-optimized kernel"],
+    code: ["mvm kernel fetch --type firecracker", "# Downloads the latest Firecracker-optimized kernel"],
     callout: 'This is the default. Use this unless you need custom kernel modules or a specific version. Boots in under 200ms.',
   },
   {
@@ -597,10 +608,19 @@ export const kernelSections = [
       "# Build a specific version",
       "mvm kernel fetch --type official --version 6.6",
       "",
+      "# Apply a custom kernel config fragment",
+      "mvm kernel fetch --type official --config /path/to/my-fragment.config",
+      "",
+      "# Specify architecture and parallel build jobs",
+      "mvm kernel fetch --type official --arch arm64 --jobs 8",
+      "",
+      "# Set as default after fetch",
+      "mvm kernel fetch --type official --set-default",
+      "",
       "# Force clean rebuild (bypass cache)",
       "mvm kernel fetch --type official --clean-build",
     ],
-    callout: 'Official builds require build deps: <code>build-essential</code>, <code>flex</code>, <code>bison</code>, <code>libelf-dev</code>, <code>libssl-dev</code>, <code>libncurses-dev</code>, <code>bc</code>, <code>git</code>, <code>curl</code>, <code>pkg-config</code>, <code>dwarves</code> (for pahole). Expect 10-30 min build times.',
+    callout: 'Official builds require build deps: <code>build-essential</code>, <code>flex</code>, <code>bison</code>, <code>libelf-dev</code>, <code>libssl-dev</code>, <code>libncurses-dev</code>, <code>bc</code>, <code>git</code>, <code>curl</code>, <code>pkg-config</code>, <code>dwarves</code> (for pahole). Expect 10-30 min build times. Use <code>--config PATH</code> to apply a custom kernel config fragment, <code>--arch ARCH</code> for architecture (x86_64, arm64), <code>--jobs N</code> for parallel build jobs, and <code>--set-default</code> to set as default after fetch.',
   },
   {
     title: "Managing kernels",
@@ -616,7 +636,7 @@ export const binarySections = [
   {
     title: "What binaries are",
     description:
-      'Firecracker and jailer binaries downloaded from the Firecracker GitHub releases page. You need at least one version downloaded to create VMs. Default version: v1.15.0.',
+      'Firecracker and jailer binaries downloaded from the Firecracker GitHub releases page. You need at least one version downloaded to create VMs.',
   },
   {
     title: "Managing binaries",
@@ -627,11 +647,17 @@ export const binarySections = [
       "# List downloaded versions",
       "mvm bin ls",
       "",
-      "# Set as active version",
-      "mvm bin set-default",
+      "# List remote versions available for download",
+      "mvm bin ls --remote",
       "",
-      "# Remove a version",
-      "mvm bin rm 1.15.0",
+      "# Set as active version by ID prefix",
+      "mvm bin default abc123",
+      "",
+      "# Remove by version",
+      "mvm bin rm --version 1.15.0",
+      "",
+      "# Remove by ID",
+      "mvm bin rm abc123",
     ],
     callout: '<code>mvm bin fetch</code> downloads both <code>firecracker</code> and <code>jailer</code> together. They must match versions — mixing v1.14 firecracker with v1.15 jailer causes runtime errors.',
   },
@@ -696,7 +722,14 @@ export const networkSections = [
     title: "Network commands",
     code: [
       "# Create a named network with a custom subnet",
+      "# You will be prompted to select interface(s) for NAT",
       "mvm network create mynet --subnet 10.0.1.0/24",
+      "",
+      "# Create with explicit NAT gateway interfaces",
+      "mvm network create mynet --subnet 10.0.1.0/24 --nat-gateways eth0",
+      "",
+      "# Create without NAT (no internet access for VMs)",
+      "mvm network create mynet --subnet 10.0.1.0/24 --no-nat",
       "",
       "# List all networks",
       "mvm network ls",
@@ -707,10 +740,13 @@ export const networkSections = [
       "# Set a network as default",
       "mvm network set-default mynet",
       "",
+      "# Sync iptables rules between database and host",
+      "mvm network sync",
+      "",
       "# Remove a network (only if no VMs attached)",
       "mvm network rm mynet",
     ],
-    callout: 'You cannot remove a network that has VMs attached. Stop and remove the VMs first. Also, <code>mvm network rm</code> removes iptables rules — if Docker uses a different iptables backend, this can leave orphaned rules.',
+    callout: 'You cannot remove a network that has VMs attached. Stop and remove the VMs first.',
   },
   {
     title: "Using networks with VMs",
@@ -736,7 +772,7 @@ export const configSections = [
     description:
       'Settings resolve in this order (lower overrides higher):',
     items: [
-      'Built-in defaults from <code>_defaults.py</code> (compiled into the package)',
+      'Built-in defaults from <code>constants.py</code> (compiled into the package)',
       'Runtime config file (<code>~/.config/mvmctl/config.json</code>)',
       '<code>MVM_*</code> environment variables',
       'CLI flags (highest priority)',
@@ -745,25 +781,25 @@ export const configSections = [
   {
     title: "Config file location",
     description:
-      'Runtime config: <code>~/.config/mvmctl/config.json</code> (override with <code>MVM_CONFIG_DIR</code>). Asset metadata (kernel/image/bin defaults): <code>~/.cache/mvmctl/metadata.json</code> (override with <code>MVM_CACHE_DIR</code>).',
+      'Runtime config: <code>~/.config/mvmctl/config.json</code> (override with <code>MVM_CONFIG_DIR</code>). Asset cache: <code>~/.cache/mvmctl/</code> (override with <code>MVM_CACHE_DIR</code>).',
   },
   {
     title: "Config commands",
     code: [
-      "# Show resolved configuration",
-      "mvm config show",
+      "# List all overridable settings and their current values",
+      "mvm config list",
       "",
       "# Get a specific value",
-      "mvm config get assets.kernels_dir",
+      "mvm config get defaults.vm vcpu_count",
       "",
       "# Set a value (persists to config.json)",
-      "mvm config set debug.enabled true",
+      "mvm config set defaults.vm vcpu_count 4",
       "",
-      "# Validate config file",
-      "mvm config validate",
+      "# Reset a single value to default",
+      "mvm config reset defaults.vm vcpu_count",
       "",
-      "# Print Firecracker JSON boot config (debugging)",
-      "mvm config dump-vm myvm",
+      "# Reset all overrides globally",
+      "mvm config reset --all",
     ],
   },
   {
@@ -772,29 +808,34 @@ export const configSections = [
       "MVM_CACHE_DIR          Override cache directory               ~/.cache/mvmctl",
       "MVM_CONFIG_DIR         Override config directory               ~/.config/mvmctl",
       "MVM_LOG_LEVEL          Log level: DEBUG, INFO, WARNING, ERROR  INFO",
-      "MVM_KERNEL             Override default kernel path",
       "MVM_FIRECRACKER_BIN    Override Firecracker binary path",
     ],
   },
   {
     title: "Cache management",
     code: [
-      "# Dry-run — see what would be removed",
-      "mvm cache prune --dry-run",
+      "# Initialize cache directories",
+      "mvm cache init",
       "",
-      "# Prune stale entries",
-      "mvm cache prune",
-      "",
-      "# Prune specific types",
+      "# Prune specific resource type",
       "mvm cache prune vm",
       "mvm cache prune network",
       "mvm cache prune image",
       "mvm cache prune kernel",
+      "mvm cache prune binary",
+      "mvm cache prune misc",
       "",
-      "# Clear all assets (confirmation required)",
-      "mvm cache clear",
+      "# Dry-run prune all (see what would be removed)",
+      "mvm cache prune --all --dry-run",
+      "",
+      "# Prune all resources including protected items",
+      "mvm cache prune --all",
+      "",
+      "# Completely clean all cache (nuclear option)",
+      "mvm cache clean",
+      "mvm cache clean --dry-run",
     ],
-    callout: 'Always run <code>--dry-run</code> first. Cache pruning is one-way. <code>mvm cache clear</code> removes all cached assets (binaries, kernels, images) but does not touch running VMs.',
+    callout: 'Always run <code>--dry-run</code> first. Cache pruning is one-way. <code>mvm cache clean</code> removes ALL cached assets AND host networking, but does not touch running VMs unless you use <code>--all</code>.',
   },
 ];
 
@@ -901,7 +942,7 @@ export const cloudInitSections = [
   {
     title: "How mvmctl handles cloud-init",
     description:
-      'By default, mvmctl uses the <strong>inject</strong> mode — it injects cloud-init files directly into the root filesystem using libguestfs. If libguestfs is not available, it falls back to <strong>net</strong> mode (temporary HTTP server, a.k.a. nocloud-net).',
+      'By default, mvmctl uses the <strong>off</strong> mode — cloud-init is disabled. When enabled, the default is <strong>inject</strong> mode via libguestfs. If libguestfs is not available, it falls back to <strong>net</strong> mode (temporary HTTP server, a.k.a. nocloud-net).',
     callout: undefined,
   },
   {
@@ -910,7 +951,7 @@ export const cloudInitSections = [
       '<code>inject</code> (default) — injects cloud-init files directly into the rootfs using libguestfs. Fastest and most reliable.',
       '<code>net</code> — starts a temporary HTTP server (nocloud-net). The VM fetches config during boot via <code>ds=nocloud-net;s=http://GATEWAY_IP:PORT/</code>. No libguestfs needed.',
       '<code>iso</code> — attaches a CD-ROM ISO with cloud-init files. Compatible with all images. Slower (requires <code>cloud-localds</code>).',
-      '<code>off</code> — disables cloud-init entirely. VM boots with no user setup.',
+      '<code>off</code> (default) — disables cloud-init entirely. VM boots with no user setup.',
     ],
     callout: undefined,
   },
@@ -985,14 +1026,17 @@ export const debugMode = {
   description:
     'Enable debug logging to see what mvmctl is doing under the hood:',
   code: [
-    '# Persistent:',
+    '# Enable persistently:',
     'mvm config set debug.enabled true',
     '',
-    '# Single command:',
+    '# Run a single command with debug output:',
     'MVM_LOG_LEVEL=DEBUG mvm vm create --name myvm --image ubuntu-24.04',
+    '',
+    '# Disable when done:',
+    'mvm config set debug.enabled false',
   ],
   callout:
-    'Debug output is verbose. Switch it back off: <code>mvm config set debug.enabled false</code>.',
+    'Use <code>MVM_LOG_LEVEL=DEBUG</code> prefix for any command. Debug output is verbose. Persistent mode: <code>mvm config set debug.enabled false</code> to disable.',
 } as const;
 
 export const helpSection = {
@@ -1039,7 +1083,7 @@ export const troubleshooting = [
   {
     problem: "Kernel not found",
     fix: [
-      "mvm kernel fetch",
+      "mvm kernel fetch --type firecracker",
       "mvm kernel ls  # Verify it is cached",
     ],
     note: "Default fetch downloads a Firecracker-optimized kernel (~30s). Official builds take 10-30 min.",
@@ -1048,18 +1092,18 @@ export const troubleshooting = [
     problem: "Firecracker binary not found",
     fix: [
       "mvm bin fetch 1.15.0",
-      "mvm bin set-default",
+      "mvm bin default <id>",
     ],
-    note: "Always run <code>mvm bin set-default</code> after fetching. Without it, mvmctl does not know which version to use.",
+    note: "Always run <code>mvm bin default &lt;id&gt;</code> after fetching. Without it, mvmctl does not know which version to use.",
   },
   {
     problem: "VM won't boot / SSH times out",
     fix: [
       "# Watch boot progress:",
-      "mvm logs --name myvm --type boot --follow",
+      "mvm logs myvm --follow",
       "",
       "# If nothing at all, check Firecracker process log:",
-      "mvm logs --name myvm --type os",
+      "mvm logs myvm --os",
     ],
     note: "Wait at least 60 seconds before assuming the VM is stuck. If the boot log shows nothing, the kernel may be incompatible or the image corrupt.",
   },
@@ -1115,11 +1159,11 @@ export const troubleshooting = [
   {
     problem: "Cache corruption or stale state",
     fix: [
-      "# Preview removals",
-      "mvm cache prune --dry-run",
+      "# Preview what would be removed",
+      "mvm cache prune --all --dry-run",
       "",
-      "# Remove stale entries",
-      "mvm cache prune",
+      "# Remove stale entries from a specific type",
+      "mvm cache prune vm",
       "",
       "# Full reset (removes ALL VMs — careful!)",
       "mvm cache prune --all",
