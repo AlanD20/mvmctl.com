@@ -434,21 +434,9 @@ export const injectCopyButtons = (selector = ".code-wrap") => {
         btn.classList.add("copied");
         setCopyIcon(icon, "check");
 
-        gsap.fromTo(
-          btn,
-          { scale: 0.92, rotation: -6 },
-          { scale: 1, rotation: 0, duration: 0.2, ease: "power3.out" }
-        );
-
         resetTimer = window.setTimeout(() => {
           btn.classList.remove("copied");
           setCopyIcon(icon, "copy");
-
-          gsap.fromTo(
-            btn,
-            { scale: 0.95 },
-            { scale: 1, duration: 0.22, ease: "power3.out" }
-          );
         }, 1100);
       } catch {
         btn.classList.add("failed");

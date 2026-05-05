@@ -973,7 +973,7 @@ const isActiveLink = (href: string) => {
     width: 1.5rem;
     height: 1.5rem;
     flex: 0 0 auto;
-    transition: transform 180ms ease, color 180ms ease, border-color 180ms ease, background-color 180ms ease;
+    transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease;
   }
 
   .copy-btn svg {
@@ -999,7 +999,7 @@ const isActiveLink = (href: string) => {
   .copy-btn:hover {
     border-color: var(--color-accent-primary-74);
     color: var(--color-accent-primary);
-    transform: scale(1.04);
+    transform: none;
   }
 
   .code-wrap.with-copy:hover {
@@ -1014,6 +1014,65 @@ const isActiveLink = (href: string) => {
 
   .copy-btn:active,
   .copy-btn:focus-visible {
+    border-color: var(--color-accent-primary-82);
+    color: var(--color-accent-primary);
+    outline: none;
+  }
+
+  .heading-anchor-wrap {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.35rem;
+    flex: 0 0 auto;
+  }
+
+  .heading-anchor-btn {
+    border: 1px solid var(--color-border-strong);
+    border-radius: 0.25rem;
+    background: var(--color-surface-4);
+    color: var(--text-soft);
+    font: inherit;
+    line-height: 1;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    width: 1.5rem;
+    height: 1.5rem;
+    flex: 0 0 auto;
+    transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease;
+  }
+
+  .heading-anchor-btn svg,
+  .heading-anchor-icon svg {
+    flex: 0 0 auto;
+    vertical-align: middle;
+    width: 0.75rem;
+    height: 0.75rem;
+    display: block;
+  }
+
+  .heading-anchor-btn.copied {
+    border-color: var(--color-accent-primary-82);
+    background: var(--color-accent-primary-18);
+    color: var(--color-accent-primary);
+  }
+
+  .heading-anchor-btn.failed {
+    border-color: var(--color-accent-warm-82);
+    background: var(--color-accent-warm-17);
+    color: var(--color-accent-warm);
+  }
+
+  .heading-anchor-btn:hover {
+    border-color: var(--color-accent-primary-74);
+    color: var(--color-accent-primary);
+    transform: none;
+  }
+
+  .heading-anchor-btn:active,
+  .heading-anchor-btn:focus-visible {
     border-color: var(--color-accent-primary-82);
     color: var(--color-accent-primary);
     outline: none;
