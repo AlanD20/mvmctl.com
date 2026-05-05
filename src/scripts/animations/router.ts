@@ -71,18 +71,23 @@ const handleAnchorClick = (event: Event) => {
 
   const href = target.getAttribute("href");
   const id = getSamePageSectionId(href, window.location.pathname);
-  if (!id) {
+  if (id) {
+    event.preventDefault();
+    scrollToSection(id);
+    window.history.pushState(null, "", `#${id}`);
     return;
   }
 
-  event.preventDefault();
-  scrollToSection(id);
-  window.history.pushState(null, "", `#${id}`);
+  if (href === "/" && normalizePath(window.location.pathname) === "/") {
+    event.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.history.pushState(null, "", "/");
+  }
 };
 
 const bindAnchorOffsetScroll = () => {
   const links = document.querySelectorAll<HTMLAnchorElement>(
-    ".site-header nav a[href*='#'], .hero-actions a[href*='#']",
+    ".site-header nav a[href*='#'], .site-header nav a[href='/'], .hero-actions a[href*='#']",
   );
 
   links.forEach((link) => {
