@@ -213,7 +213,7 @@ export const setupDocsSpy = () => {
     const lr = link.getBoundingClientRect();
     const tr = toc.getBoundingClientRect();
     if (lr.bottom > tr.bottom || lr.top < tr.top) {
-      link.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      toc.scrollTop = toc.scrollTop + lr.top - tr.top - 8;
     }
   };
 
