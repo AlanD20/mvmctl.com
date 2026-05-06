@@ -321,6 +321,13 @@ export const setupDocsAnchorOffsets = () => {
       }
 
       event.preventDefault();
+
+      if (id === "overview") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.history.pushState(null, "", "#overview");
+        return;
+      }
+
       /* Read the section's own scroll-margin-top so JS matches CSS exactly */
       const smt = getComputedStyle(section).scrollMarginTop;
       const offset = smt ? parseFloat(smt) : 76;

@@ -289,9 +289,14 @@ import { apiSections } from "../../content/site/api";
   .doc-section {
     position: relative;
     border-bottom: none;
-    scroll-margin-top: calc(var(--header-height) + 4rem);
+    scroll-margin-top: calc(var(--header-height) + 3rem);
     padding: 0.5rem 0;
   }
+
+  #overview {
+    scroll-margin-top: 0;
+  }
+
   .doc-section::after {
     content: "";
     display: block;
