@@ -21,7 +21,9 @@ const siteUrl = Astro.site?.toString() ?? "https://mvmctl.aland20.com";
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).toString();
 const imageUrl = new URL(image, siteUrl).toString();
 const isDocsPage = currentPath.startsWith("/docs");
-const primaryNavLinks = navLinks.filter((item) => normalizePath(item.href) !== "/docs");
+const primaryNavLinks = isDocsPage
+  ? []
+  : navLinks.filter((item) => normalizePath(item.href) !== "/docs");
 const isActiveLink = (href: string) => {
   if (href.startsWith("/#")) {
     const section = href.slice(2);
@@ -98,30 +100,34 @@ const isActiveLink = (href: string) => {
           </span>
         </a>
 
-        <nav>
-          <ul>
-            {
-              primaryNavLinks.map((item) => (
-                <li>
-                  <a
-                    href={item.href}
-                    class={isActiveLink(item.href) ? "active" : undefined}
-                    aria-current={isActiveLink(item.href) ? "page" : undefined}
-                    target={isExternalLink(item.href) ? "_blank" : undefined}
-                    rel={isExternalLink(item.href) ? "noopener noreferrer" : undefined}
-                    data-anim='nav-link'>
-                    <Icon
-                      icon={getIcon(item.icon)}
-                      size='0.75rem'
-                      class='nav-icon'
-                    />
-                    <span class='nav-label'>{item.label}</span>
-                  </a>
-                </li>
-              ))
-            }
-          </ul>
-        </nav>
+        {
+          primaryNavLinks.length > 0 && (
+            <nav>
+              <ul>
+                {
+                  primaryNavLinks.map((item) => (
+                    <li>
+                      <a
+                        href={item.href}
+                        class={isActiveLink(item.href) ? "active" : undefined}
+                        aria-current={isActiveLink(item.href) ? "page" : undefined}
+                        target={isExternalLink(item.href) ? "_blank" : undefined}
+                        rel={isExternalLink(item.href) ? "noopener noreferrer" : undefined}
+                        data-anim='nav-link'>
+                        <Icon
+                          icon={getIcon(item.icon)}
+                          size='0.75rem'
+                          class='nav-icon'
+                        />
+                        <span class='nav-label'>{item.label}</span>
+                      </a>
+                    </li>
+                  ))
+                }
+              </ul>
+            </nav>
+          )
+        }
 
         <div class='nav-actions'>
           {
