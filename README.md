@@ -34,7 +34,8 @@ pnpm preview
 - `/feature` → landing, auto-scroll to features
 - `/features` → redirects to `/feature`
 - `/install` → landing, auto-scroll to install section
-- `/docs/` → documentation page
+- `/docs/` → documentation (quickstart)
+- `/docs/api` → API reference
 
 ## Project structure
 
@@ -55,7 +56,7 @@ src/
 
 ## Contributing
 
-See [CONTRIBUTING.md](https://github.com/AanD20/mvmctl/blob/main/.github/CONTRIBUTING.md) in the main mvmctl repository.
+See [CONTRIBUTING.md](https://github.com/AlanD20/mvmctl/blob/main/.github/CONTRIBUTING.md) in the main mvmctl repository.
 
 ## License
 

@@ -17,7 +17,7 @@ When instructions conflict, follow this order:
 - Stack: Astro + TypeScript + GSAP + Font Awesome
 - Package manager: `pnpm`
 - ESM: `"type": "module"`
-- Node: `>=22.12.0`
+- Node: `>=24.0.0`
 - TS strictness: `astro/tsconfigs/strict`
 - Site configured in `astro.config.mjs`
 

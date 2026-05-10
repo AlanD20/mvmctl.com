@@ -32,16 +32,17 @@ export const hero = {
   secondaryCta: { href: "/docs/", label: "Read docs" },
   tertiaryCta: { href: "https://github.com/AlanD20/mvmctl", label: "GitHub" },
   metrics: [
+    // KEEP IN SYNC: when adding/removing CLI command groups, update this count
     { label: "Install paths", value: "4", icon: "download" as IconName },
-    { label: "Command groups", value: "13", icon: "layers" as IconName },
+    { label: "Command groups", value: "15", icon: "layers" as IconName },
     { label: "Primary platform", value: "Linux", icon: "server" as IconName },
   ],
   commandPreview: [
     "# interactive host setup",
     "mvm init",
-    "mvm kernel pull",
-    "mvm image pull ubuntu-24.04",
-    "mvm vm create --name myvm --image ubuntu-24.04",
+    "mvm kernel pull --type firecracker",
+    "mvm image pull ubuntu --version 24.04",
+    "mvm vm create myvm --image ubuntu:24.04",
     "mvm ssh myvm",
   ],
 } as const;
@@ -92,6 +93,8 @@ export const installMethods: InstallMethod[] = [
     subtitle: "Recommended · no Python runtime needed",
     icon: "download",
     steps: [
+      // NOTE: This URL is forward-looking — the project is pre-production
+      // with no actual releases yet. It will work once v0.1.0 is tagged.
       "curl -L -o mvm https://github.com/AlanD20/mvmctl/releases/latest/download/mvm",
       "chmod +x mvm",
       "sudo mv mvm /usr/local/bin/",
