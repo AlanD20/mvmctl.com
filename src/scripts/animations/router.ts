@@ -87,7 +87,7 @@ const handleAnchorClick = (event: Event) => {
 
 const bindAnchorOffsetScroll = () => {
   const links = document.querySelectorAll<HTMLAnchorElement>(
-    ".site-header nav a[href*='#'], .site-header nav a[href='/'], .hero-actions a[href*='#']",
+    ".site-header nav a[href*='#'], .site-header nav a[href='/'], .hero-actions a[href*='#'], .mobile-nav-dropdown a[href*='#'], .mobile-nav-dropdown a[href='/']",
   );
 
   links.forEach((link) => {

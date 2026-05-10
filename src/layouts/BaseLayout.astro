@@ -141,6 +141,17 @@ const isActiveLink = (href: string) => {
               </button>
             ) : null
           }
+          {
+            !isDocsPage ? (
+              <button class='mobile-nav-toggle' type='button' aria-label='Toggle navigation' aria-expanded='false'>
+                <Icon
+                  icon={getIcon("bars")}
+                  size='1rem'
+                  class='mobile-nav-toggle-icon'
+                />
+              </button>
+            ) : null
+          }
           <a class='header-link' href='/docs/'>
             <Icon
               icon={getIcon("book")}
@@ -151,7 +162,36 @@ const isActiveLink = (href: string) => {
           </a>
         </div>
       </div>
+
     </header>
+    {
+      !isDocsPage ? (
+        <div class='mobile-nav-dropdown'>
+          <ul>
+            {
+              primaryNavLinks.map((item) => (
+                <li>
+                  <a
+                    href={item.href}
+                    class={isActiveLink(item.href) ? "active" : undefined}
+                    aria-current={isActiveLink(item.href) ? "page" : undefined}
+                    target={isExternalLink(item.href) ? "_blank" : undefined}
+                    rel={isExternalLink(item.href) ? "noopener noreferrer" : undefined}
+                  >
+                    <Icon
+                      icon={getIcon(item.icon)}
+                      size='1rem'
+                      class='nav-icon'
+                    />
+                    <span>{item.label}</span>
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      ) : null
+    }
     <main>
       <slot />
     </main>
@@ -159,111 +199,112 @@ const isActiveLink = (href: string) => {
       <p>mvmctl · MIT Licensed</p>
     </footer>
 
+    <script is:inline>
+      (function() {
+        var init = function() {
+          var docsToggle = document.querySelector(".docs-left-toggle");
+          var leftNav = document.querySelector(".left-nav");
+          if (docsToggle && leftNav) {
+            if (docsToggle.dataset.bound !== "true") {
+              docsToggle.dataset.bound = "true";
+              docsToggle.setAttribute("aria-expanded", "false");
+              docsToggle.addEventListener("click", function() {
+                if (docsToggle.hidden) return;
+                var open = !leftNav.classList.contains("mobile-open");
+                leftNav.classList.toggle("mobile-open", open);
+                docsToggle.classList.toggle("active", open);
+                docsToggle.setAttribute("aria-expanded", open ? "true" : "false");
+              });
+              document.addEventListener("click", function(e) {
+                if (!docsToggle.contains(e.target) && !leftNav.contains(e.target)) {
+                  leftNav.classList.remove("mobile-open");
+                  docsToggle.classList.remove("active");
+                  docsToggle.setAttribute("aria-expanded", "false");
+                }
+              });
+              document.addEventListener("keydown", function(e) {
+                if (e.key === "Escape") {
+                  leftNav.classList.remove("mobile-open");
+                  docsToggle.classList.remove("active");
+                  docsToggle.setAttribute("aria-expanded", "false");
+                }
+              });
+            }
+            var syncDocsToggle = function() {
+              var shouldShow = window.innerWidth <= 980;
+              docsToggle.hidden = !shouldShow;
+              if (!shouldShow) {
+                leftNav.classList.remove("mobile-open");
+                docsToggle.classList.remove("active");
+                docsToggle.setAttribute("aria-expanded", "false");
+              }
+            };
+            window.addEventListener("resize", syncDocsToggle);
+            syncDocsToggle();
+          }
+
+          var mobileToggle = document.querySelector(".mobile-nav-toggle");
+          var mobileDropdown = document.querySelector(".mobile-nav-dropdown");
+          if (mobileToggle && mobileDropdown) {
+            if (mobileToggle.dataset.bound !== "true") {
+              mobileToggle.dataset.bound = "true";
+              mobileToggle.addEventListener("click", function(e) {
+                e.stopPropagation();
+                var open = !mobileDropdown.classList.contains("is-open");
+                mobileDropdown.classList.toggle("is-open", open);
+                mobileToggle.classList.toggle("active", open);
+                mobileToggle.setAttribute("aria-expanded", open ? "true" : "false");
+              });
+              mobileDropdown.querySelectorAll("a").forEach(function(link) {
+                link.addEventListener("click", function() {
+                  mobileDropdown.classList.remove("is-open");
+                  mobileToggle.classList.remove("active");
+                  mobileToggle.setAttribute("aria-expanded", "false");
+                });
+              });
+              document.addEventListener("click", function(e) {
+                if (!mobileToggle.contains(e.target) && !mobileDropdown.contains(e.target)) {
+                  mobileDropdown.classList.remove("is-open");
+                  mobileToggle.classList.remove("active");
+                  mobileToggle.setAttribute("aria-expanded", "false");
+                }
+              });
+              document.addEventListener("keydown", function(e) {
+                if (e.key === "Escape") {
+                  mobileDropdown.classList.remove("is-open");
+                  mobileToggle.classList.remove("active");
+                  mobileToggle.setAttribute("aria-expanded", "false");
+                }
+              });
+              window.addEventListener("resize", function() {
+                if (window.innerWidth > 430) {
+                  mobileDropdown.classList.remove("is-open");
+                  mobileToggle.classList.remove("active");
+                  mobileToggle.setAttribute("aria-expanded", "false");
+                }
+              });
+            }
+          }
+
+          document.querySelectorAll(".brand-favicon").forEach(function(img) {
+            if (img.complete) {
+              img.classList.add("is-loaded");
+              var glyph = img.closest(".brand-glyph");
+              if (glyph) glyph.classList.add("is-loaded");
+            }
+          });
+        };
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", init);
+        } else {
+          init();
+        }
+        document.addEventListener("astro:page-load", init);
+      })();
+    </script>
     <script>
       import "../scripts/animations/router";
-
-      const bindDocsMenuToggle = () => {
-        const toggle = document.querySelector(".docs-left-toggle");
-        const leftNav = document.querySelector(".left-nav");
-
-        if (!(toggle instanceof HTMLButtonElement) || !(leftNav instanceof HTMLElement)) {
-          return;
-        }
-
-        const closeMenu = () => {
-          leftNav.classList.remove("mobile-open");
-          toggle.classList.remove("active");
-          toggle.setAttribute("aria-expanded", "false");
-        };
-
-        const syncToggleVisibility = () => {
-          const shouldShowToggle = window.innerWidth <= 980;
-          toggle.hidden = !shouldShowToggle;
-
-          if (!shouldShowToggle) {
-            closeMenu();
-          }
-        };
-
-        if (toggle.dataset.bound === "true") {
-          syncToggleVisibility();
-          return;
-        }
-
-        toggle.dataset.bound = "true";
-
-        toggle.setAttribute("aria-expanded", "false");
-        toggle.addEventListener("click", () => {
-          if (toggle.hidden) {
-            return;
-          }
-
-          const open = !leftNav.classList.contains("mobile-open");
-          leftNav.classList.toggle("mobile-open", open);
-          toggle.classList.toggle("active", open);
-          toggle.setAttribute("aria-expanded", open ? "true" : "false");
-        });
-
-        document.querySelectorAll("[data-docs-left-link]").forEach((link) => {
-          if (!(link instanceof HTMLAnchorElement)) {
-            return;
-          }
-
-          if (link.dataset.mobileCloseBound === "true") {
-            return;
-          }
-
-          link.dataset.mobileCloseBound = "true";
-          link.addEventListener("click", closeMenu);
-        });
-
-        document.addEventListener("click", (event) => {
-          const target = event.target;
-          if (!(target instanceof Node)) {
-            return;
-          }
-
-          if (toggle.contains(target) || leftNav.contains(target)) {
-            return;
-          }
-
-          closeMenu();
-        });
-
-        document.addEventListener("keydown", (event) => {
-          if (event.key === "Escape") {
-            closeMenu();
-          }
-        });
-
-        window.addEventListener("resize", syncToggleVisibility);
-        syncToggleVisibility();
-      };
-
-      const checkFavicons = () => {
-        document.querySelectorAll(".brand-favicon").forEach((img) => {
-          if (img instanceof HTMLImageElement && img.complete) {
-            img.classList.add("is-loaded");
-            const glyph = img.closest(".brand-glyph");
-            if (glyph) glyph.classList.add("is-loaded");
-          }
-        });
-      };
-
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", () => {
-          bindDocsMenuToggle();
-          checkFavicons();
-        }, { once: true });
-      } else {
-        bindDocsMenuToggle();
-        checkFavicons();
-      }
-
-      document.addEventListener("astro:page-load", () => {
-        bindDocsMenuToggle();
-        checkFavicons();
-      });
     </script>
   </body>
 </html>
@@ -775,7 +816,7 @@ const isActiveLink = (href: string) => {
   .site-header nav a {
     text-decoration: none;
     color: var(--text-soft);
-    font-size: clamp(0.75rem, 4vw, 1rem);
+    font-size: 0.875rem;
     font-weight: 500;
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
@@ -905,7 +946,7 @@ const isActiveLink = (href: string) => {
     text-decoration: none;
     color: var(--color-text-muted-2);
     background: var(--color-surface-3);
-    font-size: clamp(0.75rem, 4vw, 1rem);
+    font-size: 0.875rem;
     line-height: 1;
     font-weight: 500;
     transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
@@ -930,6 +971,118 @@ const isActiveLink = (href: string) => {
     color: currentColor;
     min-width: 0.75rem;
     min-height: 0.75rem;
+  }
+
+  .mobile-nav-toggle {
+    display: none;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 0;
+    background: var(--color-surface-3);
+    color: var(--color-text-muted-2);
+    cursor: pointer;
+    width: 3rem;
+    height: 3rem;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease;
+  }
+
+  .mobile-nav-toggle:hover,
+  .mobile-nav-toggle:focus-visible {
+    color: var(--color-text-primary);
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+    outline: none;
+  }
+
+  .mobile-nav-toggle:active {
+    color: var(--color-text-soft-bright);
+    background: var(--color-surface-active);
+    border-color: var(--color-border-active);
+  }
+
+  .mobile-nav-toggle.active {
+    color: var(--color-accent-primary);
+    background: var(--color-surface-active);
+    border-color: var(--color-accent-primary-60);
+  }
+
+  .mobile-nav-toggle-icon {
+    color: currentColor;
+    width: 1rem;
+    height: 1rem;
+    transition: transform 180ms ease;
+  }
+
+  .mobile-nav-toggle.active .mobile-nav-toggle-icon {
+    transform: rotate(90deg);
+  }
+
+  .mobile-nav-dropdown {
+    position: fixed;
+    top: calc(var(--header-height) + 1.5rem);
+    left: 50%;
+    width: min(1120px, calc(100vw - 2rem));
+    background: var(--color-surface-header);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--color-border-header);
+    box-shadow: 0px 0px 20px 5px var(--color-shadow-medium);
+    border-radius: 1rem;
+    padding: 0.5rem;
+    z-index: 100;
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(-0.5rem) scale(0.96);
+    transform-origin: top center;
+    transition: opacity 200ms ease, transform 200ms ease, visibility 200ms ease;
+    pointer-events: none;
+  }
+
+  .mobile-nav-dropdown.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0) scale(1);
+    pointer-events: auto;
+  }
+
+  .mobile-nav-dropdown ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .mobile-nav-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    color: var(--text-soft);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: color 180ms ease, background-color 180ms ease;
+  }
+
+  .mobile-nav-dropdown a:hover,
+  .mobile-nav-dropdown a:focus-visible {
+    color: var(--text);
+    background: var(--color-overlay-white-06);
+    outline: none;
+  }
+
+  .mobile-nav-dropdown a:active,
+  .mobile-nav-dropdown a.active,
+  .mobile-nav-dropdown a[aria-current="page"] {
+    color: var(--color-text-primary);
+    background: var(--color-surface-selected);
   }
 
   .site-footer {
@@ -1087,6 +1240,20 @@ const isActiveLink = (href: string) => {
   /* ==========================================================================
      Responsive Enhancements
      ========================================================================== */
+
+  @media (max-width: 430px) {
+    .site-header {
+      overflow-x: visible;
+    }
+
+    .site-header nav {
+      display: none;
+    }
+
+    .mobile-nav-toggle {
+      display: inline-flex;
+    }
+  }
 
   @media (max-width: 768px) {
     .brand {

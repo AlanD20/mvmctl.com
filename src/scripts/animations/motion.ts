@@ -494,19 +494,20 @@ export const setupLandingNavSpy = () => {
     return;
   }
 
-  const navLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>(".site-header nav a"));
-  if (!navLinks.length) {
+  const desktopLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>(".site-header nav a"));
+  const mobileLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>(".mobile-nav-dropdown a"));
+  if (!desktopLinks.length && !mobileLinks.length) {
     return;
   }
 
   const currentPath = normalizePath(window.location.pathname);
 
-  const homeLink = navLinks.find((link) => {
+  const homeLinks = [...desktopLinks, ...mobileLinks].filter((link) => {
     const path = getLinkPath(link);
     return path === "/" || path === "" || path.startsWith("/#");
   });
 
-  const featureLinks = navLinks.filter((link) => {
+  const featureLinks = [...desktopLinks, ...mobileLinks].filter((link) => {
     const href = link.getAttribute("href") ?? "";
     const path = getLinkPath(link);
     if (path === "/feature" || path === "/features") {
@@ -520,7 +521,7 @@ export const setupLandingNavSpy = () => {
     return false;
   });
 
-  const installLink = navLinks.find((link) => {
+  const installLinks = [...desktopLinks, ...mobileLinks].filter((link) => {
     const href = link.getAttribute("href") ?? "";
     const path = getLinkPath(link);
     if (path === "/install") {
@@ -537,7 +538,7 @@ export const setupLandingNavSpy = () => {
   const featuresSection = document.getElementById("features");
   const installSection = document.getElementById("install");
 
-  if (!homeLink || !featureLinks.length || !installLink || !featuresSection || !installSection) {
+  if (!homeLinks.length || !featureLinks.length || !installLinks.length || !featuresSection || !installSection) {
     return;
   }
 
@@ -552,9 +553,9 @@ export const setupLandingNavSpy = () => {
   };
 
   const updateActive = (activeSection: "home" | "features" | "install") => {
-    setActive(homeLink, activeSection === "home");
+    homeLinks.forEach((link) => setActive(link, activeSection === "home"));
     featureLinks.forEach((link) => setActive(link, activeSection === "features"));
-    setActive(installLink, activeSection === "install");
+    installLinks.forEach((link) => setActive(link, activeSection === "install"));
   };
 
   const offset = getAnchorOffset() + 14;
