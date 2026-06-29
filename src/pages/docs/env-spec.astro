@@ -1,0 +1,80 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import DocsNavLeft from "../../components/docs/DocsNavLeft.astro";
+import DocsOnThisPage from "../../components/docs/DocsOnThisPage.astro";
+import DocsEnvSpecArticle from "../../components/docs/DocsEnvSpecArticle.astro";
+import { envSpecNav } from "../../content/site/env-spec";
+---
+
+<BaseLayout
+  title="mvmctl env spec · Environment workflow YAML reference"
+  description="Complete reference for the mvm env workflow engine YAML spec format — network, key, image, kernel, binary, vm, exec, ssh, and copy step types."
+>
+  <div class="docs-shell">
+    <DocsNavLeft items={envSpecNav} />
+    <DocsEnvSpecArticle />
+    <DocsOnThisPage toc={[
+      { id: "env-spec-overview", label: "Overview" },
+      { id: "env-spec-commands", label: "Commands" },
+      { id: "env-spec-structure", label: "Spec Structure" },
+      { id: "env-spec-network", label: "Network" },
+      { id: "env-spec-key", label: "Key" },
+      { id: "env-spec-image", label: "Image" },
+      { id: "env-spec-kernel", label: "Kernel" },
+      { id: "env-spec-binary", label: "Binary" },
+      { id: "env-spec-vm", label: "VM" },
+      { id: "env-spec-exec", label: "Exec" },
+      { id: "env-spec-ssh", label: "SSH" },
+      { id: "env-spec-copy", label: "Copy" },
+      { id: "env-spec-dependencies", label: "Dependencies" },
+      { id: "env-spec-destroy", label: "Destroy Behavior" },
+      { id: "env-spec-example", label: "Full Example" },
+      { id: "env-spec-realworld", label: "Real-World Examples" },
+      { id: "env-spec-realworld-rc", label: "RC Test Environment", level: 3 },
+      { id: "env-spec-realworld-builder", label: "Package Builder", level: 3 },
+      { id: "env-spec-state", label: "State File" },
+    ]} />
+  </div>
+</BaseLayout>
+
+<style>
+  .docs-shell {
+    width: calc(100vw - 2rem);
+    max-width: 1320px;
+    margin: 0 auto 5rem;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr) 220px;
+    gap: 2rem;
+  }
+
+  .docs-shell :global(.left-nav) {
+    grid-column: 1;
+  }
+
+  .docs-shell :global(.article) {
+    grid-column: 2;
+    min-width: 0;
+  }
+
+  @media (max-width: 1200px) {
+    .docs-shell {
+      grid-template-columns: 240px minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 980px) {
+    .docs-shell {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1rem;
+    }
+    .docs-shell :global(.left-nav),
+    .docs-shell :global(.article) {
+      grid-column: 1;
+    }
+    .docs-shell :global(.article) {
+      width: min(100%, 72ch);
+      justify-self: center;
+    }
+  }
+</style>

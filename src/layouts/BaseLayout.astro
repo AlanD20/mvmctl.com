@@ -208,12 +208,21 @@ const isActiveLink = (href: string) => {
             if (docsToggle.dataset.bound !== "true") {
               docsToggle.dataset.bound = "true";
               docsToggle.setAttribute("aria-expanded", "false");
-              docsToggle.addEventListener("click", function() {
+              docsToggle.addEventListener("click", function(e) {
                 if (docsToggle.hidden) return;
+                e.stopPropagation();
                 var open = !leftNav.classList.contains("mobile-open");
                 leftNav.classList.toggle("mobile-open", open);
                 docsToggle.classList.toggle("active", open);
                 docsToggle.setAttribute("aria-expanded", open ? "true" : "false");
+              });
+              leftNav.addEventListener("click", function() {
+                /* Close left nav on mobile when a nav link is clicked */
+                if (window.innerWidth <= 980 && leftNav.classList.contains("mobile-open")) {
+                  leftNav.classList.remove("mobile-open");
+                  docsToggle.classList.remove("active");
+                  docsToggle.setAttribute("aria-expanded", "false");
+                }
               });
               document.addEventListener("click", function(e) {
                 if (!docsToggle.contains(e.target) && !leftNav.contains(e.target)) {
@@ -389,6 +398,16 @@ const isActiveLink = (href: string) => {
     --color-accent-lilac-24: rgba(196, 142, 255, 0.24);
     --color-accent-lilac-28: rgba(196, 142, 255, 0.28);
     --color-accent-lilac-55: rgba(196, 142, 255, 0.55);
+    --color-accent-amber: #fbbf24;
+    --color-accent-amber-16: rgba(251, 191, 36, 0.16);
+    --color-accent-amber-24: rgba(251, 191, 36, 0.24);
+    --color-accent-amber-28: rgba(251, 191, 36, 0.28);
+    --color-accent-amber-55: rgba(251, 191, 36, 0.55);
+    --color-accent-teal: #2dd4bf;
+    --color-accent-teal-16: rgba(45, 212, 191, 0.16);
+    --color-accent-teal-24: rgba(45, 212, 191, 0.24);
+    --color-accent-teal-28: rgba(45, 212, 191, 0.28);
+    --color-accent-teal-55: rgba(45, 212, 191, 0.55);
     --color-shadow-strong: rgba(8, 8, 12, 0.85);
     --color-shadow-medium: rgba(8, 8, 12, 0.5);
     --color-shadow-deep: rgba(5, 10, 20, 0.45);
@@ -413,6 +432,14 @@ const isActiveLink = (href: string) => {
     --color-tone-purple-end: rgba(32, 20, 49, 0.72);
     --color-tone-purple-text: #f3ecff;
     --color-tone-purple-content: rgba(240, 228, 255, 0.88);
+    --color-tone-amber-start: rgba(120, 85, 20, 0.42);
+    --color-tone-amber-end: rgba(45, 30, 10, 0.72);
+    --color-tone-amber-text: #fffbeb;
+    --color-tone-amber-content: rgba(255, 245, 210, 0.88);
+    --color-tone-teal-start: rgba(20, 94, 84, 0.42);
+    --color-tone-teal-end: rgba(10, 35, 30, 0.72);
+    --color-tone-teal-text: #ebfffa;
+    --color-tone-teal-content: rgba(210, 255, 240, 0.88);
     --color-mask-solid: rgba(0, 0, 0, 1);
     --color-mask-mid: rgba(0, 0, 0, 0.72);
     --color-mask-soft: rgba(0, 0, 0, 0.24);

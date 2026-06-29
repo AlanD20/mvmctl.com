@@ -250,17 +250,20 @@ export const setupDocsSpy = () => {
 
     links.forEach((link) => {
       const target = link.getAttribute("href")?.replace("#", "");
-      const isNested = isNestedLink(link);
+      if (!target) return;
 
-      if (isNested) {
-        const shouldBeActive = finalH3 ? target === finalH3.id : false;
-        link.classList.toggle("active", shouldBeActive);
-        if (shouldBeActive) scrollRightNav(link);
-      } else {
-        const shouldBeActive = finalSection ? target === finalSection.id : false;
-        link.classList.toggle("active", shouldBeActive);
-        if (shouldBeActive) scrollRightNav(link);
-      }
+      /* Match against:
+         - active section (for top-level TOC entries)
+         - active h3 (for nested TOC entries)
+         - any h3 in the page (for level-2 TOC entries that point to h3 anchors)
+      */
+      /* Match: active section ID or active h3 ID */
+      const shouldBeActive =
+        (finalSection && target === finalSection.id) ||
+        (finalH3 && target === finalH3.id);
+
+      link.classList.toggle("active", !!shouldBeActive);
+      if (shouldBeActive) scrollRightNav(link);
     });
   };
 

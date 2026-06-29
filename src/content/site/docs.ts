@@ -50,55 +50,51 @@ export const docsNav: readonly DocsNavItem[] = [
   },
   {
     id: "vm-lifecycle",
-    label: "VM Lifecycle",
+    label: "Managing VMs",
     icon: "terminal",
     children: [
-      { id: "vm-lifecycle-ssh", label: "SSH access", icon: "terminal" },
+      { id: "vm-lifecycle-ssh", label: "SSH into a VM", icon: "terminal" },
       { id: "vm-lifecycle-console", label: "Console access", icon: "terminal" },
-      { id: "vm-lifecycle-logs", label: "Logs", icon: "terminal" },
+      { id: "vm-lifecycle-exec", label: "Run commands inside a VM", icon: "terminal" },
+      { id: "vm-lifecycle-logs", label: "View VM logs", icon: "terminal" },
       { id: "vm-lifecycle-snapshot", label: "Snapshots", icon: "terminal" },
-      { id: "vm-lifecycle-cp", label: "Copy files (mvm cp)", icon: "terminal" },
-      { id: "vm-lifecycle-rm", label: "Removing VMs", icon: "terminal" },
+      { id: "vm-lifecycle-cp", label: "Copy files to and from VMs", icon: "terminal" },
+      { id: "vm-lifecycle-ps", label: "List running VMs", icon: "terminal" },
+      { id: "vm-lifecycle-inspect", label: "Inspect a VM", icon: "terminal" },
+      { id: "vm-lifecycle-rm", label: "Remove a VM", icon: "terminal" },
     ],
   },
   {
-    id: "resource-management",
-    label: "Resource Management",
+    id: "resource-management-image",
+    label: "Images",
     icon: "archive",
-    children: [
-      {
-        id: "resource-management-image",
-        label: "Image management",
-        icon: "archive",
-      },
-      {
-        id: "resource-management-kernel",
-        label: "Kernel management",
-        icon: "archive",
-      },
-      {
-        id: "resource-management-bin",
-        label: "Binary management",
-        icon: "archive",
-      },
-      {
-        id: "resource-management-key",
-        label: "SSH key management",
-        icon: "archive",
-      },
-      {
-        id: "resource-management-volume",
-        label: "Volume management",
-        icon: "archive",
-      },
-    ],
   },
-  { id: "network-management", label: "Network Management", icon: "network" },
+  {
+    id: "resource-management-kernel",
+    label: "Kernels",
+    icon: "archive",
+  },
+  {
+    id: "resource-management-bin",
+    label: "Firecracker binaries",
+    icon: "archive",
+  },
+  {
+    id: "resource-management-key",
+    label: "SSH keys",
+    icon: "archive",
+  },
+  {
+    id: "resource-management-volume",
+    label: "Volumes",
+    icon: "archive",
+  },
+  { id: "network-management", label: "Networks", icon: "network" },
   { id: "configuration", label: "Configuration", icon: "gear" },
   { id: "dependencies", label: "Dependencies", icon: "chip" },
   { id: "cloud-init", label: "Cloud-Init", icon: "layers" },
   { id: "troubleshooting", label: "Troubleshooting", icon: "spanner" },
-  { href: "/docs/api/", label: "API Reference", icon: "terminal" },
+  { href: "/docs/env-spec/", label: "Env spec reference", icon: "terminal" },
 ] as const;
 
 export const docsQuickstartToc: readonly TocItem[] = [
@@ -109,97 +105,27 @@ export const docsQuickstartToc: readonly TocItem[] = [
   { id: "first-vm", label: "Create your first VM" },
   { id: "vm-create", label: "mvm vm create" },
   { id: "vm-create-flags", label: "All vm create flags", level: 3 },
-  { id: "vm-lifecycle", label: "VM Lifecycle" },
-  { id: "vm-lifecycle-ssh", label: "SSH access", level: 3 },
+  { id: "vm-lifecycle", label: "Managing VMs" },
+  { id: "vm-lifecycle-ssh", label: "SSH into a VM", level: 3 },
   { id: "vm-lifecycle-console", label: "Console access", level: 3 },
-  { id: "vm-lifecycle-logs", label: "Logs", level: 3 },
+  { id: "vm-lifecycle-exec", label: "Run commands inside a VM", level: 3 },
+  { id: "vm-lifecycle-logs", label: "View VM logs", level: 3 },
   { id: "vm-lifecycle-snapshot", label: "Snapshots", level: 3 },
-  { id: "vm-lifecycle-cp", label: "Copy files (mvm cp)", level: 3 },
-  { id: "vm-lifecycle-rm", label: "Removing VMs", level: 3 },
+  { id: "vm-lifecycle-cp", label: "Copy files to and from VMs", level: 3 },
+  { id: "vm-lifecycle-ps", label: "List running VMs", level: 3 },
+  { id: "vm-lifecycle-inspect", label: "Inspect a VM", level: 3 },
+  { id: "vm-lifecycle-rm", label: "Remove a VM", level: 3 },
   { id: "resource-management", label: "Resource Management" },
-  { id: "resource-management-image", label: "Image management", level: 3 },
-  { id: "resource-management-kernel", label: "Kernel management", level: 3 },
-  { id: "resource-management-bin", label: "Binary management", level: 3 },
-  { id: "resource-management-key", label: "SSH key management", level: 3 },
-  { id: "resource-management-volume", label: "Volume management", level: 3 },
-  { id: "network-management", label: "Network Management" },
+  { id: "resource-management-image", label: "Images", level: 3 },
+  { id: "resource-management-kernel", label: "Kernels", level: 3 },
+  { id: "resource-management-bin", label: "Firecracker binaries", level: 3 },
+  { id: "resource-management-key", label: "SSH keys", level: 3 },
+  { id: "resource-management-volume", label: "Volumes", level: 3 },
+  { id: "network-management", label: "Networks" },
   { id: "configuration", label: "Configuration" },
   { id: "dependencies", label: "Dependencies" },
   { id: "cloud-init", label: "Cloud-Init" },
   { id: "troubleshooting", label: "Troubleshooting" },
-] as const;
-
-export const docsApiToc: readonly TocItem[] = [
-  { id: "api-overview", label: "Overview" },
-  { id: "api-import-pattern", label: "Import Pattern" },
-  { id: "api-module-overview", label: "Module Overview" },
-  { id: "api-data-models", label: "Data Models" },
-  { id: "api-model-vmstatus", label: "VMStatus", level: 3 },
-  { id: "api-model-vminstanceitem", label: "VMInstanceItem", level: 3 },
-  { id: "api-model-networkitem", label: "NetworkItem", level: 3 },
-  { id: "api-model-imageitem", label: "ImageItem", level: 3 },
-  { id: "api-model-kernelitem", label: "KernelItem", level: 3 },
-  { id: "api-model-binaryitem", label: "BinaryItem", level: 3 },
-  { id: "api-model-sshkeyitem", label: "SSHKeyItem", level: 3 },
-  { id: "api-model-volumeitem", label: "VolumeItem", level: 3 },
-  { id: "api-error-handling", label: "Error Handling" },
-  { id: "api-vm-operation", label: "VMOperation", level: 3 },
-  { id: "api-network-operation", label: "NetworkOperation", level: 3 },
-  { id: "api-image-operation", label: "ImageOperation", level: 3 },
-  { id: "api-kernel-operation", label: "KernelOperation", level: 3 },
-  { id: "api-key-operation", label: "KeyOperation", level: 3 },
-  { id: "api-binary-operation", label: "BinaryOperation", level: 3 },
-  { id: "api-volume-operation", label: "VolumeOperation", level: 3 },
-  { id: "api-console-operation", label: "ConsoleOperation", level: 3 },
-  { id: "api-log-operation", label: "LogOperation", level: 3 },
-  { id: "api-config-operation", label: "ConfigOperation", level: 3 },
-  { id: "api-host-operation", label: "HostOperation", level: 3 },
-  { id: "api-cache-operation", label: "CacheOperation", level: 3 },
-  { id: "api-ssh-operation", label: "SSHOperation", level: 3 },
-  { id: "api-init-operation", label: "InitOperation", level: 3 },
-  { id: "api-end-to-end", label: "End-to-End Example" },
-] as const;
-
-export const apiDocsNav: readonly DocsNavItem[] = [
-  { href: "/docs/", label: "Documentation", icon: "book" },
-  { id: "api-overview", label: "Overview", icon: "terminal" },
-  { id: "api-import-pattern", label: "Import Pattern", icon: "terminal" },
-  { id: "api-module-overview", label: "Module Overview", icon: "terminal" },
-  {
-    id: "api-data-models",
-    label: "Data Models",
-    icon: "archive",
-    children: [
-      { id: "api-model-vmstatus", label: "VMStatus", icon: "archive" },
-      {
-        id: "api-model-vminstanceitem",
-        label: "VMInstanceItem",
-        icon: "archive",
-      },
-      { id: "api-model-networkitem", label: "NetworkItem", icon: "archive" },
-      { id: "api-model-imageitem", label: "ImageItem", icon: "archive" },
-      { id: "api-model-kernelitem", label: "KernelItem", icon: "archive" },
-      { id: "api-model-binaryitem", label: "BinaryItem", icon: "archive" },
-      { id: "api-model-sshkeyitem", label: "SSHKeyItem", icon: "archive" },
-      { id: "api-model-volumeitem", label: "VolumeItem", icon: "archive" },
-    ],
-  },
-  { id: "api-error-handling", label: "Error Handling", icon: "spanner" },
-  { id: "api-vm-operation", label: "VMOperation", icon: "terminal" },
-  { id: "api-network-operation", label: "NetworkOperation", icon: "terminal" },
-  { id: "api-image-operation", label: "ImageOperation", icon: "terminal" },
-  { id: "api-kernel-operation", label: "KernelOperation", icon: "terminal" },
-  { id: "api-key-operation", label: "KeyOperation", icon: "terminal" },
-  { id: "api-binary-operation", label: "BinaryOperation", icon: "terminal" },
-  { id: "api-volume-operation", label: "VolumeOperation", icon: "terminal" },
-  { id: "api-console-operation", label: "ConsoleOperation", icon: "terminal" },
-  { id: "api-log-operation", label: "LogOperation", icon: "terminal" },
-  { id: "api-config-operation", label: "ConfigOperation", icon: "terminal" },
-  { id: "api-host-operation", label: "HostOperation", icon: "terminal" },
-  { id: "api-cache-operation", label: "CacheOperation", icon: "terminal" },
-  { id: "api-ssh-operation", label: "SSHOperation", icon: "terminal" },
-  { id: "api-init-operation", label: "InitOperation", icon: "terminal" },
-  { id: "api-end-to-end", label: "End-to-End Example", icon: "play" },
 ] as const;
 
 /* ───────────────────────────────────────────────────────────────
@@ -209,8 +135,8 @@ export const apiDocsNav: readonly DocsNavItem[] = [
 export const prerequisites = [
   "Linux host (x86_64 or aarch64) with KVM support — check with <code>ls /dev/kvm</code>",
   "Access to <code>/dev/kvm</code> and membership in the <code>kvm</code> group",
-  "Python 3.13+ for pip/pipx/source installs",
-  "Root access once for host setup (<code>mvm init</code> or <code>sudo mvm host init</code>)",
+  "Go 1.26.3+ to build from source (optional — binary install does not require Go)",
+  "Root access once for host setup (<code>mvm init</code> handles this for you)",
   "<code>nftables</code> for NAT and firewall rules (default backend)",
 ] as const;
 
@@ -219,13 +145,13 @@ export const distroPackages = {
     title: "Ubuntu / Debian packages",
     id: "ubuntu-packages",
     command: [
-      "sudo apt-get install -y iproute2 iptables nftables cloud-image-utils qemu-img e2fsprogs kmod",
+      "sudo apt-get install -y iproute2 iptables nftables qemu-utils e2fsprogs util-linux procps kmod openssh-client tar sudo passwd fakeroot",
     ],
   },
   arch: {
     title: "Arch packages",
     id: "arch-packages",
-    command: ["sudo pacman -S --needed iproute2 iptables nftables cloud-utils qemu-img e2fsprogs kmod"],
+    command: ["sudo pacman -S --needed iproute2 iptables nftables qemu-img e2fsprogs util-linux procps-ng kmod openssh tar sudo shadow fakeroot"],
   },
 } as const;
 
@@ -237,40 +163,37 @@ export const installMethods: readonly CommandBlock[] = [
   {
     id: "binary",
     title: "Binary",
-    description: "No Python runtime required. Best for production machines.",
+    description: "No Go toolchain required. Best for production machines.",
     icon: "download",
     code: [
-      "curl -L -o mvm https://github.com/AlanD20/mvmctl/releases/latest/download/mvm",
-      "chmod +x mvm",
-      "sudo mv mvm /usr/local/bin/",
+      "# Get the latest binary from the Releases page",
+      "# https://github.com/AlanD20/mvmctl/releases",
+      "mkdir -p ~/.local/bin",
+      "curl -L -o ~/.local/bin/mvm https://github.com/AlanD20/mvmctl/releases/latest/download/mvm",
+      "chmod +x ~/.local/bin/mvm",
       "mvm --help",
     ],
   },
   {
-    id: "pipx",
-    title: "pipx",
-    description:
-      "Isolated Python app install. Keeps mvmctl separate from system Python.",
-    icon: "rocket",
-    code: ["pipx install mvmctl", "mvm --help"],
-  },
-  {
-    id: "pip",
-    title: "pip",
-    description: "System or virtualenv install.",
-    icon: "layers",
-    code: ["pip install mvmctl", "mvm --help"],
+    id: "aur",
+    title: "AUR (Arch Linux)",
+    description: "Available as mvmctl-bin for Arch Linux users.",
+    icon: "download",
+    code: [
+      "yay -S mvmctl-bin",
+      "mvm --help",
+    ],
   },
   {
     id: "source",
     title: "Source",
-    description: "For local development or contributing.",
+    description: "For local development or contributing. Requires Go 1.26.3+.",
     icon: "fileCode",
     code: [
       "git clone https://github.com/AlanD20/mvmctl",
       "cd mvmctl",
-      "uv sync",
-      "uv run mvm --help",
+      "./scripts/build.sh release --output ~/.local/bin/mvm",
+      "mvm --help",
     ],
   },
 ] as const;
@@ -283,18 +206,18 @@ export const hostInitSections = [
   {
     title: "Interactive setup (recommended)",
     description:
-      "Run <code>mvm init</code> — it walks you through host config (sudo/group/sudoers), Firecracker binary download, cache initialization, service binary extraction, and optional libguestfs setup. Escalates to root automatically when needed.",
+      "Run <code>mvm init</code> — it walks you through host config (sudo/group/sudoers), Firecracker binary download, cache initialization, service binary extraction, and default asset setup. Escalates to root automatically when needed.",
     code: ["mvm init"],
     callout:
       "When prompted to log out/in, <strong>do it</strong>. Group membership changes only apply to new login sessions. If you skip this, subsequent commands will fail with permission errors. Alternatively run <code>newgrp mvm</code> to avoid logging out.",
   },
   {
-    title: "Manual host setup",
+    title: "One-time host setup",
     description:
-      "Prefer doing things step by step? <code>sudo mvm host init</code> does the one-time machine setup. It is idempotent — safe to re-run.",
-    code: ["sudo mvm host init"],
+      "Run <code>mvm init</code> to perform the one-time machine setup. It is idempotent — safe to re-run.",
+    code: ["mvm init"],
     callout:
-      "<code>mvm host init</code> requires sudo because it creates the <code>mvm</code> system group, writes sudoers drop-in files, loads KVM kernel modules, enables IP forwarding, and sets up bridge/TAP networking. Normal <code>mvm</code> commands do not need sudo after this runs.",
+      "<code>mvm init</code> escalates to root when needed. It creates the <code>mvm</code> system group, writes sudoers drop-in files, loads KVM kernel modules, enables IP forwarding, and sets up bridge/TAP networking. Normal <code>mvm</code> commands do not need sudo after this runs.",
   },
   {
     title: "What host init actually does",
@@ -322,12 +245,13 @@ export const hostInitSections = [
       "# Combine flags for fully automated setup",
       "mvm init --non-interactive --skip-host",
     ],
-    callout: "Combine <code>--skip-host</code> and <code>--skip-network</code> to skip both host setup and default network creation. Useful when re-running <code>mvm init</code> to only pull a new binary or enable libguestfs.",
+    callout:       "Combine <code>--skip-host</code> and <code>--skip-network</code> to skip both host setup and default network creation. Useful when re-running <code>mvm init</code> to only pull new assets.",
   },
   {
     title: "Other host commands",
     code: [
-      "mvm host status   # Show current host configuration state — useful for verifying setup",
+      "mvm host status   # Show current host configuration state vs expected — useful for verifying setup",
+      "mvm host status --json   # Show current host configuration state as JSON",
       "mvm host info     # Show host hardware, limits, and VM capacity projection",
       "mvm host info --refresh  # Re-detect hardware and limits before displaying",
       "mvm host info --json     # Output as JSON",
@@ -350,7 +274,7 @@ export const firstVmSections = [
       "Create a complete microVM from scratch: generate an SSH key, download a kernel and OS image, boot the VM, connect, and clean up.",
     code: [
       "# 1. Generate an SSH key for VM access",
-      "mvm key create test --default",
+      "mvm key create my-key --default",
       "",
       "# 2. Download Firecracker-optimized kernel (~30s)",
       "mvm kernel pull --type firecracker",
@@ -404,31 +328,33 @@ export const vmCreateFlagLines: readonly string[] = [
   "VM_NAME (positional)          VM name (required). Used to identify the VM in all commands.",
   "--image IMAGE              Image name, type:version (e.g. ubuntu:24.04), short ID, or path to .ext4 file. Auto-detected from defaults if omitted.",
   "--kernel KERNEL            Kernel short ID or path to vmlinux. Auto-detected from defaults if omitted.",
-  "--vcpus, --cpus N          vCPU count (default: from user config).",
+  "--vcpu N                   Number of vCPUs (default: from user config).",
   "--mem, --memory N          Memory in MiB or GiB (e.g. 512M, 1G) (default: from user config).",
   "--disk-size, -s SIZE       Rootfs disk size (e.g. 1G, 512M or 1024M). Default: from config.",
-  "--ssh-key KEY              SSH public key name or path, e.g. 'mykey' or ~/.ssh/id_ed25519.pub",
+  "--ssh-key KEY              SSH public key name (from key cache) or file path.",
   "--user USER                Default SSH user for cloud-init. Default: from config.",
   "--ip ADDRESS               Static guest IP, e.g. 172.27.0.42. Default: auto-assigned.",
   "--network, --net NAME      Named network to attach to. Default: 'net'.",
   "--mac ADDRESS              Custom MAC address. Auto-generated if omitted.",
   "--cloud-init-mode MODE     One of: off (default), inject, iso, net.",
-  "--user-data PATH           Path to custom cloud-init user-data file.",
+  "--cloudinit-config PATH    Path to custom cloud-init configuration file.",
   "--nocloud-net-port PORT    Port for nocloud-net HTTP server (0=auto-assign).",
-  "--no-pci                Disable PCI transport (default: enabled). Required for hotplug support.",
-  "--nested-virt/--no-nested-virt   Enable nested virtualization (requires PCI, adds kvm-intel/amd.nested=1 boot arg)",
-  "--cpu-template PATH              Path to CPU template JSON file (merged with nested-virt config if both set)",
-  "--no-console               Disable serial console.",
+  "--no-pci                   Disable PCI transport (default: enabled). Required for hotplug support.",
+  "--nested-virt              Enable nested virtualization (requires PCI, adds kvm-intel/amd.nested=1 boot arg)",
+  "--cpu-template PATH        Path to CPU template JSON file (merged with nested-virt config if both set)",
+  "--console                  Enable serial console relay (default: disabled).",
   "--lsm-flags FLAGS          Linux Security Module flags for kernel cmdline.",
-  "--firecracker-bin PATH     Path to firecracker binary. Env var: MVM_FIRECRACKER_BIN.",
-  "--enable-logging/--no-enable-logging  Enable Firecracker logging.",
-  "--enable-metrics/--no-enable-metrics  Enable Firecracker metrics.",
+  "--enable-logging           Enable Firecracker logging.",
+  "--enable-metrics           Enable Firecracker metrics.",
   "--boot-args ARGS           Custom kernel boot arguments (e.g. 'console=ttyS0 reboot=k panic=1').",
+  "--writeback                Use writeback cache mode for drives.",
+  "--vsock-port PORT          Vsock port for the guest agent (default: 1024).",
   "--skip-cleanup             Skip cleanup on failure (for debugging).",
   "--skip-deblob              Skip debloat operations on rootfs (removes OS caches, package manager caches).",
   "--count, -c N              Number of VMs to create (default: 1).",
   "--atomic                   If any VM fails, remove all successfully-created VMs (all-or-nothing).",
   "--volume, -v NAME          Attach a volume to the VM (can be specified multiple times).",
+  "--force, -f                Skip confirmation prompts.",
 ];
 
 export const vmCreateExamples = [
@@ -496,7 +422,7 @@ export const vmCreateExamples = [
       "EOF",
       "",
       "# Pass it to the VM",
-      "mvm vm create myvm --image ubuntu:24.04 --user-data my-user-data.yaml",
+      "mvm vm create myvm --image ubuntu:24.04 --cloudinit-config my-user-data.yaml",
     ],
     note: "Custom user-data merges with mvmctl's default cloud-init. You can add packages, write files, run commands, etc.",
   },
@@ -572,6 +498,40 @@ export const consoleExplanation = {
   ],
 };
 
+export const execExplanation = {
+  whatItDoes:
+    "Execute a command inside a VM via the vsock guest agent. No SSH or network stack required — works over the vsock channel directly.",
+  callouts: [
+    "Unlike <code>mvm ssh --cmd</code>, <code>mvm exec</code> does not need SSH keys or a network connection. It uses the vsock agent inside the VM.",
+    "Use <code>--user</code> to run as a specific user (default: root).",
+    "Use <code>--timeout</code> to set the vsock agent connect/probe timeout in seconds.",
+    "Use <code>--no-sync</code> to skip the final <code>sync()</code> (faster but risks data loss on VM stop).",
+    "The VM must have the vsock agent running. This is true for any VM created with mvmctl.",
+  ],
+  examples: [
+    {
+      code: 'mvm exec myvm -- uname -a',
+      note: "Run a command as root and see output.",
+    },
+    {
+      code: 'mvm exec myvm --user ubuntu -- whoami',
+      note: "Run a command as a specific user.",
+    },
+    {
+      code: 'mvm exec myvm --timeout 30 -- long-running-command',
+      note: "Override the default vsock probe timeout.",
+    },
+    {
+      code: 'mvm exec myvm --no-sync -- echo "fast"',
+      note: "Skip final sync for faster execution.",
+    },
+    {
+      code: "mvm exec myvm --port 1025 -- my-command",
+      note: "Specify a custom vsock port.",
+    },
+  ],
+};
+
 export const logsExplanation = {
   whatItDoes:
     "View or stream VM logs. Two types: boot (serial console — kernel boot messages, cloud-init, login prompts) and OS (Firecracker process stderr/stdout).",
@@ -599,29 +559,41 @@ export const logsExplanation = {
 
 export const snapshotExplanation = {
   whatItDoes:
-    "Saves VM memory and disk state to disk. <code>mvm vm load</code> restores it later. Useful for preserving a long-running VM state before rebooting the host.",
+    "Create and restore VM snapshots — save memory and disk state to disk, then restore later. Useful for preserving a long-running VM state before rebooting the host.",
   callouts: [
     "Snapshots can be large — memory + disk. A VM with 2 GiB RAM creates a ~2 GiB memory file.",
     "The VM continues running while being snapshotted. The snapshot is crash-consistent (like pulling the power cord).",
-    "Snapshots are stored in <code>~/.cache/mvmctl/vms/&lt;vm-sha&gt;/snapshots/</code>.",
+    "Snapshots are stored in <code>~/.cache/mvmctl/snapshots/&lt;id&gt;/</code>.",
   ],
   examples: [
     {
-      code: "mvm vm snapshot myvm <mem_file> <state_file>",
-      note: "Snapshot a running VM. Requires memory and state file paths.",
+      code: "mvm snapshot create myvm",
+      note: "Snapshot a running VM. Saves memory and disk state.",
     },
     {
-      code: "mvm vm load myvm <mem_file> <state_file>",
-      note: "Restore the VM from memory and state files.",
+      code: "mvm snapshot ls",
+      note: "List all snapshots.",
+    },
+    {
+      code: "mvm snapshot inspect <snapshot-id>",
+      note: "Show detailed snapshot information.",
+    },
+    {
+      code: "mvm snapshot restore <snapshot-id> <vm-name>",
+      note: "Restore the VM from a saved snapshot.",
+    },
+    {
+      code: "mvm snapshot rm <snapshot-id>",
+      note: "Remove a snapshot.",
     },
   ],
 };
 
 export const cpExplanation = {
   whatItDoes:
-    "Copy files between the host and microVMs using tar-over-SSH. No guest dependencies beyond POSIX-mandated tar.",
+    "Copy files between the host and microVMs using a binary frame protocol over vsock. The vsock agent inside the VM handles file transfer operations.",
   callouts: [
-    "Uses <code>tar</code> on both sides — no extra packages needed inside the VM.",
+    "Uses a binary frame protocol over vsock — no SSH or tar dependency needed inside the VM. Transfers are encrypted by the host-guest isolation boundary.",
     "Path format: use <code>vm_name:/remote/path</code> for VM paths, plain <code>/local/path</code> for local paths.",
     "Multiple sources are allowed for host → VM copies.",
   ],
@@ -637,10 +609,6 @@ export const cpExplanation = {
     {
       code: "mvm cp myvm1:/data/file.txt myvm2:/data/",
       note: "Copy a file between two VMs.",
-    },
-    {
-      code: "mvm cp file.txt myvm:/dst/ --user admin --key mykey",
-      note: "Specify SSH user and key for the VM connection.",
     },
     {
       code: "mvm cp *.txt myvm:/dst/",
@@ -695,32 +663,6 @@ export const vmPsExplanation = {
   ],
 };
 
-export const vmExportExplanation = {
-  whatItDoes:
-    "Export a VM's configuration to a portable JSON file, including kernel, image, network, and resource settings. Useful for replicating VMs across hosts or for backup.",
-  examples: [
-    {
-      code: "mvm vm export myvm > myvm-config.json",
-      note: "Exports the VM configuration as JSON to stdout. Redirect to a file to save it.",
-    },
-  ],
-};
-
-export const vmImportExplanation = {
-  whatItDoes:
-    "Import a VM configuration from a JSON file previously exported with <code>mvm vm export</code>. Creates a new VM with the same resource, network, and image settings.",
-  examples: [
-    {
-      code: "mvm vm import myvm-config.json",
-      note: "Import VM configuration from a JSON file. The kernel and image must be available locally.",
-    },
-    {
-      code: "mvm vm import myvm-config.json --name cloned-vm",
-      note: "Override the VM name when importing.",
-    },
-  ],
-};
-
 /* ───────────────────────────────────────────────────────────────
    RESOURCE MANAGEMENT
    ─────────────────────────────────────────────────────────────── */
@@ -737,8 +679,8 @@ export const imageSections = [
     description:
       "These image types are defined in mvmctl and can be fetched with <code>mvm image pull &lt;type&gt;:&lt;version&gt;</code> (e.g. <code>mvm image pull ubuntu:24.04</code>) or the longer <code>mvm image pull &lt;type&gt; --version &lt;version&gt;</code> — or use <code>mvm image ls --remote</code> to see all available versions:",
     items: [
-      "<code>ubuntu</code> — Ubuntu LTS (tar-rootfs). Versions: 26.04, 24.04, 22.04",
-      "<code>ubuntu-minimal</code> — Ubuntu Minimal (tar-rootfs). Versions: 26.04, 24.04, 22.04",
+      "<code>ubuntu</code> — Ubuntu LTS (tar-rootfs). Versions: 26.04, 24.04, 22.04, 20.04",
+      "<code>ubuntu-minimal</code> — Ubuntu Minimal (tar-rootfs). Versions: 26.04, 24.04, 22.04, 20.04",
       "<code>debian</code> — Debian (qcow2). Versions: 13, 12, 11",
       "<code>alpine</code> — Alpine Linux (VHD). Versions: 3.x releases",
       "<code>archlinux</code> — Arch Linux (qcow2, rolling release — no version needed)",
@@ -766,9 +708,7 @@ export const imageSections = [
       "# Force re-download (overwrites cached copy)",
       "mvm image pull ubuntu:24.04 -f",
       "",
-      "# Specify architecture",
-      "mvm image pull ubuntu:24.04 --arch arm64",
-      "",
+
       "# Skip cached version listing and fetch live",
       "mvm image pull ubuntu:24.04 --no-cache",
       "",
@@ -789,8 +729,15 @@ export const imageSections = [
   {
     title: "Importing custom images",
     description:
-      "Have a custom rootfs (e.g., from Packer)? Import it into the cache:",
+      "Import a rootfs from a file or create a reusable base image from a running VM:",
     code: [
+      "# From a VM selector — create a reusable base image from a VM's rootfs",
+      "mvm image import base-img my-vm",
+      "",
+      "# From a VM selector, with a version tag",
+      "mvm image import base-img:v1.0 my-vm --version v2.0",
+      "",
+      "# From a file (qcow2, raw, tar-rootfs)",
       "mvm image import my-custom-image /path/to/my-custom-image.raw --format raw",
       "",
       "# Overwrite existing image",
@@ -809,7 +756,7 @@ export const imageSections = [
       "mvm image default my-custom-image",
     ],
     callout:
-      "Syntax: <code>mvm image import NAME SOURCE_PATH</code>. Supports raw images (.raw/.img), qcow2, and tar-rootfs archives (.tar/.tar.gz/.tar.xz/.tgz) natively — no manual conversion needed.",
+      "Syntax: <code>mvm image import NAME [SOURCE_PATH | VM_SELECTOR]</code>. When the second argument is a VM selector (name or ID), mvmctl copies that VM's rootfs to create a reusable image. Supports raw images (.raw/.img), qcow2, and tar-rootfs archives (.tar/.tar.gz/.tar.xz/.tgz) from files.",
   },
   {
     title: "Managing images",
@@ -860,17 +807,20 @@ export const kernelSections = [
       "# Enable kernel features (kvm, nftables)",
       "mvm kernel pull official:6.19.9 --features kvm,nftables",
       "",
-      "# Specify architecture and parallel build jobs",
-      "mvm kernel pull --type official --arch arm64 --jobs 8",
+      "# Specify parallel build jobs",
+      "mvm kernel pull --type official --jobs 8",
       "",
       "# Set as default after fetch",
       "mvm kernel pull --type official --default",
       "",
       "# Force clean rebuild (bypass cache)",
       "mvm kernel pull --type official --clean-build",
+      "",
+      "# Keep the build directory for debugging",
+      "mvm kernel pull --type official --keep-build-dir",
     ],
     callout:
-      "Official builds require build deps: <code>build-essential</code>, <code>flex</code>, <code>bison</code>, <code>libelf-dev</code>, <code>libssl-dev</code>, <code>libncurses-dev</code>, <code>bc</code>, <code>git</code>, <code>curl</code>, <code>pkg-config</code>, <code>dwarves</code> (for pahole). Expect 10-30 min build times. Use <code>--config PATH</code> to apply a custom kernel config fragment, <code>--arch ARCH</code> for architecture (x86_64, arm64), <code>--jobs N</code> for parallel build jobs, and <code>--default</code> to set as default after fetch.",
+      "Official builds require build deps: <code>build-essential</code>, <code>flex</code>, <code>bison</code>, <code>libelf-dev</code>, <code>libssl-dev</code>, <code>libncurses-dev</code>, <code>bc</code>, <code>git</code>, <code>curl</code>, <code>pkg-config</code>, <code>dwarves</code> (for pahole). Expect 10-30 min build times. Use <code>--config PATH</code> to apply a custom kernel config fragment, <code>--jobs N</code> for parallel build jobs, and <code>--default</code> to set as default after fetch.",
   },
   {
     title: "Managing kernels",
@@ -940,8 +890,8 @@ export const keySections = [
       "mvm key create mykey --default",
       "",
       "# Import an existing public key",
-      "mvm key add mykey ~/.ssh/id_ed25519.pub",
-      "mvm key add mykey ~/.ssh/id_ed25519.pub --force   # Overwrite if key exists",
+      "mvm key import mykey ~/.ssh/id_ed25519.pub",
+      "mvm key import mykey ~/.ssh/id_ed25519.pub --force   # Overwrite if key exists",
       "",
       "# List all cached keys",
       "mvm key ls",
@@ -955,8 +905,8 @@ export const keySections = [
       "# Clear all default keys",
       "mvm key default --clear",
       "",
-      "# Export a key to a directory (--out is required)",
-      "mvm key export mykey --out ~/.ssh/exported",
+      "# Export a key to a directory",
+      "mvm key export mykey ~/.ssh/exported",
       "",
       "# Remove a key from cache",
       "mvm key rm mykey",
@@ -1029,7 +979,7 @@ export const volumeSections = [
       "mvm volume rm data-disk -f",
     ],
     callout:
-      "A volume can only be removed if it is not attached to a running VM, unless <code>--force / -f</code> is used. Detach first with <code>mvm vm detach-volume</code>.",
+      "A volume can only be removed if it is not attached to a running VM, unless <code>--force / -f</code> is used. Detach first with <code>mvm volume detach</code>.",
   },
   {
     title: "Resizing volumes",
@@ -1053,10 +1003,10 @@ export const volumeSections = [
       "mvm vm create myvm --image ubuntu:24.04 --volume data-disk",
       "",
       "# Attach to a running VM (via Firecracker API)",
-      "mvm vm attach-volume myvm data-disk",
+      "mvm volume attach myvm data-disk",
       "",
       "# Detach from a running VM",
-      "mvm vm detach-volume myvm data-disk",
+      "mvm volume detach myvm data-disk",
     ],
     callout:
       "A volume can only be attached to one VM at a time. Attaching to a second VM automatically detaches from the first if supported by the Firecracker API.",
@@ -1141,17 +1091,16 @@ export const configSections = [
     title: "Configuration priority",
     description: "Settings resolve in this order (lower overrides higher):",
     items: [
-      "Built-in defaults from <code>constants.py</code> (compiled into the package, lowest priority)",
-      "SQLite database (<code>~/.cache/mvmctl/mvmdb.db</code>) — canonical store for asset defaults",
-      "Runtime config file (<code>~/.config/mvmctl/config.json</code>)",
-      "<code>MVM_*</code> environment variables",
+      "Built-in defaults from <code>constants.go</code> (compiled into the binary, lowest priority)",
+      "SQLite database (<code>~/.cache/mvmctl/mvmdb.db</code>) — canonical store for user overrides",
+      "<code>MVM_*</code> environment variables (e.g. <code>MVM_LOG_LEVEL</code>, <code>MVM_CACHE_DIR</code>)",
       "CLI flags (highest priority)",
     ],
   },
   {
-    title: "Config file location",
+    title: "Config and cache location",
     description:
-      "Runtime config: <code>~/.config/mvmctl/config.json</code> (override with <code>MVM_CONFIG_DIR</code>). Asset cache: <code>~/.cache/mvmctl/</code> (override with <code>MVM_CACHE_DIR</code>).",
+      "All configuration is stored in the SQLite database at <code>~/.cache/mvmctl/mvmdb.db</code> (override with <code>MVM_CACHE_DIR</code>). The config directory at <code>~/.config/mvmctl/</code> holds SSH keys (override with <code>MVM_CONFIG_DIR</code>).",
   },
   {
     title: "Config commands",
@@ -1162,7 +1111,7 @@ export const configSections = [
       "# Get a specific value",
       "mvm config get defaults.vm vcpu_count",
       "",
-      "# Set a value (persists to config.json)",
+      "# Set a value (persists to database)",
       "mvm config set defaults.vm vcpu_count 4",
       "",
       "# Reset a single value to default",
@@ -1177,15 +1126,17 @@ export const configSections = [
     code: [
       "MVM_CACHE_DIR          Override cache directory               ~/.cache/mvmctl",
       "MVM_CONFIG_DIR         Override config directory               ~/.config/mvmctl",
-      "MVM_LOG_LEVEL          Log level: DEBUG, INFO, WARNING, ERROR  WARNING (CLI flags recommended)",
-      "MVM_FIRECRACKER_BIN    Override Firecracker binary path",
-      "MVM_COMPLETE           Set by shell completion system             —",
+      "MVM_LOG_LEVEL          Log level: DEBUG, INFO, WARN, ERROR     WARN (CLI flags recommended)",
+      "MVM_WARM_POOL          Warm image pool backend (disk or tmpfs)   tmpfs (default)",
+      "MVM_TEMP_DIR           Override temp directory for microVMs       /tmp/mvmctl",
       "MVM_ESCALATED          Set by sudo wrapper to indicate             1",
       "                       privilege escalation",
       "MVM_ASSET_MIRROR       Local directory for asset mirroring",
+      "MVM_SUDO_RESTART       Set internally when re-running                     (not set)",
+      "                       <code>mvm init</code> with sudo",
     ],
     callout:
-      "The <code>--verbose</code> (sets INFO) and <code>--debug</code> (sets DEBUG) CLI flags are the <strong>recommended</strong> way to control log level — they take precedence over <code>MVM_LOG_LEVEL</code>. The env var falls back to WARNING if neither flag is set and the variable is unset.",
+      "The <code>--verbose</code> (sets INFO) and <code>--debug</code> (sets DEBUG) CLI flags are the <strong>recommended</strong> way to control log level — they take precedence over <code>MVM_LOG_LEVEL</code>. The env var falls back to WARN if neither flag is set and the variable is unset.",
   },
   {
     title: "Cache management",
@@ -1301,7 +1252,6 @@ export const dependencySections = [
         "util-linux",
         "util-linux",
       ],
-      ["parted", "Partition reading", "parted", "parted", "parted"],
       [
         "blkid",
         "Root partition/UUID detection",
@@ -1325,6 +1275,13 @@ export const dependencySections = [
       ],
       ["mkfs.ext4", "Rootfs formatting", "e2fsprogs", "e2fsprogs", "e2fsprogs"],
       [
+        "fakeroot",
+        "Preserve tarball ownership during extraction",
+        "fakeroot",
+        "fakeroot",
+        "fakeroot",
+      ],
+      [
         "unsquashfs",
         "SquashFS extraction",
         "squashfs-tools",
@@ -1332,13 +1289,6 @@ export const dependencySections = [
         "squashfs-tools",
       ],
       ["tar", "Tarball extraction", "tar", "tar", "tar"],
-      [
-        "zstd",
-        "Image compression/decompression",
-        "zstd",
-        "zstd",
-        "zstd",
-      ],
       [
         "cloud-localds",
         "Cloud-init seed ISO",
@@ -1359,19 +1309,16 @@ export const dependencySections = [
   {
     title: "libguestfs (optional — for cloud-init direct injection)",
     description:
-      "Required only if you use <code>--cloud-init-mode inject</code> and the primary loop-mount provisioner is unavailable. The <code>guestfs</code> Python module is <strong>not on PyPI</strong> — install via your package manager.",
+      "Required only if you enable the GuestFS backend via <code>mvm config set settings guestfs_enabled true</code>. The loop-mount provisioner is the default and does not require libguestfs.",
     code: [
       "# Debian/Ubuntu",
-      "sudo apt-get install libguestfs0 libguestfs-tools supermin python3-libguestfs",
+      "sudo apt-get install libguestfs0 libguestfs-tools supermin",
       "",
       "# RHEL/CentOS/Fedora",
       "sudo dnf install libguestfs libguestfs-tools supermin",
       "",
       "# Arch",
       "sudo pacman -S libguestfs supermin",
-      "",
-      "# Verify",
-      "python3 -c 'import guestfs; print(\"OK\")'",
     ],
   },
   {
@@ -1402,7 +1349,7 @@ export const dependencySections = [
     title: "Host system requirements",
     callout: undefined,
     items: [
-      "<strong>Kernel modules:</strong> <code>kvm</code>, <code>kvm_intel</code> or <code>kvm_amd</code>, <code>tun</code>, <code>bridge</code>, <code>vhost_vsock</code>",
+      "<strong>Kernel modules:</strong> <code>kvm</code>, <code>kvm_intel</code> or <code>kvm_amd</code>, <code>tun</code>, <code>bridge</code>, <code>vhost_vsock</code>, <code>nft_chain_nat</code>",
       "<strong>Hardware virtualization:</strong> VT-x (Intel) or AMD-V must be enabled in BIOS/UEFI",
       "<strong>Permissions:</strong> The user must be in the <code>mvm</code> group (created by <code>mvm host init</code>)",
     ],
@@ -1429,8 +1376,8 @@ export const cloudInitSections = [
   {
     title: "Cloud-init modes",
     items: [
-      "<code>inject</code> — injects cloud-init files directly into the rootfs via loop-mount provisioner (with libguestfs as fallback). Fastest and most reliable.",
-      "<code>net</code> — starts a temporary HTTP server (nocloud-net). The VM fetches config during boot via <code>ds=nocloud-net;s=http://GATEWAY_IP:PORT/</code>. No libguestfs needed.",
+      "<code>inject</code> — injects cloud-init files directly into the rootfs via the active provisioner backend (loop-mount by default, or guestfs if enabled). Fastest and most reliable.",
+      "<code>net</code> — starts a temporary HTTP server (nocloud-net). The VM fetches config during boot via <code>ds=nocloud;seedfrom=http://GATEWAY_IP:PORT/</code>. No libguestfs needed.",
       "<code>iso</code> — attaches a CD-ROM ISO with cloud-init files. Compatible with all images. Slower (requires <code>cloud-localds</code>).",
       "<code>off</code> (default) — disables cloud-init entirely. VM boots with no user setup.",
     ],
@@ -1453,7 +1400,7 @@ export const cloudInitSections = [
       "Each VM gets its own HTTP server on a unique port",
       "Source-based firewall rules — only the VM's IP can reach its server",
       "Servers bind to the bridge gateway IP, not <code>0.0.0.0</code>",
-      "Rules are tagged with <code># mvm-nocloud:&lt;vm_name&gt;:&lt;port&gt;</code>",
+      "Rules are tagged with <code># nocloudnet:&lt;vm_name&gt;:&lt;port&gt;</code>",
     ],
     callout: undefined,
   },
@@ -1470,10 +1417,10 @@ export const prerequisitesSubIntro =
   "mvmctl depends on a few system tools for networking, image handling, and cloud-init:";
 
 export const prerequisitesCallout =
-  "On Ubuntu 24.04+, you may need <code>--break-system-packages</code> with <code>pip install</code>. Use the binary or pipx install instead.";
+  "On Ubuntu 24.04+, install the prebuilt binary for the fastest setup. Use <code>mvm --help</code> to verify installation.";
 
 export const installIntro =
-  "Four ways to install. The <strong>prebuilt binary</strong> is the fastest — no Python runtime needed.";
+  "Two ways to install. The <strong>prebuilt binary</strong> is the fastest — no Go toolchain needed.";
 
 export const installCallout =
   'After installing, run <code>mvm --help</code> to verify. If "command not found", ensure <code>/usr/local/bin</code> is in your <code>PATH</code>.';
@@ -1518,7 +1465,7 @@ export const debugMode = {
     "MVM_LOG_LEVEL=DEBUG mvm vm create myvm --image ubuntu:24.04",
   ],
   callout:
-    "The <code>--verbose</code> flag sets INFO level; <code>--debug</code> sets DEBUG level. CLI flags take precedence over <code>MVM_LOG_LEVEL</code>. Falls back to WARNING if neither flag nor env var is set.",
+    "The <code>--verbose</code> flag sets INFO level; <code>--debug</code> sets DEBUG level. CLI flags take precedence over <code>MVM_LOG_LEVEL</code>. Falls back to WARN if neither flag nor env var is set.",
 } as const;
 
 export const helpSection = {
@@ -1557,9 +1504,9 @@ export const troubleshooting = [
     problem: "Bridge mvm-net not found",
     fix: [
       "# The bridge is created automatically. Ensure host init ran:",
-      "sudo mvm host init",
+      "mvm init",
     ],
-    note: "Re-running <code>sudo mvm host init</code> is safe (idempotent). The default bridge is named <code>mvm-net</code>.",
+    note: "Re-running <code>mvm init</code> is safe (idempotent). The default bridge is named <code>mvm-net</code>.",
   },
   {
     problem: "Image not found",
@@ -1577,8 +1524,8 @@ export const troubleshooting = [
   },
   {
     problem: "Firecracker binary not found",
-    fix: ["mvm bin pull firecracker --version v1.15", "mvm bin default <id>"],
-    note: "Always run <code>mvm bin default &lt;id&gt;</code> after fetching. The default version (e.g. v1.15) matches the installed Firecracker release — you can also pull other versions with <code>mvm bin pull firecracker --version &lt;version&gt;</code>.",
+    fix: ["mvm bin pull firecracker --version 1.15.0", "mvm bin default <id>"],
+    note: "Always run <code>mvm bin default &lt;id&gt;</code> after fetching. The default version (e.g. 1.15.0) matches the installed Firecracker release — you can also pull other versions with <code>mvm bin pull firecracker --version &lt;version&gt;</code>.",
   },
   {
     problem: "VM won't boot / SSH times out",
@@ -1597,24 +1544,28 @@ export const troubleshooting = [
       "# Port range (8000-9000) may be exhausted",
       "sudo ss -tlnp | grep -E ':(8[0-9]{3}|9[0-9]{3})'",
       "# Kill orphaned servers",
-      "pkill -f mvm-nocloud-server",
+      'pkill -f "mvm run nocloudnet serve"',
     ],
     note: "Each VM uses one port in 8000-9000. If many VMs were not cleaned up, orphaned servers may still be running.",
   },
   {
-    problem: "Mixed iptables backends (Docker conflict)",
+    problem: "Mixed firewall backends (Docker conflict)",
     fix: [
       "# Symptom: VM has IP, ping works, but TCP times out",
       "# Detection:",
-      "iptables --version",
-      "sudo iptables-legacy -L -n -v",
+      "mvm config get settings firewall_backend",
+      "sudo nft list ruleset | grep -c 'MVM-'",
       "",
-      "# Fix: clear orphaned legacy rules",
-      "sudo iptables-legacy -F",
+      "# Fix 1: sync firewall rules from database",
+      "mvm network sync",
       "",
-      "# Then re-run: sudo mvm host init",
+      "# Fix 2: reboot host (clears all firewall state cleanly)",
+      "sudo reboot",
+      "",
+      "# Fix 3: Configure Docker to use the same backend as mvmctl",
+      "# Then re-run: mvm host init",
     ],
-    note: "Docker may switch to iptables-legacy while mvmctl uses iptables-nft. Rules end up in different places. Reboot clears both backends.",
+    note: "Docker and mvmctl may use different firewall backends (nftables vs iptables-legacy). Rules go to different places. mvm network sync reloads rules from the database.",
   },
   {
     problem: "Network creation fails with permission denied",
@@ -1661,7 +1612,7 @@ export const troubleshooting = [
       "mvm volume inspect my-data",
       "",
       "# Detach from current VM first",
-      "mvm vm detach-volume <vm-name> my-data",
+      "mvm volume detach <vm-name> my-data",
       "",
       "# Force remove (use with caution)",
       "mvm volume rm my-data -f",

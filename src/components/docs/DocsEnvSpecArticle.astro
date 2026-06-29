@@ -1,0 +1,111 @@
+---
+import CodeBlock from "../ui/CodeBlock.astro";
+import { envSpecSections } from "../../content/site/env-spec";
+---
+
+<article class='article' data-anim='docs-main'>
+  <section class='doc-section' id='env-spec-overview' data-anchor-title='Env Spec Reference'>
+    <p class='kicker'>mvmctl env spec</p>
+    <h1>Environment Spec Reference</h1>
+  </section>
+
+  {
+    envSpecSections.map((section) => (
+      <section class='doc-section' id={section.id} data-anchor-title={section.title}>
+        <h2>{section.title}</h2>
+        {section.content ? <p set:html={section.content} /> : null}
+
+        {section.code ? (
+          <div class='sub-section'>
+            <div class='inline-block' data-anim='docs-card'>
+              <CodeBlock lines={section.code} compact={true} />
+            </div>
+          </div>
+        ) : null}
+
+        {section.headers && section.rows ? (
+          <div class='sub-section'>
+            <div class='table-wrap'>
+              <table>
+                <thead>
+                  <tr>
+                    {section.headers.map((h) => <th set:html={h} />)}
+                  </tr>
+                </thead>
+                <tbody>
+                  {section.rows.map((row) => (
+                    <tr>
+                      {row.map((cell) => <td set:html={cell} />)}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : null}
+
+        {section.subsections ? section.subsections.map((sub) => (
+          <div class='sub-section'>
+            <h3 id={sub.id}>{sub.title}</h3>
+            {sub.content ? <p set:html={sub.content} /> : null}
+            {sub.code ? (
+              <div class='inline-block' data-anim='docs-card'>
+                <CodeBlock lines={sub.code} compact={true} />
+              </div>
+            ) : null}
+          </div>
+        )) : null}
+      </section>
+    ))
+  }
+</article>
+
+<style>
+  .table-wrap {
+    overflow-x: auto;
+    margin: 1rem 0;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  th {
+    font-weight: 600;
+    color: var(--text);
+    background: var(--color-surface-4);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  td {
+    color: var(--text-soft);
+  }
+
+  td code {
+    white-space: nowrap;
+    font-size: 0.8rem;
+    background: transparent;
+    padding: 0;
+    color: var(--color-text-code-2);
+  }
+
+  .sub-section {
+    margin: 1.5rem 0;
+  }
+
+  .inline-block {
+    margin: 1rem 0;
+  }
+</style>

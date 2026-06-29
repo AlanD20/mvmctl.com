@@ -8,12 +8,12 @@ import { getIcon } from "../../lib/icons";
 <Section
   id="features"
   title="What mvmctl gives you"
-  description="A visual overview of the core building blocks: lifecycle control, host integration, and reproducible installs."
+  description="Container speed with VM isolation — one CLI to create, connect, snapshot, and tear down Firecracker microVMs. Single binary, zero runtime deps, all the ergonomics you expect from a modern tool."
 >
   <div class="grid" data-anim="feature-grid">
     {
       features.map((feature, index) => (
-        <article class={`card tone-${index + 1}`} data-anim="feature-card">
+        <article class={`card tone-${(index % 5) + 1}`} data-anim="feature-card">
           <div class="visual" aria-hidden="true">
             <div class="icon-badge">
               <Icon icon={getIcon(feature.icon)} size="1rem" class="icon" />
@@ -199,6 +199,78 @@ import { getIcon } from "../../lib/icons";
   }
 
   .card.tone-3:hover {
+    border-color: var(--color-accent-lilac-55);
+  }
+
+  .card.tone-4 {
+    background: linear-gradient(180deg, var(--color-tone-amber-start), var(--color-tone-amber-end));
+    color: var(--color-tone-amber-text);
+  }
+
+  .card.tone-4 .icon-badge {
+    background: var(--color-accent-amber-16);
+    border-color: var(--color-accent-amber-28);
+  }
+
+  .card.tone-4 .icon {
+    color: var(--color-accent-amber);
+    filter: drop-shadow(0 0 8px var(--color-accent-amber-24));
+  }
+
+  .card.tone-4 p,
+  .card.tone-4 ul {
+    color: var(--color-tone-amber-content);
+  }
+
+  .card.tone-4:hover {
+    border-color: var(--color-accent-amber-55);
+  }
+
+  .card.tone-5 {
+    background: linear-gradient(180deg, var(--color-tone-teal-start), var(--color-tone-teal-end));
+    color: var(--color-tone-teal-text);
+  }
+
+  .card.tone-5 .icon-badge {
+    background: var(--color-accent-teal-16);
+    border-color: var(--color-accent-teal-28);
+  }
+
+  .card.tone-5 .icon {
+    color: var(--color-accent-teal);
+    filter: drop-shadow(0 0 8px var(--color-accent-teal-24));
+  }
+
+  .card.tone-5 p,
+  .card.tone-5 ul {
+    color: var(--color-tone-teal-content);
+  }
+
+  .card.tone-5:hover {
+    border-color: var(--color-accent-teal-55);
+  }
+
+  .card.tone-6 {
+    background: linear-gradient(180deg, var(--color-tone-purple-start), var(--color-tone-purple-end));
+    color: var(--color-tone-purple-text);
+  }
+
+  .card.tone-6 .icon-badge {
+    background: var(--color-accent-lilac-16);
+    border-color: var(--color-accent-lilac-28);
+  }
+
+  .card.tone-6 .icon {
+    color: var(--color-accent-lilac);
+    filter: drop-shadow(0 0 8px var(--color-accent-lilac-24));
+  }
+
+  .card.tone-6 p,
+  .card.tone-6 ul {
+    color: var(--color-tone-purple-content);
+  }
+
+  .card.tone-6:hover {
     border-color: var(--color-accent-lilac-55);
   }
 

@@ -16,15 +16,18 @@ import {
   vmCreateExamples,
   sshExplanation,
   consoleExplanation,
+  execExplanation,
   logsExplanation,
   snapshotExplanation,
   vmRmExplanation,
   vmInspectExplanation,
   vmPsExplanation,
+  cpExplanation,
   imageSections,
   kernelSections,
   binarySections,
   keySections,
+  volumeSections,
   networkSections,
   configSections,
   dependencySections,
@@ -215,6 +218,14 @@ import { getIcon } from "../../lib/icons";
     ))}
     {consoleExplanation.callouts.map((g) => <Callout text={g} />)}
 
+    <!-- mvm exec -->
+    <h3 id='vm-lifecycle-exec'>mvm exec</h3>
+    <p>{execExplanation.whatItDoes}</p>
+    {execExplanation.examples.map((ex) => (
+      <div class='inline-block' data-anim='docs-card'><CodeBlock lines={[ex.code]} compact={true} /><Note text={ex.note} /></div>
+    ))}
+    {execExplanation.callouts.map((g) => <Callout text={g} />)}
+
     <!-- Logs -->
     <h3 id='vm-lifecycle-logs'>mvm logs</h3>
     <p>{logsExplanation.whatItDoes}</p>
@@ -231,15 +242,23 @@ import { getIcon } from "../../lib/icons";
     ))}
     {snapshotExplanation.callouts.map((g) => <Callout text={g} />)}
 
+    <!-- mvm cp -->
+    <h3 id='vm-lifecycle-cp'>mvm cp</h3>
+    <p>{cpExplanation.whatItDoes}</p>
+    {cpExplanation.examples.map((ex) => (
+      <div class='inline-block' data-anim='docs-card'><CodeBlock lines={[ex.code]} compact={true} /><Note text={ex.note} /></div>
+    ))}
+    {cpExplanation.callouts.map((g) => <Callout text={g} />)}
+
     <!-- vm ps -->
-    <h3>mvm vm ps</h3>
+    <h3 id='vm-lifecycle-ps'>mvm vm ps</h3>
     <p>{vmPsExplanation.whatItDoes}</p>
     {vmPsExplanation.examples.map((ex) => (
       <div class='inline-block' data-anim='docs-card'><CodeBlock lines={[ex.code]} compact={true} /><Note text={ex.note} /></div>
     ))}
 
     <!-- Inspect -->
-    <h3>mvm vm ls / inspect</h3>
+    <h3 id='vm-lifecycle-inspect'>mvm vm ls / inspect</h3>
     <p>{vmInspectExplanation.whatItDoes}</p>
     {vmInspectExplanation.examples.map((ex) => (
       <div class='inline-block' data-anim='docs-card'><CodeBlock lines={[ex.code]} compact={true} /><Note text={ex.note} /></div>
@@ -299,6 +318,18 @@ import { getIcon } from "../../lib/icons";
       <div class="sub-section">
         <p><strong>{s.title}</strong></p>
         {s.description ? <p set:html={s.description} /> : null}
+        {s.code ? <div class='inline-block' data-anim='docs-card'><CodeBlock lines={s.code} compact={true} /></div> : null}
+        {s.callout ? <Callout text={s.callout} /> : null}
+      </div>
+    ))}
+
+    <!-- Volumes -->
+    <h3 id='resource-management-volume'>mvm volume</h3>
+    {volumeSections.map((s) => (
+      <div class="sub-section">
+        <p><strong>{s.title}</strong></p>
+        {s.description ? <p set:html={s.description} /> : null}
+        {s.items ? <ul>{s.items.map((item) => <li set:html={item} />)}</ul> : null}
         {s.code ? <div class='inline-block' data-anim='docs-card'><CodeBlock lines={s.code} compact={true} /></div> : null}
         {s.callout ? <Callout text={s.callout} /> : null}
       </div>
