@@ -30,6 +30,7 @@ import {
   volumeSections,
   networkSections,
   configSections,
+  shellCompletionSections,
   dependencySections,
   cloudInitSections,
   prerequisitesIntro,
@@ -375,6 +376,19 @@ import { getIcon } from "../../lib/icons";
         <h3>{s.title}</h3>
         {s.description ? <p set:html={s.description} /> : null}
         {s.items ? <ol>{s.items.map((item) => <li set:html={item} />)}</ol> : null}
+        {s.code ? <div class='inline-block' data-anim='docs-card'><CodeBlock lines={s.code} compact={true} /></div> : null}
+        {s.callout ? <Callout text={s.callout} /> : null}
+      </div>
+    ))}
+  </section>
+
+  <!-- SHELL COMPLETION -->
+  <section id='shell-completion' class='doc-section' data-anchor-title='Shell Completion'>
+    <h2>Shell Completion</h2>
+    {shellCompletionSections.map((s) => (
+      <div class="sub-section">
+        <p><strong>{s.title}</strong></p>
+        {s.description ? <p set:html={s.description} /> : null}
         {s.code ? <div class='inline-block' data-anim='docs-card'><CodeBlock lines={s.code} compact={true} /></div> : null}
         {s.callout ? <Callout text={s.callout} /> : null}
       </div>

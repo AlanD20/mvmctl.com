@@ -123,6 +123,7 @@ export const docsQuickstartToc: readonly TocItem[] = [
   { id: "resource-management-volume", label: "Volumes", level: 3 },
   { id: "network-management", label: "Networks" },
   { id: "configuration", label: "Configuration" },
+  { id: "shell-completion", label: "Shell Completion" },
   { id: "dependencies", label: "Dependencies" },
   { id: "cloud-init", label: "Cloud-Init" },
   { id: "troubleshooting", label: "Troubleshooting" },
@@ -638,7 +639,7 @@ export const vmRmExplanation = {
 
 export const vmInspectExplanation = {
   whatItDoes:
-    "Shows detailed VM information: SHA256 hash ID, IP address, network, kernel path, image path, resources, creation time, and current state.",
+    "Shows detailed VM information: SHA256 hash ID, IP address, network, kernel path, image path, resources, creation time, current state, and vsock agent config (guest CID, UDS path, port, agent version, upgrade state).",
   examples: [
     { code: "mvm vm inspect myvm", note: "Show all details for a VM." },
     {
@@ -756,7 +757,7 @@ export const imageSections = [
       "mvm image default my-custom-image",
     ],
     callout:
-      "Syntax: <code>mvm image import NAME [SOURCE_PATH | VM_SELECTOR]</code>. When the second argument is a VM selector (name or ID), mvmctl copies that VM's rootfs to create a reusable image. Supports raw images (.raw/.img), qcow2, and tar-rootfs archives (.tar/.tar.gz/.tar.xz/.tgz) from files.",
+      "Syntax: <code>mvm image import NAME [SOURCE | VM_SELECTOR]</code>. When the second argument is a VM selector (name or ID), mvmctl copies that VM's rootfs to create a reusable image. Supports raw images (.raw/.img), qcow2, and tar-rootfs archives (.tar/.tar.gz/.tar.xz/.tgz) from files.",
   },
   {
     title: "Managing images",
@@ -836,15 +837,15 @@ export const kernelSections = [
   {
     title: "Kernel feature reference",
     description:
-      'The <code>--features</code> flag applies pre-defined kernel config fragments on top of the base Firecracker config. Multiple features can be combined (e.g. <code>--features kvm,nftables,tuntap</code>). Defined in <a href="https://github.com/AlanD20/mvmctl/blob/main/internal/assets/kernels.yaml">kernels.yaml</a>.',
+      'The <code>--features</code> flag applies pre-defined kernel config fragments on top of the base Firecracker config. Multiple features can be combined (e.g. <code>--features kvm,nftables,tuntap</code>). Use <code>--features all</code> or <code>--features *</code> to enable every feature in the spec. Enabled features are persisted and shown in <code>mvm kernel inspect</code>. Defined in <a href="https://github.com/AlanD20/mvmctl/blob/main/internal/assets/kernels.yaml">kernels.yaml</a>.',
     headers: ["Feature", "Description", "Key config enforced"],
     rows: [
       ["kvm", "Nested KVM virtualization", "CONFIG_KVM, CONFIG_KVM_INTEL / CONFIG_KVM_AMD"],
       ["nftables", "nftables NAT firewall backend", "CONFIG_NFT_NAT, CONFIG_NF_TABLES_INET, CONFIG_NFT_MASQ"],
       ["tuntap", "TUN/TAP device support (VM networking)", "CONFIG_TUN"],
       ["btrfs", "Btrfs filesystem support", "CONFIG_BTRFS_FS, CONFIG_BTRFS_FS_POSIX_ACL"],
-      ["containers", "Container runtime core (containerd/runc)", "CONFIG_NAMESPACES, CONFIG_CGROUPS, CONFIG_SECCOMP, CONFIG_OVERLAY_FS"],
-      ["iptables", "iptables kube-proxy backend", "CONFIG_NETFILTER, CONFIG_NETFILTER_XTABLES, CONFIG_IP_NF_NAT"],
+      ["containers", "Container runtime core (containerd/runc)", "CONFIG_NAMESPACES, CONFIG_CGROUPS, CONFIG_SECCOMP, CONFIG_OVERLAY_FS, CONFIG_IKCONFIG, CONFIG_IKCONFIG_PROC"],
+      ["iptables", "iptables kube-proxy backend", "CONFIG_NETFILTER, CONFIG_NETFILTER_XTABLES, CONFIG_IP_NF_NAT, CONFIG_NF_CONNTRACK"],
       ["cni-bridge", "CNI bridge / overlay networking", "CONFIG_BRIDGE, CONFIG_VETH, CONFIG_MACVLAN, CONFIG_IPVLAN"],
       ["ebpf", "eBPF / BTF (Cilium, bpftool)", "CONFIG_BPF, CONFIG_BPF_JIT, CONFIG_DEBUG_INFO_BTF"],
       ["storage", "Filesystems for persistent volumes", "CONFIG_EXT4_FS, CONFIG_XFS_FS, CONFIG_BTRFS_FS, CONFIG_BLK_DEV_NVME"],
@@ -1184,6 +1185,33 @@ export const configSections = [
     ],
     callout:
       "Always run <code>--dry-run</code> first. Cache pruning is one-way. <code>mvm cache clean</code> removes ALL cached assets AND host networking, but does not touch running VMs unless you use <code>--all</code>.",
+  },
+];
+
+/* ───────────────────────────────────────────────────────────────
+   SHELL COMPLETION
+   ─────────────────────────────────────────────────────────────── */
+
+export const shellCompletionSections = [
+  {
+    title: "Shell completion",
+    description:
+      'Generate tab-completion scripts for your shell. Uses Cobra\'s built-in generators — completions adapt automatically as commands change. Supports bash, zsh, fish, and PowerShell.',
+    code: [
+      "# bash — add to ~/.bashrc",
+      "source <(mvm completion bash)",
+      "",
+      "# zsh — add to ~/.zshrc (inline)",
+      "source <(mvm completion zsh)",
+      "",
+      "# zsh — or place in fpath for compinit auto-load",
+      "mvm completion zsh > \"${fpath[1]}/_mvm\"",
+      "",
+      "# fish",
+      "mvm completion fish > ~/.config/fish/completions/mvm.fish",
+    ],
+    callout:
+      'Run <code>mvm completion --help</code> for the full installation guide per shell.',
   },
 ];
 
