@@ -833,6 +833,23 @@ export const kernelSections = [
       "mvm kernel rm <id>               # Remove a cached kernel",
     ],
   },
+  {
+    title: "Kernel feature reference",
+    description:
+      'The <code>--features</code> flag applies pre-defined kernel config fragments on top of the base Firecracker config. Multiple features can be combined (e.g. <code>--features kvm,nftables,tuntap</code>). Defined in <a href="https://github.com/AlanD20/mvmctl/blob/main/internal/assets/kernels.yaml">kernels.yaml</a>.',
+    headers: ["Feature", "Description", "Key config enforced"],
+    rows: [
+      ["kvm", "Nested KVM virtualization", "CONFIG_KVM, CONFIG_KVM_INTEL / CONFIG_KVM_AMD"],
+      ["nftables", "nftables NAT firewall backend", "CONFIG_NFT_NAT, CONFIG_NF_TABLES_INET, CONFIG_NFT_MASQ"],
+      ["tuntap", "TUN/TAP device support (VM networking)", "CONFIG_TUN"],
+      ["btrfs", "Btrfs filesystem support", "CONFIG_BTRFS_FS, CONFIG_BTRFS_FS_POSIX_ACL"],
+      ["containers", "Container runtime core (containerd/runc)", "CONFIG_NAMESPACES, CONFIG_CGROUPS, CONFIG_SECCOMP, CONFIG_OVERLAY_FS"],
+      ["iptables", "iptables kube-proxy backend", "CONFIG_NETFILTER, CONFIG_NETFILTER_XTABLES, CONFIG_IP_NF_NAT"],
+      ["cni-bridge", "CNI bridge / overlay networking", "CONFIG_BRIDGE, CONFIG_VETH, CONFIG_MACVLAN, CONFIG_IPVLAN"],
+      ["ebpf", "eBPF / BTF (Cilium, bpftool)", "CONFIG_BPF, CONFIG_BPF_JIT, CONFIG_DEBUG_INFO_BTF"],
+      ["storage", "Filesystems for persistent volumes", "CONFIG_EXT4_FS, CONFIG_XFS_FS, CONFIG_BTRFS_FS, CONFIG_BLK_DEV_NVME"],
+    ],
+  },
 ];
 
 export const binarySections = [
@@ -1423,7 +1440,7 @@ export const installIntro =
   "Two ways to install. The <strong>prebuilt binary</strong> is the fastest — no Go toolchain needed.";
 
 export const installCallout =
-  'After installing, run <code>mvm --help</code> to verify. If "command not found", ensure <code>/usr/local/bin</code> is in your <code>PATH</code>.';
+  'After installing, run <code>mvm --help</code> to verify. If "command not found", ensure <code>~/.local/bin</code> is in your <code>PATH</code>.';
 
 export const hostInitIntro =
   "Before creating any VMs, your host needs one-time setup: KVM module loading, IP forwarding, the <code>mvm</code> group, sudoers permissions, and bridge networking. This is what <code>mvm init</code> handles for you.";
