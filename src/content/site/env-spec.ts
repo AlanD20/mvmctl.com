@@ -279,6 +279,7 @@ export const envSpecSections: readonly EnvSpecSection[] = [
       ["timeout", "int", "No", "0", "Command timeout in seconds. 0 = no timeout."],
       ["port", "int", "No", "0", "Vsock agent port override. 0 = default."],
       ["env", "map", "No", "{}", "Environment variable overrides for the command."],
+      ["ignore_errors", "bool", "No", "false", "Continue workflow if the command exits with non-zero code."],
     ],
     code: [
       "exec:",
@@ -305,6 +306,7 @@ export const envSpecSections: readonly EnvSpecSection[] = [
       ["cmd", "string", "No", "", "Command to execute."],
       ["timeout", "int", "No", "0", "Connection timeout in seconds."],
       ["env", "map", "No", "{}", "Environment variable overrides."],
+      ["ignore_errors", "bool", "No", "false", "Continue workflow if the command exits with non-zero code."],
     ],
   },
   {
