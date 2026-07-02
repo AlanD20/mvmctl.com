@@ -263,6 +263,7 @@ export const envSpecSections: readonly EnvSpecSection[] = [
       ["count", "int", "No", "1", "Batch count for creating multiple VMs."],
       ["atomic", "bool", "No", "false", "Atomic batch creation (all or nothing)."],
       ["vsock_port", "int", "No", "1024", "Vsock port for guest agent."],
+      ["writeback", "bool", "No", "config", "Use writeback cache mode for drives (guest fsync honored)."],
     ],
   },
   {
@@ -338,6 +339,19 @@ export const envSpecSections: readonly EnvSpecSection[] = [
     ],
   },
   {
+    id: "env-spec-removes",
+    title: "Removes",
+    type: "intro",
+    content:
+      "Steps can also declare resources to clean up after they complete using <code>removes</code>. This is useful for patterns like <code>image_import</code> where you capture a VM's rootfs and then destroy the source VM. Format is the same as <code>depends_on</code>: <code>\"type:name\"</code>.",
+    code: [
+      "image_import:",
+      "  - name: capture-base",
+      "    source: builder",
+      "    removes: [vm:builder]",
+    ],
+  },
+  {
     id: "env-spec-destroy",
     title: "Destroy Behavior",
     type: "table",
@@ -347,7 +361,7 @@ export const envSpecSections: readonly EnvSpecSection[] = [
       ["key", "Deleted — key files removed, DB record removed"],
       ["vm", "Deleted — Firecracker killed, TAP removed, lease released, volumes detached, DB record deleted"],
       ["image", "Preserved — cached asset, shared across environments"],
-      ["image_import", "Preserved — cached asset, shared across environments"],
+      ["image_import", "Deleted — image file removed, DB record deleted"],
       ["kernel", "Preserved — cached asset, shared across environments"],
       ["binary", "Preserved — cached asset, shared across environments"],
       ["ssh", "No-op — ephemeral side-effect"],

@@ -124,6 +124,7 @@ export const docsQuickstartToc: readonly TocItem[] = [
   { id: "network-management", label: "Networks" },
   { id: "configuration", label: "Configuration" },
   { id: "shell-completion", label: "Shell Completion" },
+  { id: "self-update", label: "Self-Update" },
   { id: "dependencies", label: "Dependencies" },
   { id: "cloud-init", label: "Cloud-Init" },
   { id: "troubleshooting", label: "Troubleshooting" },
