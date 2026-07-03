@@ -45,7 +45,8 @@ export const envSpecSections: readonly EnvSpecSection[] = [
     title: "Commands",
     type: "code",
     code: [
-      "mvm env apply <spec-path>     # Provision everything in the spec",
+      "mvm env apply <spec-path>                  # Provision everything in the spec",
+      "mvm env apply <spec-path> --env KEY=VAL    # With extra env vars for exec steps (repeatable)",
       "mvm env ls                    # List applied environments",
       "mvm env diff <spec-path>      # Show what would change (spec vs state)",
       "mvm env destroy <wf-id|path>  # Tear down exactly what was provisioned",
