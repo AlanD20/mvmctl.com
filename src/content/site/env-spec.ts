@@ -58,6 +58,7 @@ export const envSpecSections: readonly EnvSpecSection[] = [
     type: "code",
     code: [
       "version: \"1\"",
+      "ephemeral: false   # optional, default false",
       "",
       "network:",
       "  - name: <step-name>",
@@ -362,7 +363,7 @@ export const envSpecSections: readonly EnvSpecSection[] = [
       ["key", "Deleted — key files removed, DB record removed"],
       ["vm", "Deleted — Firecracker killed, TAP removed, lease released, volumes detached, DB record deleted"],
       ["image", "Preserved — cached asset, shared across environments"],
-      ["image_import", "Deleted — image file removed, DB record deleted"],
+      ["image_import", "Preserved — image file stays in cache, DB record kept"],
       ["kernel", "Preserved — cached asset, shared across environments"],
       ["binary", "Preserved — cached asset, shared across environments"],
       ["ssh", "No-op — ephemeral side-effect"],
