@@ -848,9 +848,11 @@ export const kernelSections = [
       ["btrfs", "Btrfs filesystem support", "CONFIG_BTRFS_FS, CONFIG_BTRFS_FS_POSIX_ACL"],
       ["containers", "Container runtime core (containerd/runc)", "CONFIG_NAMESPACES, CONFIG_CGROUPS, CONFIG_SECCOMP, CONFIG_OVERLAY_FS, CONFIG_IKCONFIG, CONFIG_IKCONFIG_PROC"],
       ["iptables", "iptables kube-proxy backend", "CONFIG_NETFILTER, CONFIG_NETFILTER_XTABLES, CONFIG_IP_NF_NAT, CONFIG_NF_CONNTRACK, CONFIG_IP_SET, CONFIG_NETFILTER_XT_SET, CONFIG_NETFILTER_XT_MARK, CONFIG_NETFILTER_XT_TARGET_CT"],
-      ["cni-bridge", "CNI bridge / overlay networking", "CONFIG_BRIDGE, CONFIG_VETH, CONFIG_MACVLAN, CONFIG_IPVLAN, CONFIG_VXLAN"],
-      ["ebpf", "eBPF / BTF (Cilium, bpftool)", "CONFIG_BPF, CONFIG_BPF_JIT, CONFIG_DEBUG_INFO_BTF"],
+      ["cni-bridge", "CNI bridge / overlay networking", "CONFIG_BRIDGE, CONFIG_VETH, CONFIG_MACVLAN, CONFIG_IPVLAN, CONFIG_VXLAN, CONFIG_GENEVE, CONFIG_FIB_RULES"],
+      ["ebpf", "eBPF / BTF (Cilium, bpftool)", "CONFIG_BPF, CONFIG_BPF_JIT, CONFIG_DEBUG_INFO_BTF, CONFIG_BPF_EVENTS, CONFIG_PERF_EVENTS, CONFIG_NET_CLS_BPF, CONFIG_NET_CLS_ACT, CONFIG_NET_SCH_INGRESS"],
       ["storage", "Filesystems for persistent volumes", "CONFIG_EXT4_FS, CONFIG_XFS_FS, CONFIG_BTRFS_FS, CONFIG_BLK_DEV_NVME"],
+      ["fqdn-proxy", "L7 / FQDN policy proxy (TPROXY, xt_socket)", "CONFIG_NETFILTER_XT_TARGET_TPROXY, CONFIG_NETFILTER_XT_TARGET_CT, CONFIG_NETFILTER_XT_MATCH_SOCKET"],
+      ["bandwidth", "Bandwidth manager (FQ packet scheduler)", "CONFIG_NET_SCH_FQ"],
     ],
   },
 ];
