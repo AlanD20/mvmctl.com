@@ -853,6 +853,10 @@ export const kernelSections = [
       ["storage", "Filesystems for persistent volumes", "CONFIG_EXT4_FS, CONFIG_XFS_FS, CONFIG_BTRFS_FS, CONFIG_BLK_DEV_NVME"],
       ["fqdn-proxy", "L7 / FQDN policy proxy (TPROXY, xt_socket)", "CONFIG_NETFILTER_XT_TARGET_TPROXY, CONFIG_NETFILTER_XT_TARGET_CT, CONFIG_NETFILTER_XT_MATCH_SOCKET"],
       ["bandwidth", "Bandwidth manager (FQ packet scheduler)", "CONFIG_NET_SCH_FQ"],
+      ["iscsi-target", "iSCSI target mode (Longhorn block storage)", "CONFIG_TARGET_CORE, CONFIG_ISCSI_TARGET, CONFIG_ISCSI_TCP, CONFIG_BLK_DEV_SD"],
+      ["ebpf-cni", "eBPF-based CNI networking (Cilium, Hubble)", "CONFIG_BPF, CONFIG_DEBUG_INFO_BTF, CONFIG_VXLAN, CONFIG_GENEVE, CONFIG_IP_SET, CONFIG_NETFILTER_XT_TARGET_TPROXY, CONFIG_NETFILTER_XT_MATCH_SOCKET"],
+      ["iscsi-target", "iSCSI target mode (Longhorn block storage)", "CONFIG_TARGET_CORE, CONFIG_ISCSI_TARGET, CONFIG_ISCSI_TCP, CONFIG_BLK_DEV_SD"],
+      ["ebpf-cni", "eBPF-based CNI networking (Cilium, Hubble)", "CONFIG_BPF, CONFIG_DEBUG_INFO_BTF, CONFIG_VXLAN, CONFIG_GENEVE, CONFIG_IP_SET, CONFIG_NETFILTER_XT_TARGET_TPROXY, CONFIG_NETFILTER_XT_MATCH_SOCKET"],
     ],
   },
 ];

@@ -45,7 +45,7 @@ export const envSpecSections: readonly EnvSpecSection[] = [
     type: "code",
     code: [
       "version: \"1\"",
-      "ephemeral: false",
+      "ephemeral: false   # auto-destroy after apply (success or failure)",
       "",
       "network:",
       "  <name>:               # map key = step name",
