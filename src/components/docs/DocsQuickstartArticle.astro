@@ -150,9 +150,6 @@ import { getIcon } from "../../lib/icons";
             <CodeBlock lines={section.code} compact={true} />
           </div>
         ) : null}
-        {section.items ? (
-          <ul>{section.items.map((item) => <li set:html={item} />)}</ul>
-        ) : null}
         {section.callout ? <Callout text={section.callout} /> : null}
       </div>
     ))}
@@ -236,7 +233,7 @@ import { getIcon } from "../../lib/icons";
     {logsExplanation.callouts.map((g) => <Callout text={g} />)}
 
     <!-- Snapshots -->
-    <h3 id='vm-lifecycle-snapshot'>mvm vm snapshot / load</h3>
+    <h3 id='vm-lifecycle-snapshot'>mvm snapshot</h3>
     <p>{snapshotExplanation.whatItDoes}</p>
     {snapshotExplanation.examples.map((ex) => (
       <div class='inline-block' data-anim='docs-card'><CodeBlock lines={[ex.code]} compact={true} /><Note text={ex.note} /></div>
@@ -344,7 +341,6 @@ import { getIcon } from "../../lib/icons";
       <div class="sub-section">
         <p><strong>{s.title}</strong></p>
         {s.description ? <p set:html={s.description} /> : null}
-        {s.items ? <ul>{s.items.map((item) => <li set:html={item} />)}</ul> : null}
         {s.code ? <div class='inline-block' data-anim='docs-card'><CodeBlock lines={s.code} compact={true} /></div> : null}
         {s.callout ? <Callout text={s.callout} /> : null}
       </div>
@@ -362,7 +358,6 @@ import { getIcon } from "../../lib/icons";
         {s.description ? <p set:html={s.description} /> : null}
         {s.code ? <div class='inline-block' data-anim='docs-card'><CodeBlock lines={s.code} compact={true} /></div> : null}
         {s.callout ? <Callout text={s.callout} /> : null}
-        {s.note ? <Note text={s.note} /> : null}
       </div>
     ))}
   </section>
@@ -400,12 +395,10 @@ import { getIcon } from "../../lib/icons";
     <h2>Self-Update</h2>
     <div class="sub-section">
       <p><strong>mvm self-update</strong></p>
-      <p>Check for and apply binary updates from GitHub Releases. Downloads the latest release matching your architecture and verifies the SHA256 checksum before swapping.</p>
+      <p>Check GitHub Releases for updates. The installed system binary cannot replace itself through ordinary self-update; install an approved release with the administrator-owned <code>host install-system</code> procedure.</p>
       <div class='inline-block' data-anim='docs-card'>
         <CodeBlock lines={[
-          "mvm self-update              # Check + apply if newer",
           "mvm self-update check        # Check only, print available version",
-          "mvm self-update apply        # Force apply (even if same version)",
         ]} compact={true} />
       </div>
     </div>
@@ -419,18 +412,7 @@ import { getIcon } from "../../lib/icons";
     {dependencySections.map((s) => (
       <div class="sub-section">
         <h3>{s.title}</h3>
-        {s.description ? <p set:html={s.description} /> : null}
-        {s.headers && s.rows ? (
-          <div class="table-wrap">
-            <table class="dep-table">
-              <thead><tr>{s.headers.map((h) => <th>{h}</th>)}</tr></thead>
-              <tbody>{s.rows.map((row) => <tr>{row.map((cell) => <td><code>{cell}</code></td>)}</tr>)}</tbody>
-            </table>
-          </div>
-        ) : null}
-        {s.code ? <div class='inline-block' data-anim='docs-card'><CodeBlock lines={s.code} compact={true} /></div> : null}
-        {s.items ? <ul>{s.items.map((item) => <li set:html={item} />)}</ul> : null}
-        {s.callout ? <Callout text={s.callout} /> : null}
+        <p set:html={s.description} />
       </div>
     ))}
   </section>

@@ -3,37 +3,17 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import DocsNavLeft from "../../components/docs/DocsNavLeft.astro";
 import DocsOnThisPage from "../../components/docs/DocsOnThisPage.astro";
 import DocsEnvSpecArticle from "../../components/docs/DocsEnvSpecArticle.astro";
-import { envSpecNav } from "../../content/site/env-spec";
+import { envSpecNav, envSpecSections } from "../../content/site/env-spec";
 ---
 
 <BaseLayout
   title="mvmctl env spec · Environment workflow YAML reference"
-  description="Complete reference for the mvm env workflow engine YAML spec format — network, key, image, kernel, binary, vm, exec, ssh, and copy step types."
+  description="The mvm env YAML reference for 0.3.0: workflow dependencies, resource steps, guest commands, and cleanup behavior."
 >
   <div class="docs-shell">
     <DocsNavLeft items={envSpecNav} />
     <DocsEnvSpecArticle />
-    <DocsOnThisPage toc={[
-      { id: "env-spec-overview", label: "Overview" },
-      { id: "env-spec-commands", label: "Commands" },
-      { id: "env-spec-structure", label: "Spec Structure" },
-      { id: "env-spec-network", label: "Network" },
-      { id: "env-spec-key", label: "Key" },
-      { id: "env-spec-image", label: "Image" },
-      { id: "env-spec-kernel", label: "Kernel" },
-      { id: "env-spec-binary", label: "Binary" },
-      { id: "env-spec-vm", label: "VM" },
-      { id: "env-spec-exec", label: "Exec" },
-      { id: "env-spec-ssh", label: "SSH" },
-      { id: "env-spec-copy", label: "Copy" },
-      { id: "env-spec-dependencies", label: "Dependencies" },
-      { id: "env-spec-destroy", label: "Destroy Behavior" },
-      { id: "env-spec-example", label: "Full Example" },
-      { id: "env-spec-realworld", label: "Real-World Examples" },
-      { id: "env-spec-realworld-rc", label: "RC Test Environment", level: 3 },
-      { id: "env-spec-realworld-builder", label: "Package Builder", level: 3 },
-      { id: "env-spec-state", label: "State File" },
-    ]} />
+    <DocsOnThisPage toc={envSpecSections.map(({ id, title }) => ({ id, label: title }))} />
   </div>
 </BaseLayout>
 

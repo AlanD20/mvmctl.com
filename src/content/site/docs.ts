@@ -31,9 +31,9 @@ export type TocItem = {
    ─────────────────────────────────────────────────────────────── */
 
 export const docsMeta = {
-  title: "mvmctl documentation",
+  title: "mvmctl 0.3.0 documentation",
   intro:
-    "Everything you need to install, configure, and manage microVMs with mvmctl. Covers every command with explanations, callouts, and real-world examples.",
+    "Install mvmctl, create your first microVM, and manage networks, storage and environments. These docs cover the upcoming 0.3.0 release, which requires a clean installation and fresh managed state.",
 } as const;
 
 export const docsNav: readonly DocsNavItem[] = [
@@ -135,11 +135,12 @@ export const docsQuickstartToc: readonly TocItem[] = [
    ─────────────────────────────────────────────────────────────── */
 
 export const prerequisites = [
-  "Linux host (x86_64 or aarch64) with KVM support — check with <code>ls /dev/kvm</code>",
+  "Linux host with KVM support — check with <code>ls /dev/kvm</code>. Runtime testing for 0.3.0 covers x86_64; aarch64 is not yet qualified.",
   "Access to <code>/dev/kvm</code> and membership in the <code>kvm</code> group",
   "Go 1.26.3+ to build from source (optional — binary install does not require Go)",
-  "Root access once for host setup (<code>mvm init</code> handles this for you)",
-  "<code>nftables</code> for NAT and firewall rules (default backend)",
+  "Administrator access for system installation, host setup and binary upgrades",
+  "Kernel nftables support for both inet and bridge families; the nft command is not required",
+  "The matching Firecracker/Jailer 1.17.0 pair",
 ] as const;
 
 export const distroPackages = {
@@ -147,13 +148,13 @@ export const distroPackages = {
     title: "Ubuntu / Debian packages",
     id: "ubuntu-packages",
     command: [
-      "sudo apt-get install -y iproute2 iptables nftables qemu-utils e2fsprogs util-linux procps kmod openssh-client tar sudo passwd fakeroot",
+      "sudo apt-get install -y iproute2 qemu-utils e2fsprogs util-linux procps kmod openssh-client tar sudo passwd fakeroot",
     ],
   },
   arch: {
     title: "Arch packages",
     id: "arch-packages",
-    command: ["sudo pacman -S --needed iproute2 iptables nftables qemu-img e2fsprogs util-linux procps-ng kmod openssh tar sudo shadow fakeroot"],
+    command: ["sudo pacman -S --needed iproute2 qemu-img e2fsprogs util-linux procps-ng kmod openssh tar sudo shadow fakeroot"],
   },
 } as const;
 
@@ -165,21 +166,19 @@ export const installMethods: readonly CommandBlock[] = [
   {
     id: "binary",
     title: "Binary",
-    description: "No Go toolchain required. Best for production machines.",
+    description: "No Go toolchain required. Use this path after v0.3.0 is published; until then, build the release branch from source.",
     icon: "download",
     code: [
-      "# Get the latest binary from the Releases page",
-      "# https://github.com/AlanD20/mvmctl/releases",
-      "mkdir -p ~/.local/bin",
-      "curl -L -o ~/.local/bin/mvm https://github.com/AlanD20/mvmctl/releases/latest/download/mvm",
-      "chmod +x ~/.local/bin/mvm",
-      "mvm --help",
+      "curl -fL -o ./mvm https://github.com/AlanD20/mvmctl/releases/download/v0.3.0/mvm",
+      "chmod +x ./mvm",
+      "sudo ./mvm host install-system",
+      "/usr/local/bin/mvm --help",
     ],
   },
   {
     id: "aur",
     title: "AUR (Arch Linux)",
-    description: "Available as mvmctl-bin for Arch Linux users.",
+    description: "Before using the package, confirm it provides 0.3.0. Older packages do not follow this guide's installation contract.",
     icon: "download",
     code: [
       "yay -S mvmctl-bin",
@@ -192,10 +191,11 @@ export const installMethods: readonly CommandBlock[] = [
     description: "For local development or contributing. Requires Go 1.26.3+.",
     icon: "fileCode",
     code: [
-      "git clone https://github.com/AlanD20/mvmctl",
+      "git clone --branch 0.3.0-release https://github.com/AlanD20/mvmctl",
       "cd mvmctl",
-      "./scripts/build.sh release --output ~/.local/bin/mvm",
-      "mvm --help",
+      "./scripts/build.sh release --version 0.3.0-rc.1",
+      "sudo ./dist/mvm host install-system",
+      "/usr/local/bin/mvm --help",
     ],
   },
 ] as const;
@@ -206,62 +206,27 @@ export const installMethods: readonly CommandBlock[] = [
 
 export const hostInitSections = [
   {
-    title: "Interactive setup (recommended)",
+    title: "Enroll your operator",
     description:
-      "Run <code>mvm init</code> — it walks you through host config (sudo/group/sudoers), Firecracker binary download, cache initialization, service binary extraction, and default asset setup. Escalates to root automatically when needed.",
-    code: ["mvm init"],
+      "After installing the system binary, run host setup from your normal user account. Log out and back in if setup changes group membership.",
+    code: ["sudo /usr/local/bin/mvm host init"],
     callout:
-      "When prompted to log out/in, <strong>do it</strong>. Group membership changes only apply to new login sessions. If you skip this, subsequent commands will fail with permission errors. Alternatively run <code>newgrp mvm</code> to avoid logging out.",
+      "When running directly as root, add <code>--operator</code> with the non-root account that will manage VMs. Do not run daily VM commands as root.",
   },
   {
-    title: "One-time host setup",
+    title: "Initialize your workspace",
     description:
-      "Run <code>mvm init</code> to perform the one-time machine setup. It is idempotent — safe to re-run.",
-    code: ["mvm init"],
+      "Prepare your operator cache, default network and the matching Firecracker/Jailer release.",
+    code: ["mvm init --skip-host --non-interactive --binary-version 1.17.0"],
     callout:
-      "<code>mvm init</code> escalates to root when needed. It creates the <code>mvm</code> system group, writes sudoers drop-in files, loads KVM kernel modules, enables IP forwarding, and sets up bridge/TAP networking. Normal <code>mvm</code> commands do not need sudo after this runs.",
+      "Use fresh managed state for 0.3.0. Existing VM databases, runtime records and snapshots are not migrated.",
   },
   {
-    title: "What host init actually does",
-    items: [
-      "Loads <code>kvm</code>, <code>kvm_intel</code>/<code>kvm_amd</code> kernel modules (networking modules <code>tun</code> and <code>bridge</code> are loaded as needed)",
-      "Enables <code>net.ipv4.ip_forward</code> for NAT networking",
-      "Creates the <code>mvm</code> system group and adds your user to it",
-      "Writes a sudoers drop-in to <code>/etc/sudoers.d/mvm</code> so mvmctl can run privileged commands (ip, iptables, sysctl, modprobe) without password prompts",
-      "Sets up the <code>mvm-net</code> bridge and firewall chains for NAT",
-    ],
-  },
-  {
-    title: "mvm init flags",
-    description: "Control the interactive wizard behavior with these flags:",
-    code: [
-      "# Non-interactive mode — use defaults, skip all prompts",
-      "mvm init --non-interactive",
-      "",
-      "# Skip host init step (useful if host is already configured)",
-      "mvm init --skip-host",
-      "",
-      "# Skip default network creation",
-      "mvm init --skip-network",
-      "",
-      "# Combine flags for fully automated setup",
-      "mvm init --non-interactive --skip-host",
-    ],
-    callout:       "Combine <code>--skip-host</code> and <code>--skip-network</code> to skip both host setup and default network creation. Useful when re-running <code>mvm init</code> to only pull new assets.",
-  },
-  {
-    title: "Other host commands",
-    code: [
-      "mvm host status   # Show current host configuration state vs expected — useful for verifying setup",
-      "mvm host status --json   # Show current host configuration state as JSON",
-      "mvm host info     # Show host hardware, limits, and VM capacity projection",
-      "mvm host info --refresh  # Re-detect hardware and limits before displaying",
-      "mvm host info --json     # Output as JSON",
-      "mvm host clean    # Remove networking config only (bridges, TAPs, iptables rules)",
-      "mvm host reset    # Full rollback — networking, sysctl, sudoers, and the mvm group",
-    ],
+    title: "Check host readiness",
+    description: "Inspect host setup and available capacity before creating VMs.",
+    code: ["mvm host status", "mvm host info"],
     callout:
-      "<code>mvm host reset</code> is destructive. It removes the mvm group, meaning anyone in it loses mvm access. Only use if you are permanently uninstalling mvmctl.",
+      "Host cleanup and reset are administrator operations. They refuse active or uncertain managed state; they are not a shortcut for deleting an older installation.",
   },
 ];
 
@@ -278,7 +243,7 @@ export const firstVmSections = [
       "# 1. Generate an SSH key for VM access",
       "mvm key create my-key --default",
       "",
-      "# 2. Download Firecracker-optimized kernel (~30s)",
+      "# 2. Download a Firecracker-optimized kernel",
       "mvm kernel pull --type firecracker",
       "",
       "# 3. Download an Ubuntu 24.04 image",
@@ -287,8 +252,8 @@ export const firstVmSections = [
       "# 4. Create and start the VM",
       "mvm vm create myvm --image ubuntu:24.04",
       "",
-      "# 5. Wait for cloud-init to finish (~30-60s)",
-      "mvm logs myvm --follow",
+      "# 5. Run a command through the guest agent",
+      "mvm exec myvm -- uname -a",
       "",
       "# 6. SSH into the VM",
       "mvm ssh myvm",
@@ -300,9 +265,9 @@ export const firstVmSections = [
       "mvm vm rm myvm -f",
     ],
     callouts: [
-      "Cloud-init takes 30-60 seconds on first boot. The VM <strong>is running</strong> during this time — it is just running startup scripts. Watch progress with <code>mvm logs myvm --follow</code>.",
+      "Complete host setup and workspace initialization first. Cloud-init is off by default; enable a mode explicitly when your workload needs it.",
       "You need at least one SSH key set up before creating a VM. Use <code>mvm key create NAME --default</code> or pass <code>--ssh-key</code> explicitly when creating a VM.",
-      "Images are several hundred MB. Ensure at least 2 GB free in <code>~/.cache/mvmctl/</code>.",
+      "Allow disk space for the downloaded image, the VM root disk, and temporary provisioning files.",
     ],
   },
 ];
@@ -311,17 +276,13 @@ export const firstVmSections = [
    VM CREATE
    ─────────────────────────────────────────────────────────────── */
 
-const NET_NAME = "net";
-const NET_SUBNET = "172.27.0.0/24";
-const NET_GATEWAY = "172.27.0.1";
-
 export const vmCreateExplanation = {
   whatItDoes:
-    'Creates and immediately starts a Firecracker microVM. Under the hood mvmctl: (1) copies the root filesystem image to a per-VM directory, (2) generates a Firecracker JSON boot config, (3) picks an available IP from the network lease pool, (4) starts a temporary HTTP server for cloud-init, (5) launches Firecracker (+ jailer). There is no separate "start" command — the VM boots right away.',
+    'Creates and starts a Firecracker microVM with protected disk backing and an isolated process. Use mvm vm stop and mvm vm start to manage it afterward.',
   callouts: [
-    'Firecracker is not a hypervisor you can "pause" like VirtualBox. <code>mvm vm create</code> starts the VM <strong>immediately</strong>.',
+    '<code>mvm vm create</code> starts the VM immediately. Pause and resume commands are also available.',
     "Each VM gets an IP from the lease pool. The default network (<code>net</code>) uses <code>172.27.0.0/24</code>. Leases are reused when VMs are removed.",
-    "The <code>--disk-size</code> flag resizes via <code>qemu-img resize</code>. It only grows the image — shrinking requires manual intervention.",
+    "The <code>--disk-size</code> flag sets the initial root disk size. It must meet the image minimum; shrinking is not supported.",
     "If you do not set <code>--ssh-key</code> and have no default key, the VM will boot but you cannot SSH in. Use <code>mvm console</code> for serial access instead.",
   ],
 };
@@ -332,7 +293,7 @@ export const vmCreateFlagLines: readonly string[] = [
   "--kernel KERNEL            Kernel short ID or path to vmlinux. Auto-detected from defaults if omitted.",
   "--vcpu N                   Number of vCPUs (default: from user config).",
   "--mem, --memory N          Memory in MiB or GiB (e.g. 512M, 1G) (default: from user config).",
-  "--disk-size, -s SIZE       Rootfs disk size (e.g. 1G, 512M or 1024M). Default: from config.",
+  "--disk-size, -s SIZE       Root disk size (e.g. 10G). Default: image minimum.",
   "--ssh-key KEY              SSH public key name (from key cache) or file path.",
   "--user USER                Default SSH user for cloud-init. Default: from config.",
   "--ip ADDRESS               Static guest IP, e.g. 172.27.0.42. Default: auto-assigned.",
@@ -340,8 +301,8 @@ export const vmCreateFlagLines: readonly string[] = [
   "--mac ADDRESS              Custom MAC address. Auto-generated if omitted.",
   "--cloud-init-mode MODE     One of: off (default), inject, iso, net.",
   "--cloudinit-config PATH    Path to custom cloud-init configuration file.",
-  "--nocloud-net-port PORT    Port for nocloud-net HTTP server (0=auto-assign).",
-  "--no-pci                   Disable PCI transport (default: enabled). Required for hotplug support.",
+  "--no-network               Create without guest networking; host exec and copy remain available.",
+  "--no-pci                   Disable PCI transport; hotplug requires PCI to remain enabled.",
   "--nested-virt              Enable nested virtualization (requires PCI, adds kvm-intel/amd.nested=1 boot arg)",
   "--cpu-template PATH        Path to CPU template JSON file (merged with nested-virt config if both set)",
   "--console                  Enable serial console relay (default: disabled).",
@@ -375,7 +336,7 @@ export const vmCreateExamples = [
       "mvm vm create \\",
       "  build-vm \\",
       "  --image ubuntu:24.04 \\",
-      "  --vcpus 4 \\",
+      "  --vcpu 4 \\",
       "  --mem 8192 \\",
       "  --disk-size 50G",
     ],
@@ -408,7 +369,7 @@ export const vmCreateExamples = [
     title: "Alpine — lightweight and fast",
     code: [
       "mvm image pull alpine --version 3.21",
-      "mvm vm create tiny-vm --image alpine:3.21 --vcpus 1 --mem 256",
+      "mvm vm create tiny-vm --image alpine:3.21 --vcpu 1 --mem 256",
     ],
     note: "Alpine boots in seconds. Great for testing or ephemeral workloads.",
   },
@@ -425,21 +386,21 @@ export const vmCreateExamples = [
       "EOF",
       "",
       "# Pass it to the VM",
-      "mvm vm create myvm --image ubuntu:24.04 --cloudinit-config my-user-data.yaml",
+      "mvm vm create myvm --image ubuntu:24.04 --cloud-init-mode inject --cloudinit-config my-user-data.yaml",
     ],
     note: "Custom user-data merges with mvmctl's default cloud-init. You can add packages, write files, run commands, etc.",
   },
   {
     title: "Batch creation with atomic rollback",
     code: [
-      "# Create 5 VMs atomically — if any fails, all are removed",
+      "# Attempt rollback of created VMs if a creation fails",
       "mvm vm create cluster --image ubuntu:24.04 --count 5 --atomic",
       "",
       "# With a volume attached to a single VM",
       "mvm volume create shared-data 10G",
       "mvm vm create worker --image ubuntu:24.04 --volume shared-data",
     ],
-    note: "The <code>--count</code> flag auto-generates names by appending <code>-1</code>, <code>-2</code>, etc. The <code>--atomic</code> flag ensures no partial creation — all created VMs are rolled back if any single VM fails. <code>--count</code> and <code>--volume</code> are mutually exclusive (a volume can only be attached to one VM). Implicit IP and MAC assignment is used (no <code>--ip</code> or <code>--mac</code> with <code>--count &gt; 1</code>).",
+    note: "<code>--count</code> generates numbered VM names. Add <code>--atomic</code> to attempt cleanup if creation fails; cleanup errors are reported and may require follow-up. Batch creation does not accept <code>--volume</code>, <code>--ip</code>, or <code>--mac</code>.",
   },
 ];
 
@@ -451,7 +412,7 @@ export const sshExplanation = {
   whatItDoes:
     "SSH into a running VM by name. Resolves the VM name to its IP address from the lease database and connects with the cached SSH key.",
   callouts: [
-    "SSH only works after cloud-init finishes. On first boot, cloud-init generates SSH host keys and configures the default user. This takes 30-60 seconds.",
+    "SSH needs guest networking, a running SSH server, and an authorized key. If you enabled cloud-init, wait for its guest setup to finish.",
     "mvmctl automatically passes the correct SSH key and user. You do not need <code>ssh -i</code> commands. But you do need a key set up beforehand.",
     "Works on custom networks too — mvmctl looks up the correct IP from the lease database.",
   ],
@@ -481,12 +442,11 @@ export const sshExplanation = {
 
 export const consoleExplanation = {
   whatItDoes:
-    "Attaches a PTY-based serial console to a VM using a vsock relay. No network stack required. Works even if the VM has no IP or cloud-init failed.",
+    "Attaches to the VM's serial console through a host PTY relay. It does not require guest networking or the vsock agent.",
   callouts: [
     "Press <code>Ctrl+X</code> then <code>D</code> to detach from the console session. This does <strong>not</strong> shut down the VM.",
-    "The console relay runs as a background process. If it crashes, use <code>mvm console --kill</code> then re-attach.",
+    "<code>mvm console myvm --kill</code> stops only the relay, not the VM. Create the VM with <code>--console</code> to enable serial access.",
     "Use <code>--state</code> to check if the relay is running without attaching. Handy for scripting.",
-    "Requires the <code>vhost_vsock</code> kernel module. Check with <code>lsmod | grep vsock</code>.",
   ],
   examples: [
     {
@@ -509,7 +469,7 @@ export const execExplanation = {
     "Use <code>--user</code> to run as a specific user (default: root).",
     "Use <code>--timeout</code> to set the vsock agent connect/probe timeout in seconds.",
     "Use <code>--no-sync</code> to skip the final <code>sync()</code> (faster but risks data loss on VM stop).",
-    "The VM must have the vsock agent running. This is true for any VM created with mvmctl.",
+    "The guest agent must be running and reachable; a booting or unhealthy guest may not be ready yet.",
   ],
   examples: [
     {
@@ -565,8 +525,8 @@ export const snapshotExplanation = {
     "Create and restore VM snapshots — save memory and disk state to disk, then restore later. Useful for preserving a long-running VM state before rebooting the host.",
   callouts: [
     "Snapshots can be large — memory + disk. A VM with 2 GiB RAM creates a ~2 GiB memory file.",
-    "The VM continues running while being snapshotted. The snapshot is crash-consistent (like pulling the power cord).",
-    "Snapshots are stored in <code>~/.cache/mvmctl/snapshots/&lt;id&gt;/</code>.",
+    "Capture pauses the VM while saving memory, its root disk, and attached data volumes, then restores its prior running or paused state. Shared writable volumes prevent capture.",
+    "Snapshot artifacts are root-controlled. Use <code>mvm snapshot rm</code> to remove them rather than deleting files directly. Quiesce applications first if you need application-level consistency.",
   ],
   examples: [
     {
@@ -596,7 +556,7 @@ export const cpExplanation = {
   whatItDoes:
     "Copy files between the host and microVMs using a binary frame protocol over vsock. The vsock agent inside the VM handles file transfer operations.",
   callouts: [
-    "Uses a binary frame protocol over vsock — no SSH or tar dependency needed inside the VM. Transfers are encrypted by the host-guest isolation boundary.",
+    "Uses a binary frame protocol over vsock, not SSH. The host-guest isolation boundary is not transport encryption.",
     "Path format: use <code>vm_name:/remote/path</code> for VM paths, plain <code>/local/path</code> for local paths.",
     "Multiple sources are allowed for host → VM copies.",
   ],
@@ -782,20 +742,20 @@ export const kernelSections = [
   {
     title: "Firecracker-optimized kernel (recommended)",
     description:
-      "A pre-built kernel from the Firecracker CI pipeline. Minimally configured for fast boot — no PCI, no ACPI. Downloads in ~30 seconds.",
+      "A pre-built guest kernel from the Firecracker CI pipeline. Use an official custom build when you need additional guest features.",
     code: [
       "mvm kernel pull --type firecracker",
       "# Downloads the latest Firecracker-optimized kernel",
     ],
     callout:
-      "This is the default. Use this unless you need custom kernel modules or a specific version. Boots in under 200ms.",
+      "This is the default kernel type. Feature fragments apply to official source builds, not pre-built kernels.",
   },
   {
     title: "Official upstream kernel (custom build)",
     description:
       "Downloads the official Linux kernel source (default: 6.19.9) and compiles it with a Firecracker-compatible config. Takes 10-30 minutes.",
     code: [
-      "# Build latest upstream kernel",
+      "# Build the configured default upstream version",
       "mvm kernel pull --type official",
       "",
       "# Using type:version shorthand",
@@ -839,7 +799,7 @@ export const kernelSections = [
   {
     title: "Kernel feature reference",
     description:
-      'The <code>--features</code> flag applies pre-defined kernel config fragments on top of the base Firecracker config. Multiple features can be combined (e.g. <code>--features kvm,nftables,tuntap</code>). Use <code>--features all</code> or <code>--features *</code> to enable every feature in the spec. Enabled features are persisted and shown in <code>mvm kernel inspect</code>. Defined in <a href="https://github.com/AlanD20/mvmctl/blob/main/internal/assets/kernels.yaml">kernels.yaml</a>.',
+      'The <code>--features</code> flag adds kernel config fragments to official source builds. Combine features with commas, or use <code>--features all</code>. Inspect enabled features with <code>mvm kernel inspect</code>. See <a href="https://github.com/AlanD20/mvmctl/blob/0.3.0-release/internal/assets/kernels.yaml">kernels.yaml</a> for the complete configuration.',
     headers: ["Feature", "Description", "Key config enforced"],
     rows: [
       ["kvm", "Nested KVM virtualization", "CONFIG_KVM, CONFIG_KVM_INTEL / CONFIG_KVM_AMD"],
@@ -855,51 +815,22 @@ export const kernelSections = [
       ["bandwidth", "Bandwidth manager (FQ packet scheduler)", "CONFIG_NET_SCH_FQ"],
       ["iscsi-target", "iSCSI target mode (Longhorn block storage)", "CONFIG_TARGET_CORE, CONFIG_ISCSI_TARGET, CONFIG_ISCSI_TCP, CONFIG_BLK_DEV_SD"],
       ["ebpf-cni", "eBPF-based CNI networking (Cilium, Hubble)", "CONFIG_BPF, CONFIG_DEBUG_INFO_BTF, CONFIG_VXLAN, CONFIG_GENEVE, CONFIG_IP_SET, CONFIG_NETFILTER_XT_TARGET_TPROXY, CONFIG_NETFILTER_XT_MATCH_SOCKET"],
-      ["iscsi-target", "iSCSI target mode (Longhorn block storage)", "CONFIG_TARGET_CORE, CONFIG_ISCSI_TARGET, CONFIG_ISCSI_TCP, CONFIG_BLK_DEV_SD"],
-      ["ebpf-cni", "eBPF-based CNI networking (Cilium, Hubble)", "CONFIG_BPF, CONFIG_DEBUG_INFO_BTF, CONFIG_VXLAN, CONFIG_GENEVE, CONFIG_IP_SET, CONFIG_NETFILTER_XT_TARGET_TPROXY, CONFIG_NETFILTER_XT_MATCH_SOCKET"],
     ],
   },
 ];
 
 export const binarySections = [
   {
-    title: "What binaries are",
-    description:
-      "Firecracker and jailer binaries downloaded from the Firecracker GitHub releases page. You need at least one version downloaded to create VMs.",
+    title: "Firecracker and Jailer",
+    description: "VM launch in 0.3.0 requires the matching Firecracker/Jailer 1.17.0 pair. Pull them together and select the release as your default.",
+    code: ["mvm bin pull firecracker:1.17.0 --default", "mvm bin ls", "mvm bin ls --remote"],
+    callout: "Other cached releases are not automatically eligible for launch. Use fresh snapshots with the required pair.",
   },
   {
-    title: "Managing binaries",
-    code: [
-      "# Download Firecracker v1.15.0 (includes jailer)",
-      "mvm bin pull firecracker --version 1.15.0",
-      "",
-      "# Build Firecracker from source at a git ref",
-      "mvm bin pull firecracker --git-ref v1.15.0",
-      "",
-      "# Force re-download even if version already exists",
-      "mvm bin pull firecracker --version 1.15.0 --force",
-      "",
-      "# List downloaded versions",
-      "mvm bin ls",
-      "",
-      "# JSON output for scripting",
-      "mvm bin ls --json",
-      "",
-      "# List remote versions available for download",
-      "mvm bin ls --remote",
-      "",
-      "# Set as active version by ID prefix",
-      "mvm bin default abc123",
-      "",
-      "# Remove by version",
-      "mvm bin rm --version 1.15.0",
-      "mvm bin rm --version 1.15.0 -f   # Force remove even if referenced by VMs",
-      "",
-      "# Remove by ID",
-      "mvm bin rm abc123",
-    ],
-    callout:
-      "<code>mvm bin pull</code> downloads both <code>firecracker</code> and <code>jailer</code> together. They must match versions — mixing v1.14 firecracker with v1.15 jailer causes runtime errors.",
+    title: "Remove an unused release",
+    description: "Remove by release version after no VM retains it.",
+    code: ["mvm bin rm 1.17.0"],
+    callout: "Force cannot override a live VM's release lease. Download the required pair again before launching another VM.",
   },
 ];
 
@@ -949,93 +880,28 @@ export const keySections = [
 
 export const volumeSections = [
   {
-    title: "What volumes are",
-    description:
-      "Volumes are persistent data disks that can be attached to VMs and survive VM removal. They are stored as raw or qcow2 disk images in the cache directory and managed through the mvmctl database.",
-    callout: undefined,
+    title: "Persistent data disks",
+    description: "Create a raw data volume once and attach it to your VMs. Removing a VM does not delete its data volumes. QCOW2 is supported for image import, not attached data volumes.",
+    code: ["mvm volume create data-disk 10G", "mvm volume ls", "mvm volume inspect data-disk"],
+    callout: "A data volume is separate from the VM root disk. Prepare its partition and filesystem inside the guest before storing files on it.",
   },
   {
-    title: "Creating volumes",
-    description: "Create a new persistent volume with a name and size:",
-    code: [
-      "# Create a 10 GB raw volume",
-      "mvm volume create data-disk 10G",
-      "",
-      "# Create a qcow2 volume (supports grow and shrink)",
-      "mvm volume create data-disk 10G --format qcow2",
-      "",
-      "# Create a read-only volume (writable by default)",
-      "mvm volume create data-disk 10G --read-only",
-      "",
-      "# Create a 512 MB volume for testing",
-      "mvm volume create test-disk 512M",
-    ],
-    callout:
-      "Shorthand alias: <code>mvm vol &lt;command&gt;</code> can be used instead of <code>mvm volume &lt;command&gt;</code>. Raw format (default) uses fallocate for fast allocation. Qcow2 format supports both grow and shrink via qemu-img. The volume name must be unique.",
+    title: "Attach and detach",
+    description: "Select an existing VM and volume. Hot attachment needs a compatible PCI-enabled VM.",
+    code: ["mvm volume attach myvm data-disk", "mvm volume detach myvm data-disk"],
+    callout: "Unmount the filesystem in the guest before detaching. Attachment does not automatically format or mount the disk.",
   },
   {
-    title: "Listing volumes",
-    code: [
-      "# List all volumes with ID, name, format, size, status, and VM",
-      "mvm volume ls",
-      "",
-      "# JSON output for scripting",
-      "mvm volume ls --json",
-    ],
+    title: "Grow a volume",
+    description: "Stop every attached VM before growing a volume. It can remain attached while stopped; shrinking is not supported.",
+    code: ["mvm vm stop myvm", "mvm volume resize data-disk 20G", "mvm vm start myvm"],
+    callout: "Growing the backing disk does not resize guest partitions or filesystems. Extend them inside the guest afterward.",
   },
   {
-    title: "Inspecting volumes",
-    description:
-      "Show detailed information about a volume including disk metadata:",
-    code: [
-      "mvm volume inspect data-disk",
-      "mvm volume inspect abc123    # ID prefix also works",
-    ],
-  },
-  {
-    title: "Removing volumes",
-    code: [
-      "# Remove by name",
-      "mvm volume rm data-disk",
-      "",
-      "# Remove multiple volumes",
-      "mvm volume rm data-disk test-disk",
-      "",
-      "# Force remove even if attached to a VM",
-      "mvm volume rm data-disk -f",
-    ],
-    callout:
-      "A volume can only be removed if it is not attached to a running VM, unless <code>--force / -f</code> is used. Detach first with <code>mvm volume detach</code>.",
-  },
-  {
-    title: "Resizing volumes",
-    description: "Grow (or shrink qcow2) an existing volume to a new size:",
-    code: [
-      "# Resize to 20 GB (grow only for raw format)",
-      "mvm volume resize data-disk 20G",
-      "",
-      "# Raw volumes: grow only (fallocate)",
-      "# Qcow2 volumes: grow and shrink (qemu-img)",
-    ],
-    callout:
-      "Raw format supports grow only (via fallocate). Qcow2 format supports both grow and shrink (via qemu-img). Shrinking below the actual data size causes data loss.",
-  },
-  {
-    title: "Attaching volumes to VMs",
-    description:
-      "Volumes can be attached and detached from running VMs using the VM command group:",
-    code: [
-      "# Attach a volume when creating a VM",
-      "mvm vm create myvm --image ubuntu:24.04 --volume data-disk",
-      "",
-      "# Attach to a running VM (via Firecracker API)",
-      "mvm volume attach myvm data-disk",
-      "",
-      "# Detach from a running VM",
-      "mvm volume detach myvm data-disk",
-    ],
-    callout:
-      "A volume can only be attached to one VM at a time. Attaching to a second VM automatically detaches from the first if supported by the Firecracker API.",
+    title: "Remove a volume",
+    description: "Remove an unattached volume, or use force after stopping every attached VM.",
+    code: ["mvm volume rm data-disk", "# For a volume still attached to stopped VMs:", "mvm volume rm data-disk --force"],
+    callout: "Removal deletes the managed volume data. Force does not bypass the stopped-VM requirement.",
   },
 ];
 
@@ -1045,66 +911,34 @@ export const volumeSections = [
 
 export const networkSections = [
   {
-    title: "How networking works",
-    description:
-      "mvmctl uses Linux bridge/TAP networking with NAT (via nftables or iptables). Each named network is a Linux bridge with its own subnet. VMs get TAP interfaces and IPs from a lease pool. Traffic is NATed to the host network.",
+    title: "Managed networks",
+    description: "Each VM runs in a separate network namespace. Networks provide private IPv4 addresses and optional NAT. mvmctl selects the uplink and manages nftables directly; there is no iptables backend or caller-selected host interface.",
+    code: ["mvm network create mynet --subnet 10.25.0.0/24", "mvm network ls", "mvm network inspect mynet"],
+    callout: "Use a private subnet that does not overlap your host routes. Kernel interface names are internal; use network names or IDs with the CLI.",
   },
   {
-    title: "The default network",
-    description: `The default network is called <strong>${NET_NAME}</strong> and uses <strong>${NET_SUBNET}</strong> (gateway: ${NET_GATEWAY}). It is created automatically the first time you run <code>mvm host init</code> — no manual network setup needed for basic use.`,
-    callout: `The default network name is <code>${NET_NAME}</code>. The bridge device is named <code>mvm-${NET_NAME}</code> (<code>mvm-net</code>), following the convention <code>mvm-&lt;network-name&gt;</code>.`,
+    title: "Connect a VM",
+    description: "Choose a network when creating a VM, or use --no-network for a guest that only needs host-side exec and file transfer.",
+    code: ["mvm vm create myvm --image ubuntu:24.04 --network mynet", "# Alternative: a VM without guest networking", "mvm vm create offline-vm --image ubuntu:24.04 --no-network"],
+    callout: "A service listening only on the guest's 127.0.0.1 is not reachable at its VM address. Bind it to the guest interface when network access is intended.",
   },
   {
-    title: "Network commands",
-    code: [
-      "# Create a named network with a custom subnet",
-      "# You will be prompted to select interface(s) for NAT",
-      "mvm network create mynet --subnet 10.0.1.0/24",
-      "",
-      "# Create non-interactively (skips NAT gateway prompts)",
-      "mvm network create mynet --subnet 10.0.1.0/24 --non-interactive",
-      "",
-      "# Create with explicit NAT gateway interfaces",
-      "mvm network create mynet --subnet 10.0.1.0/24 --nat-gateways eth0",
-      "",
-      "# Create without NAT (no internet access for VMs)",
-      "mvm network create mynet --subnet 10.0.1.0/24 --no-nat",
-      "",
-      "# Create with explicit gateway IP",
-      "mvm network create mynet --subnet 10.0.1.0/24 --ipv4-gateway 10.0.1.1",
-      "",
-      "# Create and set as default network",
-      "mvm network create mynet --subnet 10.0.1.0/24 --default",
-      "",
-      "# List all networks",
-      "mvm network ls",
-      "",
-      "# Show network details",
-      "mvm network inspect mynet",
-      "",
-      "# Set a network as default",
-      "mvm network default mynet",
-      "",
-      "# Sync firewall rules between database and host",
-      "mvm network sync",
-      "",
-      "# Remove a network (only if no VMs attached)",
-      "mvm network rm mynet",
-    ],
-    callout:
-      "Shorthand alias: <code>mvm net &lt;command&gt;</code> can be used instead of <code>mvm network &lt;command&gt;</code>. You cannot remove a network that has VMs attached. Stop and remove the VMs first.",
+    title: "Allow traffic between VMs",
+    description: "Traffic between managed VMs is denied by default, even on the same network. For existing VMs named client and server, allow only the destination port you need:",
+    code: ["mvm policy traffic create --from-vm client --to-vm server --protocol tcp --port 8080", "mvm policy traffic ls"],
+    callout: "Traffic policies govern IP connections. They do not authorize command execution. Use --from-network instead of --from-vm to select a source network.",
   },
   {
-    title: "Using networks with VMs",
-    code: [
-      "# Create a VM on a custom network",
-      "mvm network create isolated --subnet 10.0.0.0/24",
-      "mvm vm create myvm --image ubuntu:24.04 --network isolated",
-      "",
-      "# Assign a specific IP",
-      "mvm vm create myvm --image ubuntu:24.04 --network isolated --ip 10.0.0.50",
-    ],
-    note: "Custom networks get the subnet you specify. The bridge device is named <code>mvm-&lt;network-name&gt;</code>. Each VM gets a unique MAC address (auto-generated with the <code>02:FC</code> prefix).",
+    title: "Allow VM-to-VM commands",
+    description: "Exec policies are directional and name a non-root account that already exists in the destination guest. For client, server and the destination account app:",
+    code: ["mvm policy exec create client server app", "mvm policy exec ls"],
+    callout: "The host must also opt the source command into VM-to-VM execution with mvm exec --allow-vm-exec. A reverse request needs its own policy; an IP traffic grant is not enough.",
+  },
+  {
+    title: "Reconcile or remove a network",
+    description: "Use sync to reconcile managed network state. Remove attached VMs before removing their network.",
+    code: ["mvm network sync", "mvm network rm mynet"],
+    callout: "Conflicting or changed firewall state is refused rather than overwritten. Do not flush unrelated firewall rules to make setup pass.",
   },
 ];
 
@@ -1153,13 +987,9 @@ export const configSections = [
       "MVM_CACHE_DIR          Override cache directory               ~/.cache/mvmctl",
       "MVM_CONFIG_DIR         Override config directory               ~/.config/mvmctl",
       "MVM_LOG_LEVEL          Log level: DEBUG, INFO, WARN, ERROR     WARN (CLI flags recommended)",
-      "MVM_WARM_POOL          Warm image pool backend (disk or tmpfs)   tmpfs (default)",
-      "MVM_TEMP_DIR           Override temp directory for microVMs       /tmp/mvmctl",
-      "MVM_ESCALATED          Set by sudo wrapper to indicate             1",
-      "                       privilege escalation",
+      "MVM_WARM_POOL          Set to disk to keep the warm pool in the cache",
+      "MVM_TEMP_DIR           Override the temporary workspace directory",
       "MVM_ASSET_MIRROR       Local directory for asset mirroring",
-      "MVM_SUDO_RESTART       Set internally when re-running                     (not set)",
-      "                       <code>mvm init</code> with sudo",
     ],
     callout:
       "The <code>--verbose</code> (sets INFO) and <code>--debug</code> (sets DEBUG) CLI flags are the <strong>recommended</strong> way to control log level — they take precedence over <code>MVM_LOG_LEVEL</code>. The env var falls back to WARN if neither flag is set and the variable is unset.",
@@ -1187,12 +1017,12 @@ export const configSections = [
       "# Prune all without confirmation",
       "mvm cache prune --all --force",
       "",
-      "# Completely clean all cache (nuclear option)",
-      "mvm cache clean",
+      "# Preview complete cache removal before running it",
       "mvm cache clean --dry-run",
+      "mvm cache clean",
     ],
     callout:
-      "Always run <code>--dry-run</code> first. Cache pruning is one-way. <code>mvm cache clean</code> removes ALL cached assets AND host networking, but does not touch running VMs unless you use <code>--all</code>.",
+      "Preview cleanup with <code>--dry-run</code>. <code>prune --all</code> includes running VMs and protected assets; <code>cache clean</code> also retires the selected cache and its managed networking. These commands can delete VM data. Cleanup refuses unresolved ownership or active-reference conflicts.",
   },
 ];
 
@@ -1229,183 +1059,19 @@ export const shellCompletionSections = [
 
 export const dependencySections = [
   {
-    title: "Core runtime dependencies",
-    description: "These binaries are required for basic mvmctl operations:",
-    callout: undefined,
-    headers: ["Binary", "Purpose", "Debian/Ubuntu", "RHEL/Fedora", "Arch"],
-    rows: [
-      [
-        "firecracker + jailer",
-        "MicroVM VMM + security isolation",
-        "mvm bin pull",
-        "mvm bin pull",
-        "mvm bin pull",
-      ],
-      ["ip", "Bridge/TAP management", "iproute2", "iproute2", "iproute2"],
-      [
-        "iptables",
-        "NAT and firewall rules",
-        "iptables",
-        "iptables",
-        "iptables",
-      ],
-      [
-        "iptables-save",
-        "Persisting iptables rules",
-        "iptables",
-        "iptables",
-        "iptables",
-      ],
-      [
-        "nft / nftables",
-        "NAT and firewall rules (default backend)",
-        "nftables",
-        "nftables",
-        "nftables",
-      ],
-      ["sysctl", "IP forwarding", "procps", "procps-ng", "procps-ng"],
-      ["modprobe", "KVM module loading", "kmod", "kmod", "kmod"],
-      ["lsmod", "KVM module status", "kmod", "kmod", "kmod"],
-      ["groupadd", "mvm group creation", "passwd", "shadow", "shadow"],
-      ["usermod", "User group membership", "passwd", "shadow", "shadow"],
-      ["visudo", "Sudoers validation", "sudo", "sudo", "sudo"],
-      ["sudo", "Privileged commands", "sudo", "sudo", "sudo"],
-      [
-        "groupdel",
-        "Removing the mvm group on reset",
-        "passwd",
-        "shadow",
-        "shadow",
-      ],
-      [
-        "dumpe2fs",
-        "Filesystem inspection",
-        "e2fsprogs",
-        "e2fsprogs",
-        "e2fsprogs",
-      ],
-    ],
-  },
-  {
-    title: "Image & cloud-init dependencies",
-    callout: undefined,
-    headers: ["Binary", "Purpose", "Debian/Ubuntu", "RHEL/Fedora", "Arch"],
-    rows: [
-      [
-        "qemu-img",
-        "Image conversion/resize",
-        "qemu-utils",
-        "qemu-img",
-        "qemu-img",
-      ],
-      [
-        "sfdisk",
-        "Partition table manipulation",
-        "util-linux",
-        "util-linux",
-        "util-linux",
-      ],
-      [
-        "blkid",
-        "Root partition/UUID detection",
-        "util-linux",
-        "util-linux",
-        "util-linux",
-      ],
-      [
-        "mount/umount",
-        "Image mounting",
-        "util-linux",
-        "util-linux",
-        "util-linux",
-      ],
-      [
-        "truncate",
-        "Sparse file creation",
-        "coreutils",
-        "coreutils",
-        "coreutils",
-      ],
-      ["mkfs.ext4", "Rootfs formatting", "e2fsprogs", "e2fsprogs", "e2fsprogs"],
-      [
-        "fakeroot",
-        "Preserve tarball ownership during extraction",
-        "fakeroot",
-        "fakeroot",
-        "fakeroot",
-      ],
-      [
-        "unsquashfs",
-        "SquashFS extraction",
-        "squashfs-tools",
-        "squashfs-tools",
-        "squashfs-tools",
-      ],
-      ["tar", "Tarball extraction", "tar", "tar", "tar"],
-      [
-        "cloud-localds",
-        "Cloud-init seed ISO",
-        "cloud-image-utils",
-        "cloud-utils",
-        "cloud-utils",
-      ],
-      [
-        "ssh-keygen",
-        "SSH key generation",
-        "openssh-client",
-        "openssh",
-        "openssh",
-      ],
-      ["ssh", "VM connection", "openssh-client", "openssh", "openssh"],
-    ],
-  },
-  {
-    title: "libguestfs (optional — for cloud-init direct injection)",
+    title: "Install dependencies for your workflow",
     description:
-      "Required only if you enable the GuestFS backend via <code>mvm config set settings guestfs_enabled true</code>. The loop-mount provisioner is the default and does not require libguestfs.",
-    code: [
-      "# Debian/Ubuntu",
-      "sudo apt-get install libguestfs0 libguestfs-tools supermin",
-      "",
-      "# RHEL/CentOS/Fedora",
-      "sudo dnf install libguestfs libguestfs-tools supermin",
-      "",
-      "# Arch",
-      "sudo pacman -S libguestfs supermin",
-    ],
+      'Use the <a href="https://github.com/AlanD20/mvmctl/blob/0.3.0-release/docs/DEPENDENCIES.md">dependency guide</a> for distribution packages and command-specific requirements. Basic setup needs KVM, sudo, networking utilities, and image tools; GuestFS and kernel source builds need additional packages.',
   },
   {
-    title: "Building kernels from source",
+    title: "Firewall support",
     description:
-      "Building official kernels from source requires additional build dependencies (<code>make</code>, <code>gcc</code>, <code>flex</code>, <code>bison</code>, <code>libelf</code>, <code>openssl</code>, <code>ncurses</code>, <code>bc</code>, <code>pahole</code>, <code>git</code>, <code>curl</code>, <code>pkg-config</code>). See the <a href=\"https://github.com/AlanD20/mvmctl/blob/main/docs/KERNEL.md\">full custom-kernel guide</a> for details.",
-    callout: undefined,
-    headers: [],
-    rows: [],
+      "The host kernel must support nftables inet and bridge tables. mvmctl programs them directly through netlink; it does not require the nft CLI or an iptables backend.",
   },
   {
-    title: "Provisioning backend",
+    title: "Host access",
     description:
-      "mvmctl handles provisioning internally through a configurable backend. See the <a href=\"https://github.com/AlanD20/mvmctl\">project documentation</a> for backend details.",
-    callout: undefined,
-    headers: [],
-    rows: [],
-  },
-  {
-    title: "Command dependencies",
-    description:
-      "Each mvmctl command may depend on system tools that are verified during <code>mvm init</code>. See <a href=\"https://github.com/AlanD20/mvmctl/blob/main/docs/DEPENDENCIES.md\">DEPENDENCIES.md</a> for details.",
-    callout: undefined,
-    headers: [],
-    rows: [],
-  },
-  {
-    title: "Host system requirements",
-    callout: undefined,
-    items: [
-      "<strong>Kernel modules:</strong> <code>kvm</code>, <code>kvm_intel</code> or <code>kvm_amd</code>, <code>tun</code>, <code>bridge</code>, <code>vhost_vsock</code>, <code>nft_chain_nat</code>",
-      "<strong>Hardware virtualization:</strong> VT-x (Intel) or AMD-V must be enabled in BIOS/UEFI",
-      "<strong>Permissions:</strong> The user must be in the <code>mvm</code> group (created by <code>mvm host init</code>)",
-    ],
+      "Enable hardware virtualization, then use host init to enroll your operator account. Run ordinary VM commands without sudo. Host setup and workspace initialization are separate steps.",
   },
 ];
 
@@ -1429,17 +1095,17 @@ export const cloudInitSections = [
   {
     title: "Cloud-init modes",
     items: [
-      "<code>inject</code> — injects cloud-init files directly into the rootfs via the active provisioner backend (loop-mount by default, or guestfs if enabled). Fastest and most reliable.",
+      "<code>inject</code> — writes cloud-init files into the rootfs through the configured provisioner.",
       "<code>net</code> — starts a temporary HTTP server (nocloud-net). The VM fetches config during boot via <code>ds=nocloud;seedfrom=http://GATEWAY_IP:PORT/</code>. No libguestfs needed.",
-      "<code>iso</code> — attaches a CD-ROM ISO with cloud-init files. Compatible with all images. Slower (requires <code>cloud-localds</code>).",
-      "<code>off</code> (default) — disables cloud-init entirely. VM boots with no user setup.",
+      "<code>iso</code> — attaches a seed disk with cloud-init files. Requires cloud-init support in the guest and <code>cloud-localds</code> on the host.",
+      "<code>off</code> (default) — skips cloud-init. mvmctl still performs its supported direct guest setup.",
     ],
     callout: undefined,
   },
   {
     title: "How nocloud-net (net mode) works",
     items: [
-      "A temporary HTTP server starts on an available port (8000-9000 range)",
+      "A temporary HTTP server binds to the VM network gateway on TCP port 8000",
       "Firewall rules allow only the specific VM to reach its server",
       "The VM boots with the nocloud-net kernel command line datasource",
       "Cloud-init fetches <code>meta-data</code>, <code>user-data</code>, and <code>network-config</code> via HTTP",
@@ -1450,10 +1116,10 @@ export const cloudInitSections = [
   {
     title: "Security model",
     items: [
-      "Each VM gets its own HTTP server on a unique port",
+      "Each VM uses its own network namespace and the fixed gateway port 8000",
       "Source-based firewall rules — only the VM's IP can reach its server",
       "Servers bind to the bridge gateway IP, not <code>0.0.0.0</code>",
-      "Rules are tagged with <code># nocloudnet:&lt;vm_name&gt;:&lt;port&gt;</code>",
+      "Custom metadata ports are not supported",
     ],
     callout: undefined,
   },
@@ -1470,16 +1136,16 @@ export const prerequisitesSubIntro =
   "mvmctl depends on a few system tools for networking, image handling, and cloud-init:";
 
 export const prerequisitesCallout =
-  "On Ubuntu 24.04+, install the prebuilt binary for the fastest setup. Use <code>mvm --help</code> to verify installation.";
+  "The 0.3.0 release is not published yet. For development, use the source instructions in a disposable environment.";
 
 export const installIntro =
-  "Two ways to install. The <strong>prebuilt binary</strong> is the fastest — no Go toolchain needed.";
+  "Install one system-wide binary, then enroll your operator account. Use fresh managed state for 0.3.0; preserve anything you need from an older installation before replacing it.";
 
 export const installCallout =
-  'After installing, run <code>mvm --help</code> to verify. If "command not found", ensure <code>~/.local/bin</code> is in your <code>PATH</code>.';
+  'Use <code>/usr/local/bin/mvm --version</code> to check the installed version. If <code>mvm</code> selects an older user-local binary, correct your PATH before continuing.';
 
 export const hostInitIntro =
-  "Before creating any VMs, your host needs one-time setup: KVM module loading, IP forwarding, the <code>mvm</code> group, sudoers permissions, and bridge networking. This is what <code>mvm init</code> handles for you.";
+  "An administrator prepares the host once. You then initialize your own workspace and run everyday commands without prefixing them with sudo.";
 
 export const firstVmIntro =
   "This walkthrough takes you from zero to a running microVM: generate an SSH key, download a kernel and OS image, boot the VM, connect, and clean up.";
@@ -1491,10 +1157,10 @@ export const resourceManagementIntro =
   "mvmctl manages five resource types: OS images (root filesystems), kernels (vmlinux binaries), Firecracker/jailer binaries, SSH keys, and persistent data disks (volumes).";
 
 export const networkIntro =
-  "mvmctl uses Linux bridge/TAP networking with NAT (via nftables or iptables). Each named network is a separate bridge with its own subnet.";
+  "Managed networks give VMs private addresses and optional internet access through NAT. Each VM has its own network namespace. Traffic between managed VMs is denied by default, including on the same network; explicit policies allow the connections you need.";
 
 export const dependenciesIntro =
-  "mvmctl depends on several system binaries. Most are common Linux utilities; this reference covers what each is for and which package provides it.";
+  "Host requirements depend on the operations you use. Keep package selection in sync with the repository dependency guide.";
 
 export const cloudInitIntro =
   "Cloud-init configures your VM on first boot: users, SSH keys, networking, startup scripts. mvmctl handles this automatically.";
@@ -1538,138 +1204,43 @@ export const helpSection = {
 
 export const troubleshooting = [
   {
-    problem: "Permission denied: /dev/kvm",
-    fix: [
-      "# First check if /dev/kvm exists:",
-      "ls -l /dev/kvm",
-      "",
-      "# Case 1 — does not exist (KVM modules not loaded):",
-      "sudo modprobe kvm",
-      "sudo modprobe kvm_intel    # or kvm_amd on AMD",
-      "",
-      "# Case 2 — exists but not writable (group membership):",
-      "sudo usermod -aG kvm $USER",
-      "# Then log out and back in",
-    ],
-    note: "If <code>/dev/kvm</code> does not exist after <code>modprobe</code>, install KVM modules (e.g. <code>linux-modules-extra-*</code> on Ubuntu). Group membership takes effect on next login.",
+    problem: "Host setup is incomplete",
+    fix: ["mvm host status", "sudo /usr/local/bin/mvm host init"],
+    note: "Run setup from your normal operator account. Log out and back in if it changes your groups. Check that hardware virtualization is enabled and /dev/kvm exists.",
   },
   {
-    problem: "Bridge mvm-net not found",
-    fix: [
-      "# The bridge is created automatically. Ensure host init ran:",
-      "mvm init",
-    ],
-    note: "Re-running <code>mvm init</code> is safe (idempotent). The default bridge is named <code>mvm-net</code>.",
+    problem: "Required Firecracker release is missing",
+    fix: ["mvm bin pull firecracker:1.17.0 --default", "mvm bin ls"],
+    note: "VM launch requires the matching Firecracker/Jailer 1.17.0 pair. Pulling an older release does not make it eligible for launch.",
   },
   {
-    problem: "Image not found",
-    fix: ["mvm image pull ubuntu --version 24.04", "mvm image ls   # Verify it appears"],
-    note: "Image IDs are case-sensitive. Use <code>mvm image ls</code> to see available images.",
+    problem: "An image or kernel is missing",
+    fix: ["mvm image pull ubuntu:24.04 --default", "mvm kernel pull --type firecracker --default"],
+    note: "Use mvm image ls and mvm kernel ls to check local assets before creating a VM.",
   },
   {
-    problem: "Kernel not found",
-    fix: [
-      "mvm kernel pull --type firecracker",
-      "mvm kernel ls           # Verify it is cached",
-      "mvm kernel ls --remote  # List available remote versions",
-    ],
-    note: "Default fetch downloads a Firecracker-optimized kernel (~30s). Official builds take 10-30 min.",
+    problem: "VM boots but a service is unreachable",
+    fix: ["mvm vm inspect myvm", "mvm exec myvm -- ss -lnt"],
+    note: "Check the service's bind address. Guest localhost is not the VM's network address. Connections from another managed VM also need a traffic policy, even on the same network.",
   },
   {
-    problem: "Firecracker binary not found",
-    fix: ["mvm bin pull firecracker --version 1.15.0", "mvm bin default <id>"],
-    note: "Always run <code>mvm bin default &lt;id&gt;</code> after fetching. The default version (e.g. 1.15.0) matches the installed Firecracker release — you can also pull other versions with <code>mvm bin pull firecracker --version &lt;version&gt;</code>.",
+    problem: "Network synchronization reports a conflict",
+    fix: ["mvm network ls", "mvm network sync"],
+    note: "mvmctl refuses unexpected firewall state. Have an administrator resolve the reported conflict; do not flush the host firewall or kill unrelated services.",
   },
   {
-    problem: "VM won't boot / SSH times out",
-    fix: [
-      "# Watch boot progress:",
-      "mvm logs myvm --follow",
-      "",
-      "# If nothing at all, check Firecracker process log:",
-      "mvm logs myvm --os",
-    ],
-    note: "Wait at least 60 seconds before assuming the VM is stuck. If the boot log shows nothing, the kernel may be incompatible or the image corrupt.",
+    problem: "NoCloud NET cannot start",
+    fix: ["mvm host status", "mvm network ls"],
+    note: "NET mode uses gateway TCP port 8000, not a dynamic port range. Custom ports are unsupported. Inspect the reported network or listener conflict rather than terminating every NoCloud process.",
   },
   {
-    problem: "NoCloud-net server failed to start",
-    fix: [
-      "# Port range (8000-9000) may be exhausted",
-      "sudo ss -tlnp | grep -E ':(8[0-9]{3}|9[0-9]{3})'",
-      "# Kill orphaned servers",
-      'pkill -f "mvm run nocloudnet serve"',
-    ],
-    note: "Each VM uses one port in 8000-9000. If many VMs were not cleaned up, orphaned servers may still be running.",
+    problem: "Console relay is not responding",
+    fix: ["mvm console myvm --state", "mvm console myvm --kill", "mvm console myvm"],
+    note: "The console uses a serial PTY relay, not vsock. Killing the relay leaves the VM running.",
   },
   {
-    problem: "Mixed firewall backends (Docker conflict)",
-    fix: [
-      "# Symptom: VM has IP, ping works, but TCP times out",
-      "# Detection:",
-      "mvm config get settings firewall_backend",
-      "sudo nft list ruleset | grep -c 'MVM-'",
-      "",
-      "# Fix 1: sync firewall rules from database",
-      "mvm network sync",
-      "",
-      "# Fix 2: reboot host (clears all firewall state cleanly)",
-      "sudo reboot",
-      "",
-      "# Fix 3: Configure Docker to use the same backend as mvmctl",
-      "# Then re-run: mvm host init",
-    ],
-    note: "Docker and mvmctl may use different firewall backends (nftables vs iptables-legacy). Rules go to different places. mvm network sync reloads rules from the database.",
+    problem: "Volume growth or removal is refused",
+    fix: ["mvm volume inspect data-disk"],
+    note: "Stop all attached VMs before growing a volume or force-removing it. Growing does not require detaching. Force removal deletes data and cannot bypass a running VM.",
   },
-  {
-    problem: "Network creation fails with permission denied",
-    fix: [
-      "# Check mvm group membership",
-      "groups | grep mvm",
-      "",
-      "# If not in group:",
-      "sudo usermod -aG mvm $USER",
-      "# Then log out and back in",
-    ],
-    note: "The mvm group also requires a new login session. Use <code>newgrp mvm</code> to avoid logging out.",
-  },
-  {
-    problem: "Console relay not working",
-    fix: [
-      "# Check relay status",
-      "mvm console myvm --state",
-      "",
-      "# Kill and re-attach",
-      "mvm console myvm --kill",
-      "mvm console myvm",
-    ],
-    note: "The console relay uses vsock. Ensure <code>vhost_vsock</code> kernel module is loaded: <code>lsmod | grep vsock</code>.",
-  },
-  {
-    problem: "Cache corruption or stale state",
-    fix: [
-      "# Preview what would be removed",
-      "mvm cache prune --all --dry-run",
-      "",
-      "# Remove stale entries from a specific type",
-      "mvm cache prune vm",
-      "",
-      "# Full reset (removes ALL VMs — careful!)",
-      "mvm cache prune --all",
-    ],
-    note: "Cache corruption usually shows as metadata pointing to deleted files, or phantom VMs. <code>mvm cache prune</code> reconciles metadata with actual files.",
-  },
-  {
-    problem: "Volume attach fails — volume is already attached",
-    fix: [
-      "# Check volume status",
-      "mvm volume inspect my-data",
-      "",
-      "# Detach from current VM first",
-      "mvm volume detach <vm-name> my-data",
-      "",
-      "# Force remove (use with caution)",
-      "mvm volume rm my-data -f",
-    ],
-    note: "A volume can only be attached to one VM at a time. Detach it first or create a new volume. Use <code>--force / -f</code> on volume rm to skip the attached check.",
-  },
-] as const;
+];

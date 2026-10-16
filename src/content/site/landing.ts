@@ -34,16 +34,15 @@ export const hero = {
   tertiaryCta: { href: "https://github.com/AlanD20/mvmctl/releases", label: "GitHub Releases" },
   quaternaryCta: { href: "https://github.com/AlanD20/mvmctl", label: "Repository" },
   metrics: [
-    // KEEP IN SYNC: when adding/removing CLI command groups, update this count
-    { label: "Install paths", value: "3", icon: "download" as IconName },
-    { label: "Command groups", value: "18", icon: "layers" as IconName },
+    { label: "Interface", value: "One CLI", icon: "download" as IconName },
+    { label: "Environments", value: "YAML", icon: "layers" as IconName },
     { label: "Primary platform", value: "Linux", icon: "server" as IconName },
   ],
   commandPreview: [
-    "# interactive host setup",
-    "mvm init",
-    "mvm kernel pull --type firecracker",
-    "mvm image pull ubuntu --version 24.04",
+    "# after system installation and host setup",
+    "mvm init --skip-host --non-interactive --binary-version 1.17.0",
+    "mvm kernel pull --type firecracker --default",
+    "mvm image pull ubuntu:24.04 --default",
     "mvm vm create myvm --image ubuntu:24.04",
     "mvm exec myvm",
   ],
@@ -51,26 +50,26 @@ export const hero = {
 
 export const features: Feature[] = [
   {
-    title: "Fast as containers, isolated as VMs",
+    title: "Lightweight VMs, separate kernels",
     description:
-      "2-4 second boot with a dedicated kernel per VM. Rootfs is loop-mounted in-place — no extraction, no kernel sharing. Firecracker at the core, KVM isolation at the edges. Container-like ergonomics, real VM isolation.",
+      "Run each workload in a Firecracker microVM with its own kernel. Create, connect, and stop from one CLI, with KVM isolation between guests.",
     bullets: [
-      "2-4s boot with dedicated kernel per VM",
-      "Loop-mount provisioner — mount, don't extract",
+      "Dedicated kernel per VM",
+      "Isolated VM processes and protected disks",
       "mvm vm create && mvm ssh — works like docker run, but with KVM",
     ],
     icon: "branch",
-    stat: "2-4s boot · AWS Firecracker · KVM",
+    stat: "Firecracker · KVM · isolated guests",
   },
   {
     title: "Everything you need, nothing you don't",
     description:
-      "One statically-linked Go binary, no runtime dependencies. One command for the kernel, one for the image. mvmctl pulls every piece of the Firecracker stack so you don't have to hunt for matching versions.",
+      "One installed mvm binary manages your VMs, kernels and images. Host setup prepares the permissions you need; everyday commands run as your own user.",
     bullets: [
-      "Single binary — zero runtime deps, just drop it in your PATH",
+      "Single system-wide binary, with standard Linux host packages",
       "mvm kernel pull — tuned kernels on demand",
       "mvm image pull — ready-to-boot images, or import from a running VM",
-      "mvm init — idempotent host setup: KVM, bridges, firewall, sudoers",
+      "mvm init — prepare your operator cache and default assets",
     ],
     icon: "archive",
     stat: "kernel pull · image pull · host init",
@@ -78,7 +77,7 @@ export const features: Feature[] = [
   {
     title: "No SSH required",
     description:
-      "Commands, file transfer, and console access all work over vsock — no SSH daemon, no exposed ports, no guest networking needed.",
+      "Run commands and transfer files over vsock, a host-to-guest connection that needs no guest network. Use the serial console for interactive boot access.",
     bullets: [
       "mvm exec — run commands via embedded vsock agent",
       "mvm cp — file transfer over vsock, no tar-over-SSH",
@@ -93,7 +92,7 @@ export const features: Feature[] = [
       "Define complete VM environments in a single YAML spec. One command to apply, one to destroy. Batch creation with atomic rollback.",
     bullets: [
       "Declarative YAML with dependency ordering",
-      "Atomic batch — all succeed or all roll back",
+      "Optional atomic batch — attempts rollback on failure",
       "mvm env apply / mvm env destroy",
     ],
     icon: "layers",
@@ -102,11 +101,11 @@ export const features: Feature[] = [
   {
     title: "Real host integration",
     description:
-      "Run mvm init once and the host is ready — KVM, bridge networking, firewall, sudoers. Day-to-day commands never need sudo.",
+      "After administrator setup, manage VMs as your own user. Each VM gets an isolated network namespace; explicit policies control traffic between guests.",
     bullets: [
-      "Idempotent mvm init — KVM, bridges, firewall, sudoers",
-      "Named bridge networks with NAT via nftables or iptables",
-      "Persistent volumes — attach, resize, detach, survive VM teardown",
+      "One-time system installation and operator enrollment",
+      "Managed networks with NAT and nftables enforcement",
+      "Persistent raw volumes; stop attached VMs before growing them",
     ],
     icon: "network",
     stat: "bridge networking · volumes · NAT",
@@ -142,20 +141,19 @@ export const installMethods: InstallMethod[] = [
   {
     id: "binary",
     title: "Prebuilt binary",
-    subtitle: "Recommended · no Go toolchain needed",
+    subtitle: "For v0.3.0 once published · no Go toolchain needed",
     icon: "download",
     steps: [
-      "# See https://github.com/AlanD20/mvmctl/releases for all versions",
-      "mkdir -p ~/.local/bin",
-      "curl -L -o ~/.local/bin/mvm https://github.com/AlanD20/mvmctl/releases/latest/download/mvm",
-      "chmod +x ~/.local/bin/mvm",
-      "mvm --help",
+      "curl -fL -o ./mvm https://github.com/AlanD20/mvmctl/releases/download/v0.3.0/mvm",
+      "chmod +x ./mvm",
+      "sudo ./mvm host install-system",
+      "sudo /usr/local/bin/mvm host init",
     ],
   },
   {
     id: "aur",
     title: "AUR (Arch Linux)",
-    subtitle: "Available as mvmctl-bin",
+    subtitle: "Check that mvmctl-bin provides 0.3.0 before following this guide",
     icon: "download",
     steps: [
       "yay -S mvmctl-bin",
@@ -168,10 +166,11 @@ export const installMethods: InstallMethod[] = [
     subtitle: "For development and contribution",
     icon: "fileCode",
     steps: [
-      "git clone https://github.com/AlanD20/mvmctl",
+      "git clone --branch 0.3.0-release https://github.com/AlanD20/mvmctl",
       "cd mvmctl",
-      "./scripts/build.sh release --output ~/.local/bin/mvm",
-      "mvm --help",
+      "./scripts/build.sh release --version 0.3.0-rc.1",
+      "sudo ./dist/mvm host install-system",
+      "sudo /usr/local/bin/mvm host init",
     ],
   },
 ];

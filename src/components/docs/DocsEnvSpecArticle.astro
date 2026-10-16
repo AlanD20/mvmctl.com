@@ -4,7 +4,7 @@ import { envSpecSections } from "../../content/site/env-spec";
 ---
 
 <article class='article' data-anim='docs-main'>
-  <section class='doc-section' id='env-spec-overview' data-anchor-title='Env Spec Reference'>
+  <section class='doc-section' id='env-spec-reference' data-anchor-title='Env Spec Reference'>
     <p class='kicker'>mvmctl env spec</p>
     <h1>Environment Spec Reference</h1>
   </section>
@@ -14,6 +14,7 @@ import { envSpecSections } from "../../content/site/env-spec";
       <section class='doc-section' id={section.id} data-anchor-title={section.title}>
         <h2>{section.title}</h2>
         {section.content ? <p set:html={section.content} /> : null}
+        {section.items ? <ul>{section.items.map((item) => <li set:html={item} />)}</ul> : null}
 
         {section.code ? (
           <div class='sub-section'>
