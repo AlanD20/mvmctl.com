@@ -929,6 +929,12 @@ export const networkSections = [
     callout: "Traffic policies govern IP connections. They do not authorize command execution. Use --from-network instead of --from-vm to select a source network.",
   },
   {
+    title: "Reach a host service from a VM",
+    description: "Use --to-host to allow explicit TCP or UDP ports on the source network's host gateway. If the gateway is 10.25.0.1, the guest connects to 10.25.0.1:5432, not the host's LAN address or localhost.",
+    code: ["mvm policy traffic create --from-vm client --to-host --protocol tcp --port 5432", "mvm policy traffic inspect POLICY_ID --from-vm --to-host", "mvm policy traffic rm POLICY_ID --from-vm --to-host --force"],
+    callout: "Operators may select any port, but each policy must name its protocol and port/range. The host service must listen on the gateway or a suitable wildcard address. Host-to-VM access is unchanged. Use --from-network to grant that network's VMs access to its own gateway.",
+  },
+  {
     title: "Allow VM-to-VM commands",
     description: "Exec policies are directional and name a non-root account that already exists in the destination guest. For client, server and the destination account app:",
     code: ["mvm policy exec create client server app", "mvm policy exec ls"],
