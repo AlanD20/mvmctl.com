@@ -709,7 +709,7 @@ export const imageSections = [
       "# Set as default after import",
       "mvm image import myimg /path/to/image.raw --default",
       "",
-      "# Skip filesystem optimization (shrink/compression)",
+      "# Skip OS cache cleanup; offline shrink and compression still apply",
       "mvm image import myimg /path/to/image.raw --skip-optimization",
       "",
       "# Disable specific detectors",
@@ -720,6 +720,16 @@ export const imageSections = [
     ],
     callout:
       "Syntax: <code>mvm image import NAME [SOURCE | VM_SELECTOR]</code>. When the second argument is a VM selector (name or ID), mvmctl copies that VM's rootfs to create a reusable image. Supports raw images (.raw/.img), qcow2, and tar-rootfs archives (.tar/.tar.gz/.tar.xz/.tgz) from files.",
+  },
+  {
+    title: "Resuming an interrupted local import",
+    description:
+      "If local-image optimization was interrupted, retry its retained transaction without extracting the source again:",
+    code: [
+      "mvm image import myimg /path/to/image.raw --resume FULL_IMAGE_ID",
+    ],
+    callout:
+      "Use the full <code>image_id</code> from the failed command's JSON error details and the original optimization options. Resume requires LoopMount, an unregistered image ID and intact retained files. It refuses changed resources, VM sources and <code>--force</code>. Failures after retained optimization state has been removed need a fresh import. Keep the original source and do not delete root-owned records manually.",
   },
   {
     title: "Managing images",
