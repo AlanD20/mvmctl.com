@@ -144,8 +144,7 @@ export const installMethods: InstallMethod[] = [
     subtitle: "For v0.3.0 once published · verifies release checksums",
     icon: "download",
     steps: [
-      "curl -fsSLo install.sh https://mvmctl.aland20.com/install.sh",
-      "bash install.sh --version 0.3.0",
+      "curl -fsSL https://mvmctl.aland20.com/install.sh | bash -s -- --version 0.3.0",
       "sudo /usr/local/bin/mvm host init",
     ],
   },

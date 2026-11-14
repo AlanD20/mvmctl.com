@@ -172,8 +172,7 @@ export const installMethods: readonly CommandBlock[] = [
     description: "After v0.3.0 is published, download and run the installer. It requires Bash, curl and sha256sum, verifies the release checksum, and installs the system binary without erasing managed data.",
     icon: "download",
     code: [
-      "curl -fsSLo install.sh https://mvmctl.aland20.com/install.sh",
-      "bash install.sh --version 0.3.0",
+      "curl -fsSL https://mvmctl.aland20.com/install.sh | bash -s -- --version 0.3.0",
       "/usr/local/bin/mvm --version",
     ],
   },
@@ -1280,21 +1279,20 @@ export const troubleshooting = [
 
 export const uninstallSections = [
   {
-    title: "Preview, then confirm",
+    title: "Uninstall",
     description: "The 0.3.0 uninstaller removes every enrolled operator's managed VMs, snapshots, volumes, images, kernels and key copies. Export anything you need and stop other operators using mvmctl first.",
     code: [
-      "curl -fsSLo uninstall.sh https://mvmctl.aland20.com/uninstall.sh",
-      "bash uninstall.sh --dry-run",
-      "bash uninstall.sh",
+      "curl -fsSL https://mvmctl.aland20.com/uninstall.sh | bash",
     ],
-    callout: "The launcher verifies its versioned Python files before requesting administrator access. Python 3.10+ is required. Type UNINSTALL MVMCTL to confirm, or use --yes for unattended deletion.",
+    callout: "Requires Python 3.10+ and administrator access. Type UNINSTALL MVMCTL at the terminal prompt to confirm deletion. The launcher verifies its versioned Python files before running them.",
   },
   {
-    title: "Scope and custom paths",
+    title: "Optional preview and custom paths",
     description: "External asset mirrors, original external SSH files and shared system packages are preserved. Recorded host settings are restored. Unknown files, incompatible legacy state and unresolved runtime ownership stop cleanup; completed deletions are not rolled back.",
     code: [
-      "bash uninstall.sh --dry-run --cache alice=/srv/alice/mvm-cache --config alice=/srv/alice/mvm-config",
+      "curl -fsSL https://mvmctl.aland20.com/uninstall.sh | bash -s -- --dry-run",
+      "curl -fsSL https://mvmctl.aland20.com/uninstall.sh | bash -s -- --cache alice=/srv/alice/mvm-cache --config alice=/srv/alice/mvm-config",
     ],
-    callout: 'Repeat --cache or --config for unrecorded custom paths. Review the same selections without --dry-run before confirming. See the <a href="https://github.com/AlanD20/mvmctl/blob/0.3.0-release/docs/UNINSTALL.md">full uninstall guide</a> for refusal recovery. After success, install again and run host init and mvm init.',
+    callout: 'Repeat --cache or --config for unrecorded custom paths. Preview is optional. For unattended deletion, explicitly pass --yes. See the <a href="https://github.com/AlanD20/mvmctl/blob/0.3.0-release/docs/UNINSTALL.md">full uninstall guide</a> for refusal recovery. After success, install again and run host init and mvm init.',
   },
 ];
