@@ -145,7 +145,6 @@ export const installMethods: InstallMethod[] = [
     icon: "download",
     steps: [
       "curl -fsSLo install.sh https://mvmctl.aland20.com/install.sh",
-      "less install.sh",
       "bash install.sh --version 0.3.0",
       "sudo /usr/local/bin/mvm host init",
     ],

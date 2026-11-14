@@ -169,11 +169,10 @@ export const installMethods: readonly CommandBlock[] = [
   {
     id: "binary",
     title: "Install script",
-    description: "After v0.3.0 is published, download and inspect the installer. It requires Bash, curl and sha256sum, verifies the release checksum, and installs the system binary without erasing managed data.",
+    description: "After v0.3.0 is published, download and run the installer. It requires Bash, curl and sha256sum, verifies the release checksum, and installs the system binary without erasing managed data.",
     icon: "download",
     code: [
       "curl -fsSLo install.sh https://mvmctl.aland20.com/install.sh",
-      "less install.sh",
       "bash install.sh --version 0.3.0",
       "/usr/local/bin/mvm --version",
     ],
@@ -1285,7 +1284,6 @@ export const uninstallSections = [
     description: "The 0.3.0 uninstaller removes every enrolled operator's managed VMs, snapshots, volumes, images, kernels and key copies. Export anything you need and stop other operators using mvmctl first.",
     code: [
       "curl -fsSLo uninstall.sh https://mvmctl.aland20.com/uninstall.sh",
-      "less uninstall.sh",
       "bash uninstall.sh --dry-run",
       "bash uninstall.sh",
     ],
