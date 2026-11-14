@@ -2,6 +2,10 @@
 
 import json
 import os
+import pty
+import select
+import signal
+import time
 from pathlib import Path
 import subprocess
 import tempfile
@@ -136,6 +140,56 @@ if sys.argv[1]!="-c": pathlib.Path(os.environ["MARKER"]).write_text(json.dumps(s
                 self.env["CORRUPT_PAYLOAD"] = name
                 self.run_script("uninstall.sh", "--yes", success=False)
                 self.assertFalse(self.marker.exists())
+
+    def test_piped_uninstall_reads_confirmation_from_controlling_terminal(self):
+        self.install_tool("python3", """#!/usr/bin/python3
+import os,pathlib,sys
+if sys.argv[1]=="-c": raise SystemExit(0)
+assert sys.stdin.isatty(), "confirmation stdin must be a terminal"
+print("TYPE_CONFIRM",flush=True)
+pathlib.Path(os.environ["MARKER"]).write_text(input())
+""")
+        pid, terminal = pty.fork()
+        if pid == 0:
+            os.execvpe("bash", ["bash", "-c", 'cat "$PUBLIC/uninstall.sh" | bash'], self.env)
+        status = None
+        output = b""
+        sent = False
+        try:
+            deadline = time.monotonic() + 10
+            while time.monotonic() < deadline:
+                ready, _, _ = select.select([terminal], [], [], 0.1)
+                if ready:
+                    try:
+                        output += os.read(terminal, 4096)
+                    except OSError:
+                        pass  # Linux PTYs report EIO after the slave closes.
+                if b"TYPE_CONFIRM" in output and not sent:
+                    os.write(terminal, b"UNINSTALL MVMCTL\n")
+                    sent = True
+                finished, value = os.waitpid(pid, os.WNOHANG)
+                if finished:
+                    status = value
+                    break
+            self.assertIsNotNone(status, output.decode(errors="replace"))
+            self.assertEqual(os.waitstatus_to_exitcode(status), 0, output.decode(errors="replace"))
+            self.assertEqual(self.marker.read_text(), "UNINSTALL MVMCTL")
+            self.assertEqual(list(self.downloads.iterdir()), [])
+        finally:
+            if status is None:
+                os.killpg(pid, signal.SIGKILL)
+                os.waitpid(pid, 0)
+            os.close(terminal)
+
+    def test_piped_uninstall_without_terminal_refuses_unconfirmed_deletion(self):
+        self.mock_python()
+        result = subprocess.run(["bash"], input=(ROOT / "public/uninstall.sh").read_text(),
+                                env=self.env, capture_output=True, text=True, timeout=20,
+                                start_new_session=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Interactive uninstall requires a terminal", result.stderr)
+        self.assertFalse(self.marker.exists())
+        self.assertEqual(list(self.downloads.iterdir()), [])
 
     def test_help_needs_no_download_or_privilege(self):
         for name in ("install.sh", "uninstall.sh"):

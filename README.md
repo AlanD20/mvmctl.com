@@ -70,7 +70,8 @@ MIT — see [LICENSE](LICENSE).
 The public scripts are copied unchanged into the static build. The installer downloads the selected GitHub
 release and verifies its checksum before calling `host install-system`. It does not initialize host state.
 The uninstall launcher verifies pinned hashes of the Python files under `public/scripts/0.3.0/` before running
-with administrator access. Keep those files, the launcher hashes and `source.json` in sync with the reviewed
+with administrator access. Piped interactive uninstall reads confirmation from `/dev/tty`; unattended
+removal requires explicit `--yes`. Keep those files, the launcher hashes and `source.json` in sync with the reviewed
 mvmctl source revision. Do not replace versioned payloads without updating their launcher pins.
 
 Run `python3 scripts/test-distribution.py` in the disposable QA runner for launcher behavior. The tests use

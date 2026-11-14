@@ -37,8 +37,21 @@ done
 d1b8de49891a0873b005dc5983dc8b35698ea9afbd4baa66adf16a54f11ba4f6  uninstall_files.py
 CHECKSUMS
 )
-if [[ $(id -u) == 0 ]]; then
-  python3 "$workdir/uninstall.py" "$@"
+command=(python3 "$workdir/uninstall.py" "$@")
+if [[ $(id -u) != 0 ]]; then
+  command=(sudo -- "${command[@]}")
+fi
+needs_confirmation=true
+for arg in "$@"; do
+  case "$arg" in --yes|--dry-run) needs_confirmation=false ;; esac
+done
+if [[ ! -t 0 && "$needs_confirmation" == true ]]; then
+  # Piping the launcher occupies stdin; read confirmation from the user's terminal.
+  if ! { : </dev/tty; } 2>/dev/null; then
+    printf 'Interactive uninstall requires a terminal; use --dry-run or explicitly pass --yes.\n' >&2
+    exit 1
+  fi
+  "${command[@]}" </dev/tty
 else
-  sudo -- python3 "$workdir/uninstall.py" "$@"
+  "${command[@]}"
 fi
