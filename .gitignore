@@ -28,3 +28,6 @@ pnpm-debug.log*
 
 # local agent workspace
 .sisyphus/
+
+# local verification workspace
+/.tmp/

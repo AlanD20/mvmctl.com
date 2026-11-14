@@ -1,0 +1,9 @@
+{
+  "version": "0.3.0",
+  "repository": "https://github.com/AlanD20/mvmctl",
+  "source_commit": "fd22dc1626a200c0b5f951fd4aeddf0cf0950058",
+  "sha256": {
+    "uninstall.py": "180b2fc5fb09c2f05d05916f51259329a893ff272170455314eb2c61c38de840",
+    "uninstall_files.py": "d1b8de49891a0873b005dc5983dc8b35698ea9afbd4baa66adf16a54f11ba4f6"
+  }
+}
