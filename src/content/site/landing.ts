@@ -25,10 +25,10 @@ export const navLinks = [
 ] as const;
 
 export const hero = {
-  badge: "MVMCTL · CONTAINER SPEED, VM ISOLATION",
+  badge: "MVMCTL · FIRECRACKER MICROVMS ON LINUX",
   title: "Manage microVMs with one focused CLI",
   description:
-    "mvmctl is the modern way to run microVMs — get the startup speed of containers with the security and isolation of traditional VMs. Built for developers who need lightweight, fast-booting virtual machines without the overhead.",
+    "Run Linux microVMs with separate kernels, isolated processes and protected disks. Manage networks, policies, storage and snapshots from one CLI.",
   primaryCta: { href: "#install", label: "Install mvm" },
   secondaryCta: { href: "/docs/", label: "Read docs" },
   tertiaryCta: { href: "https://github.com/AlanD20/mvmctl/releases", label: "GitHub Releases" },
@@ -62,7 +62,7 @@ export const features: Feature[] = [
     stat: "Firecracker · KVM · isolated guests",
   },
   {
-    title: "Everything you need, nothing you don't",
+    title: "One CLI, ordinary-user operation",
     description:
       "One installed mvm binary manages your VMs, kernels and images. Host setup prepares the permissions you need; everyday commands run as your own user.",
     bullets: [
@@ -81,7 +81,7 @@ export const features: Feature[] = [
     bullets: [
       "mvm exec — run commands via embedded vsock agent",
       "mvm cp — file transfer over vsock, no tar-over-SSH",
-      "mvm console — serial console relay via PTY + Unix socket",
+      "mvm console — serial access independent of the guest agent",
     ],
     icon: "terminal",
     stat: "vsock agent · console · file transfer",
@@ -89,7 +89,7 @@ export const features: Feature[] = [
   {
     title: "Environment as code",
     description:
-      "Define complete VM environments in a single YAML spec. One command to apply, one to destroy. Batch creation with atomic rollback.",
+      "Declare VMs, raw volumes, policies and readiness checks in YAML. Apply them in dependency order and tear down owned resources with explicit retention rules.",
     bullets: [
       "Declarative YAML with dependency ordering",
       "Optional atomic batch — attempts rollback on failure",
@@ -101,7 +101,7 @@ export const features: Feature[] = [
   {
     title: "Real host integration",
     description:
-      "After administrator setup, manage VMs as your own user. Each VM gets an isolated network namespace; explicit policies control traffic between guests.",
+      "After administrator setup, manage VMs as your own user. Each VM gets an isolated network namespace; explicit policies control VM traffic and access to host-gateway services.",
     bullets: [
       "One-time system installation and operator enrollment",
       "Managed networks with NAT and nftables enforcement",
@@ -113,7 +113,7 @@ export const features: Feature[] = [
   {
     title: "Custom kernels & snapshots",
     description:
-      "Pre-built Firecracker kernels or custom official builds with extra features. Snapshot a running VM and restore it later, state intact.",
+      "Use prebuilt guest kernels or build from official Linux sources. Capture RAM, the root disk and attached volumes; restore with the captured release and network identity.",
     bullets: [
       "Firecracker CI kernels or custom builds with --features",
       "Kernel config overlays for advanced use cases",
@@ -123,9 +123,9 @@ export const features: Feature[] = [
     stat: "kernel builds · snapshots · restore",
   },
   {
-    title: "SSH that just works",
+    title: "Managed SSH keys",
     description:
-      "Import or generate keys with mvm key, set defaults — every VM picks them up automatically. No cloud-init edits, no post-bake injection.",
+      "Generate or import SSH keys, then select them when creating a VM. Public keys reach the guest through supported direct setup or an explicitly enabled cloud-init mode.",
     bullets: [
       "mvm key import — add existing host keys to the cache",
       "mvm key create — generate keypairs, set as default",
@@ -141,12 +141,12 @@ export const installMethods: InstallMethod[] = [
   {
     id: "binary",
     title: "Prebuilt binary",
-    subtitle: "For v0.3.0 once published · no Go toolchain needed",
+    subtitle: "For v0.3.0 once published · verifies release checksums",
     icon: "download",
     steps: [
-      "curl -fL -o ./mvm https://github.com/AlanD20/mvmctl/releases/download/v0.3.0/mvm",
-      "chmod +x ./mvm",
-      "sudo ./mvm host install-system",
+      "curl -fsSLo install.sh https://mvmctl.aland20.com/install.sh",
+      "less install.sh",
+      "bash install.sh --version 0.3.0",
       "sudo /usr/local/bin/mvm host init",
     ],
   },
@@ -157,7 +157,8 @@ export const installMethods: InstallMethod[] = [
     icon: "download",
     steps: [
       "yay -S mvmctl-bin",
-      "mvm --help",
+      "sudo /usr/bin/mvm host install-system",
+      "sudo /usr/local/bin/mvm host init",
     ],
   },
   {

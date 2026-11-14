@@ -10,6 +10,7 @@ import {
   prerequisites,
   troubleshooting,
   hostInitSections,
+  uninstallSections,
   firstVmSections,
   vmCreateExplanation,
   vmCreateFlagLines,
@@ -155,6 +156,21 @@ import { getIcon } from "../../lib/icons";
     ))}
   </section>
 
+  <!-- UNINSTALL -->
+  <section id='uninstall' class='doc-section' data-anchor-title='Uninstall / reinstall'>
+    <h2>Uninstall / reinstall</h2>
+    {uninstallSections.map((section) => (
+      <div class="sub-section">
+        <h3>{section.title}</h3>
+        <p set:html={section.description} />
+        <div class='inline-block' data-anim='docs-card'>
+          <CodeBlock lines={section.code} compact={true} />
+        </div>
+        <Callout text={section.callout} />
+      </div>
+    ))}
+  </section>
+
   <!-- FIRST VM -->
   <section id='first-vm' class='doc-section' data-anchor-title='Create your first VM'>
     <h2>Create your first VM</h2>
@@ -177,7 +193,7 @@ import { getIcon } from "../../lib/icons";
     <h2>mvm vm create</h2>
     <p>{vmCreateExplanation.whatItDoes}</p>
 
-    <h3 id='vm-create-flags'>All flags</h3>
+    <h3 id='vm-create-flags'>Creation options</h3>
     <div class='inline-block' data-anim='docs-card'>
       <CodeBlock lines={vmCreateFlagLines} compact={true} />
     </div>
