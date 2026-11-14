@@ -226,7 +226,18 @@ export const hostInitSections = [
     description: "Inspect host setup and available capacity before creating VMs.",
     code: ["mvm host status", "mvm host info"],
     callout:
-      "Host cleanup and reset are administrator operations. They refuse active or uncertain managed state; they are not a shortcut for deleting an older installation.",
+      "Host reset is an administrator operation. Cleanup and reset refuse uncertain managed state; they are not a shortcut for deleting an older installation.",
+  },
+  {
+    title: "Uninstall before a clean reinstall",
+    description:
+      "From a source checkout matching your installed version, preview the administrator script, then confirm removal of every enrolled operator's managed data.",
+    code: [
+      "sudo python3 scripts/uninstall.py --dry-run",
+      "sudo python3 scripts/uninstall.py",
+    ],
+    callout:
+      'This deletes VMs, artifacts and managed key copies. External asset mirrors, original external SSH files and shared packages remain. Custom paths and cleanup refusals are covered in the <a href="https://github.com/AlanD20/mvmctl/blob/0.3.0-release/docs/UNINSTALL.md">uninstall guide</a>.',
   },
 ];
 
