@@ -1,16 +1,6 @@
 import { injectCopyButtons } from "./copy";
 
-for (const pre of document.querySelectorAll(".archived-manual pre")) {
-  if (!pre.querySelector("code")) continue;
-  const wrapper = document.createElement("div");
-  wrapper.className = "archive-code";
-  const actions = document.createElement("div");
-  actions.className = "code-top-actions";
-  pre.replaceWith(wrapper);
-  wrapper.append(actions, pre);
-}
-
-injectCopyButtons(".code-wrap, .archive-code");
+injectCopyButtons();
 
 const nav = document.querySelector<HTMLElement>(".right-toc");
 const links = Array.from(document.querySelectorAll<HTMLAnchorElement>(
