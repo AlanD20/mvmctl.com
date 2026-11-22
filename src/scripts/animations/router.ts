@@ -1,4 +1,3 @@
-import { initDocsAnimations } from "./docs";
 import { initHomeAnimations } from "./home";
 
 const normalizePath = (path: string) => {
@@ -103,11 +102,9 @@ const bindAnchorOffsetScroll = () => {
 const runRouteAnimations = () => {
   const path = window.location.pathname;
 
-  if (path.startsWith("/docs")) {
-    initDocsAnimations();
-  } else {
-    initHomeAnimations();
-  }
+  if (path.startsWith("/docs")) return;
+
+  initHomeAnimations();
 
   if ((path === "/feature" || path === "/features") && !window.location.hash) {
     window.setTimeout(() => scrollToSection("features"), 90);
@@ -117,9 +114,7 @@ const runRouteAnimations = () => {
     window.setTimeout(() => scrollToSection("install"), 90);
   }
 
-  if (!path.startsWith("/docs")) {
-    scrollToHash();
-  }
+  scrollToHash();
   bindAnchorOffsetScroll();
 
   window.requestAnimationFrame(() => {

@@ -584,7 +584,9 @@ const { guide = "quickstart" } = Astro.props;
 </article>
 
 <script>
-  import { icons } from "../../lib/icons";
+  import { faCheck, faCircleInfo, faLink } from "@fortawesome/free-solid-svg-icons";
+
+  const headingIcons = { check: faCheck, info: faCircleInfo, link: faLink };
 
   const initDocsTabs = () => {
     const packageTabs = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-package-tab]"));
@@ -606,7 +608,7 @@ const { guide = "quickstart" } = Astro.props;
 
   const initHeadingAnchors = () => {
     const setHeadingIcon = (slot: HTMLElement, iconName: "link" | "check" | "info") => {
-      const [width, height, , , pathData] = icons[iconName].icon;
+      const [width, height, , , pathData] = headingIcons[iconName].icon;
       const pathList = Array.isArray(pathData) ? pathData : [pathData];
       while (slot.firstChild) slot.removeChild(slot.firstChild);
       const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");

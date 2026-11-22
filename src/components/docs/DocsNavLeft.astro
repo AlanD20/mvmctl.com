@@ -14,6 +14,7 @@ const { canonicalPath, items = docsNav } = Astro.props;
 
 <aside class="left-nav">
   <DocsVersionSelector {canonicalPath} />
+  <a class="ai-reference" href="/llm.txt">AI reference (llm.txt)</a>
   <nav aria-label="Documentation sections">
     <ul>
       {items.map((item) => {
@@ -46,6 +47,12 @@ const { canonicalPath, items = docsNav } = Astro.props;
 </aside>
 
 <style>
+  .ai-reference {
+    display: block;
+    margin: 0.5rem 0 0.75rem;
+    font-size: 0.8rem;
+  }
+
   .left-nav {
     position: sticky;
     top: calc(var(--header-height) + 3rem);

@@ -1,8 +1,8 @@
+import { injectCopyButtons } from "../copy";
 import {
   animateInstallTabs,
   animateMicroInteractions,
   heroEntrance,
-  injectCopyButtons,
   revealCode,
   revealGroup,
   revealUtilityHooks,

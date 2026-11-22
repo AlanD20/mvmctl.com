@@ -1,6 +1,5 @@
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { icons } from "../../lib/icons";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -23,7 +22,6 @@ type MotionState =
 
 const hoverCleanups: HoverCleanup[] = [];
 let motionDisabled = false;
-let cleanupDocsSpy: (() => void) | undefined;
 
 const shouldReduceMotion = () => {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -194,98 +192,6 @@ export const revealCode = (selector = "[data-anim='code-block']") => {
   });
 };
 
-export const setupDocsSpy = () => {
-  const links = Array.from(
-    document.querySelectorAll<HTMLAnchorElement>("[data-docs-left-link], [data-docs-toc-link]"),
-  );
-
-  if (!links.length) {
-    return;
-  }
-
-  const getThreshold = () => getAnchorOffset() + 80;
-
-  const scrollRightNav = (link: HTMLAnchorElement) => {
-    if (!link.classList.contains("active")) return;
-    if (!link.closest(".right-toc")) return;
-    const toc = link.closest<HTMLElement>(".right-toc");
-    if (!toc) return;
-    const lr = link.getBoundingClientRect();
-    const tr = toc.getBoundingClientRect();
-    if (lr.bottom > tr.bottom || lr.top < tr.top) {
-      toc.scrollTop = toc.scrollTop + lr.top - tr.top - 8;
-    }
-  };
-
-  const updateSpy = () => {
-    const threshold = getThreshold();
-    const scrollBottom = window.scrollY + window.innerHeight;
-    const docHeight = document.documentElement.scrollHeight;
-    const nearBottom = scrollBottom >= docHeight - 150;
-
-    /* Find active h2 section — the most recent one whose top is above threshold */
-    const sections = Array.from(document.querySelectorAll<HTMLElement>("main section[id]"));
-    const activeSection = sections
-      .map((section) => ({ section, top: section.getBoundingClientRect().top }))
-      .filter(({ top }) => top <= threshold)
-      .sort((a, b) => b.top - a.top)[0]?.section;
-
-    /* Find active h3 — only within the active section */
-    let finalH3: HTMLElement | null = null;
-    if (activeSection) {
-      const sectionH3s = Array.from(activeSection.querySelectorAll<HTMLElement>("h3[id]"));
-      finalH3 = sectionH3s
-        .map((h3) => ({ h3, top: h3.getBoundingClientRect().top }))
-        .filter(({ top }) => top <= threshold)
-        .sort((a, b) => b.top - a.top)[0]?.h3 ?? null;
-    }
-    /* Near-bottom fallback for h3 */
-    if (!finalH3 && nearBottom && activeSection) {
-      const sectionH3s = Array.from(activeSection.querySelectorAll<HTMLElement>("h3[id]"));
-      finalH3 = sectionH3s[sectionH3s.length - 1] ?? null;
-    }
-
-    /* Near-bottom fallback for section */
-    const finalSection = activeSection || (nearBottom ? sections[sections.length - 1] : null);
-
-    links.forEach((link) => {
-      const target = link.getAttribute("href")?.replace("#", "");
-      if (!target) return;
-
-      /* Match against:
-         - active section (for top-level TOC entries)
-         - active h3 (for nested TOC entries)
-         - any h3 in the page (for level-2 TOC entries that point to h3 anchors)
-      */
-      /* Match: active section ID or active h3 ID */
-      const shouldBeActive =
-        (finalSection && target === finalSection.id) ||
-        (finalH3 && target === finalH3.id);
-
-      link.classList.toggle("active", !!shouldBeActive);
-      if (shouldBeActive) scrollRightNav(link);
-    });
-  };
-
-  let frame = 0;
-  const scheduleSpy = () => {
-    if (frame) return;
-    frame = requestAnimationFrame(() => {
-      frame = 0;
-      updateSpy();
-    });
-  };
-
-  window.addEventListener("scroll", scheduleSpy, { passive: true });
-  window.addEventListener("hashchange", scheduleSpy);
-  cleanupDocsSpy = () => {
-    window.removeEventListener("scroll", scheduleSpy);
-    window.removeEventListener("hashchange", scheduleSpy);
-    cancelAnimationFrame(frame);
-  };
-  updateSpy();
-};
-
 export const animateInstallTabs = () => {
   if (!hasHover() || motionDisabled) {
     return;
@@ -310,94 +216,6 @@ export const animateInstallTabs = () => {
     tab.addEventListener("mouseenter", onEnter);
     tab.addEventListener("mouseleave", onLeave);
     hoverCleanups.push({ element: tab, onEnter, onLeave });
-  });
-};
-
-export const injectCopyButtons = (selector = ".code-wrap") => {
-  const wrappers = Array.from(document.querySelectorAll<HTMLElement>(selector));
-
-  const setCopyIcon = (slot: SVGSVGElement, iconName: "copy" | "check") => {
-    const [w, h, , , pathData] = icons[iconName].icon;
-    slot.setAttribute("viewBox", `0 0 ${w} ${h}`);
-    while (slot.firstChild) {
-      slot.removeChild(slot.firstChild);
-    }
-
-    const pathList = Array.isArray(pathData) ? pathData : [pathData];
-    pathList.forEach((pathItem) => {
-      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path.setAttribute("d", pathItem);
-      slot.appendChild(path);
-    });
-  };
-
-  wrappers.forEach((wrapper) => {
-    const existing = wrapper.querySelector<HTMLElement>(".copy-btn-wrap");
-    if (existing) {
-      return;
-    }
-
-    const pre = wrapper.querySelector("pre");
-    const code = wrapper.querySelector("code");
-    if (!pre || !code) {
-      return;
-    }
-
-    const actionSlot = wrapper.querySelector<HTMLElement>(".code-top-actions");
-    if (!actionSlot) {
-      return;
-    }
-
-    const wrap = document.createElement("span");
-    wrap.className = "copy-btn-wrap";
-
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "copy-btn";
-    btn.setAttribute("aria-label", "Copy code");
-
-    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    icon.setAttribute("width", "12");
-    icon.setAttribute("height", "12");
-    icon.setAttribute("fill", "currentColor");
-
-    setCopyIcon(icon, "copy");
-    btn.append(icon);
-    wrap.append(btn);
-    wrapper.classList.add("with-copy");
-    actionSlot.appendChild(wrap);
-
-    let resetTimer = 0;
-
-    btn.addEventListener("click", async () => {
-      if (resetTimer) {
-        window.clearTimeout(resetTimer);
-      }
-
-      btn.classList.remove("failed", "copied");
-      setCopyIcon(icon, "copy");
-
-      try {
-        if (!window.isSecureContext) {
-          throw new Error("Clipboard API requires secure context");
-        }
-
-        if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
-          throw new Error("Clipboard API not available");
-        }
-        await navigator.clipboard.writeText(code.textContent ?? "");
-        btn.classList.add("copied");
-        setCopyIcon(icon, "check");
-
-        resetTimer = window.setTimeout(() => {
-          btn.classList.remove("copied");
-          setCopyIcon(icon, "copy");
-        }, 1100);
-      } catch {
-        btn.classList.add("failed");
-        setCopyIcon(icon, "copy");
-      }
-    });
   });
 };
 
@@ -535,8 +353,6 @@ export const setupLandingNavSpy = () => {
 };
 
 export const clearMotionListeners = () => {
-  cleanupDocsSpy?.();
-  cleanupDocsSpy = undefined;
   hoverCleanups.forEach(({ element, onEnter, onLeave }) => {
     element.removeEventListener("mouseenter", onEnter);
     element.removeEventListener("mouseleave", onLeave);

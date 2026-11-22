@@ -25,12 +25,12 @@ export const navLinks = [
 ] as const;
 
 export const hero = {
-  badge: "MVMCTL · FIRECRACKER MICROVMS ON LINUX",
-  title: "Manage microVMs with one focused CLI",
+  badge: "MVMCTL 0.3 · PRERELEASE",
+  title: "Run Firecracker microVMs on Linux",
   description:
     "Run Linux microVMs with separate kernels, isolated processes and protected disks. Manage networks, policies, storage and snapshots from one CLI.",
   primaryCta: { href: "#install", label: "Install mvm" },
-  secondaryCta: { href: "/docs/", label: "Read docs" },
+  secondaryCta: { href: "/docs/0.3/", label: "Read the quickstart" },
   tertiaryCta: { href: "https://github.com/AlanD20/mvmctl/releases", label: "GitHub Releases" },
   quaternaryCta: { href: "https://github.com/AlanD20/mvmctl", label: "Repository" },
   metrics: [
@@ -56,7 +56,7 @@ export const features: Feature[] = [
     bullets: [
       "Dedicated kernel per VM",
       "Isolated VM processes and protected disks",
-      "mvm vm create && mvm ssh — works like docker run, but with KVM",
+      "Create VMs from reusable image and kernel assets",
     ],
     icon: "branch",
     stat: "Firecracker · KVM · isolated guests",
@@ -92,7 +92,7 @@ export const features: Feature[] = [
       "Declare VMs, raw volumes, policies and readiness checks in YAML. Apply them in dependency order and tear down owned resources with explicit retention rules.",
     bullets: [
       "Declarative YAML with dependency ordering",
-      "Optional atomic batch — attempts rollback on failure",
+      "Define readiness checks and resource retention",
       "mvm env apply / mvm env destroy",
     ],
     icon: "layers",
@@ -162,8 +162,7 @@ export const installMethods: InstallMethod[] = [
 ];
 
 export const docsTeaser = {
-  title: "Installation + first-boot docs",
-  description:
-    "Follow a concise path from Linux prerequisites to host initialization and your first running VM.",
-  cta: { href: "/docs/", label: "Open documentation" },
+  title: "Documentation",
+  description: "Set up your Linux host, launch a VM, and automate environments with YAML.",
+  cta: { href: "/docs/0.3/", label: "0.3 quickstart" },
 } as const;

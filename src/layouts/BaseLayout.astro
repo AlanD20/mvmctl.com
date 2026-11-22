@@ -57,7 +57,7 @@ const isActiveLink = (href: string) => {
     <meta name='viewport' content='width=device-width' />
     <link rel='icon' type='image/svg+xml' href='/favicon.svg' />
     <link rel='canonical' href={canonicalUrl} />
-    <ClientRouter />
+    {!isDocsPage && <ClientRouter />}
     <link rel='preconnect' href='https://fonts.googleapis.com' />
     <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin />
     <link
@@ -81,9 +81,11 @@ const isActiveLink = (href: string) => {
   <body>
     <div class='bg-orb orb-a' aria-hidden='true'></div>
     <div class='bg-orb orb-b' aria-hidden='true'></div>
-    <div class='scroll-progress' aria-hidden='true'>
-      <span data-anim='scroll-progress-bar'></span>
-    </div>
+    {!isDocsPage && (
+      <div class='scroll-progress' aria-hidden='true'>
+        <span data-anim='scroll-progress-bar'></span>
+      </div>
+    )}
     <header class='nav-wrap' data-anim='site-header'>
       <div class='site-header'>
         <a href='/' class='brand'>
@@ -315,7 +317,9 @@ const isActiveLink = (href: string) => {
       })();
     </script>
     <script>
-      import "../scripts/animations/router";
+      if (!window.location.pathname.startsWith("/docs")) {
+        void import("../scripts/animations/router");
+      }
     </script>
   </body>
 </html>
