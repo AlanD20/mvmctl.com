@@ -1,17 +1,19 @@
 ---
 import Icon from "../ui/Icon.astro";
-import { docsNav, docsVersionPath, type DocsNavItem } from "../../content/site/docs";
+import DocsVersionSelector from "./DocsVersionSelector.astro";
+import { docsNav, type DocsNavItem } from "../../content/site/docs";
 import { getIcon } from "../../lib/icons";
 
 interface Props {
+  canonicalPath: string;
   items?: readonly DocsNavItem[];
 }
 
-const { items = docsNav } = Astro.props;
+const { canonicalPath, items = docsNav } = Astro.props;
 ---
 
 <aside class="left-nav" data-anim="docs-sidebar">
-  <p class="title"><a href={`${docsVersionPath}/`}>mvmctl 0.3 · prerelease</a></p>
+  <DocsVersionSelector {canonicalPath} />
   <nav aria-label="Documentation sections">
     <ul>
       {items.map((item) => {
@@ -56,15 +58,6 @@ const { items = docsNav } = Astro.props;
 
   .left-nav::-webkit-scrollbar {
     display: none;
-  }
-
-  .title {
-    margin: 0 0 0.5rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-text-subtle);
   }
 
   ul {
@@ -136,7 +129,7 @@ const { items = docsNav } = Astro.props;
       padding: 0.75rem;
       border: 1px solid var(--color-border-light);
       border-radius: 0.75rem;
-      overflow: hidden;
+      overflow-y: auto;
       background: var(--color-overlay-dark-94);
       backdrop-filter: blur(10px);
       box-shadow: 0 10px 26px var(--color-overlay-black-32);
@@ -153,15 +146,6 @@ const { items = docsNav } = Astro.props;
       pointer-events: auto;
       visibility: visible;
       transition: opacity 180ms ease, transform 180ms ease, visibility 0s linear 0s;
-    }
-
-    .left-nav .title {
-      margin-bottom: 0.75rem;
-    }
-
-    .left-nav > nav {
-      overflow-y: auto;
-      max-height: calc(100vh - var(--header-height) - 5rem);
     }
 
     .left-nav ul {

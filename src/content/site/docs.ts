@@ -33,10 +33,14 @@ export type TocItem = {
 export const docsMeta = {
   title: "mvmctl 0.3.0 documentation",
   intro:
-    "This guide covers the upcoming 0.3.0 release. If you are coming from 0.2.x, follow the clean-install instructions and start with fresh managed state.",
+    "If you are coming from 0.2.x, follow the clean-install instructions and start with fresh managed state.",
 } as const;
 
 export const docsVersionPath = "/docs/0.3";
+
+export const docsVersions = [
+  { label: "0.3", path: docsVersionPath, prerelease: true },
+] as const;
 
 export const policyGuideLinks: readonly DocsNavItem[] = [
   { href: `${docsVersionPath}/networking/`, label: "Networking", icon: "network" },
@@ -166,7 +170,6 @@ export const docsNav: readonly DocsNavItem[] = [
 export const prerequisites = [
   "Linux host with KVM support — check with <code>ls /dev/kvm</code>. Runtime testing for 0.3.0 covers x86_64; aarch64 is not yet qualified.",
   "Access to <code>/dev/kvm</code> and membership in the <code>kvm</code> group",
-  "Go 1.26.3+ to build from source (optional — binary install does not require Go)",
   "Administrator access for system installation, host setup and binary upgrades",
   "Kernel nftables support for both inet and bridge families; the nft command is not required",
   "The matching Firecracker/Jailer 1.17.0 pair",
@@ -196,7 +199,7 @@ export const installMethods: readonly CommandBlock[] = [
   {
     id: "binary",
     title: "Install script",
-    description: "After v0.3.0 is published, download and run the installer. It requires Bash, curl and sha256sum, verifies the release checksum, and installs the system binary without erasing managed data.",
+    description: "The installer requires Bash, curl and sha256sum. It verifies the release checksum and installs the system binary without erasing managed data.",
     icon: "download",
     code: [
       "curl -fsSL https://mvmctl.aland20.com/install.sh | bash -s -- --version 0.3.0",
@@ -212,19 +215,6 @@ export const installMethods: readonly CommandBlock[] = [
       "yay -S mvmctl-bin",
       "sudo /usr/bin/mvm host install-system",
       "/usr/local/bin/mvm --version",
-    ],
-  },
-  {
-    id: "source",
-    title: "Source",
-    description: "For local development or contributing. Requires Go 1.26.3+.",
-    icon: "fileCode",
-    code: [
-      "git clone --branch 0.3.0-release https://github.com/AlanD20/mvmctl",
-      "cd mvmctl",
-      "./scripts/build.sh release --version 0.3.0-rc.1",
-      "sudo ./dist/mvm host install-system",
-      "/usr/local/bin/mvm --help",
     ],
   },
 ] as const;
@@ -1272,9 +1262,6 @@ export const prerequisitesIntro =
 
 export const prerequisitesSubIntro =
   "mvmctl depends on a few system tools for networking, image handling, and cloud-init:";
-
-export const prerequisitesCallout =
-  "0.3.0 is not published yet. Use the source instructions for development. The hosted installer requests 0.3.0 explicitly and will not fall back to an older release.";
 
 export const installIntro =
   "Install one system-wide binary, then enroll your operator account. Use fresh managed state for 0.3.0; preserve anything you need from an older installation before replacing it.";

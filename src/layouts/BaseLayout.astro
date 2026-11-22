@@ -217,8 +217,9 @@ const isActiveLink = (href: string) => {
                 docsToggle.classList.toggle("active", open);
                 docsToggle.setAttribute("aria-expanded", open ? "true" : "false");
               });
-              leftNav.addEventListener("click", function() {
+              leftNav.addEventListener("click", function(e) {
                 /* Close left nav on mobile when a nav link is clicked */
+                if (!(e.target instanceof Element) || !e.target.closest("a")) return;
                 if (window.innerWidth <= 980 && leftNav.classList.contains("mobile-open")) {
                   leftNav.classList.remove("mobile-open");
                   docsToggle.classList.remove("active");

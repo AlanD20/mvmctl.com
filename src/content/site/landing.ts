@@ -141,7 +141,7 @@ export const installMethods: InstallMethod[] = [
   {
     id: "binary",
     title: "Prebuilt binary",
-    subtitle: "For v0.3.0 once published · verifies release checksums",
+    subtitle: "Installs v0.3.0 and verifies the release checksum",
     icon: "download",
     steps: [
       "curl -fsSL https://mvmctl.aland20.com/install.sh | bash -s -- --version 0.3.0",
@@ -156,19 +156,6 @@ export const installMethods: InstallMethod[] = [
     steps: [
       "yay -S mvmctl-bin",
       "sudo /usr/bin/mvm host install-system",
-      "sudo /usr/local/bin/mvm host init",
-    ],
-  },
-  {
-    id: "source",
-    title: "From source",
-    subtitle: "For development and contribution",
-    icon: "fileCode",
-    steps: [
-      "git clone --branch 0.3.0-release https://github.com/AlanD20/mvmctl",
-      "cd mvmctl",
-      "./scripts/build.sh release --version 0.3.0-rc.1",
-      "sudo ./dist/mvm host install-system",
       "sudo /usr/local/bin/mvm host init",
     ],
   },

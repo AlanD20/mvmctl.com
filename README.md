@@ -43,10 +43,11 @@ pnpm preview
 
 ## Documentation versions
 
-Use a major/minor path such as `/docs/0.3/` for each documented release series. Keep earlier version URLs
-available when the default changes. During prerelease, label the guide and pin installation examples to the
-version they describe. Once the release is published, remove the prerelease label and point the default docs
-to the latest stable version. The environment file's `version` identifies its schema.
+Use a major/minor path such as `/docs/0.3/` for each documented release series. Register each series in
+`docsVersions` in [`src/content/site/docs.ts`](src/content/site/docs.ts) to add it to the docs version selector.
+Keep earlier version URLs available when the default changes. Mark prerelease series in `docsVersions` and
+pin installation examples to the version they describe. After publication, update the series status and point
+the default docs to the latest stable version. The environment file's `version` identifies its schema.
 
 ## Project structure
 

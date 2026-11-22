@@ -17,7 +17,7 @@ const { title, description, canonicalPath, items, toc } = Astro.props;
 
 <BaseLayout {title} {description} {canonicalPath}>
   <div class="docs-shell">
-    <DocsNavLeft {items} />
+    <DocsNavLeft {canonicalPath} {items} />
     <slot />
     <DocsOnThisPage {toc} />
   </div>
