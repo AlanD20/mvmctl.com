@@ -1,18 +1,16 @@
 ---
 import DocsPage from "../../../components/docs/DocsPage.astro";
-import DocsMarkdownArticle from "../../../components/docs/DocsMarkdownArticle.astro";
-import { Content, getHeadings } from "../../../content/reference/0.2/quickstart.md";
-import { archiveNav, archivePath, makeArchiveToc, makeArchiveNav } from "../../../content/site/docs-archive";
-
-const toc = makeArchiveToc(getHeadings());
+import DocsQuickstartArticle from "../../../components/docs/DocsQuickstartArticle.astro";
+import { archiveNav, archivePath } from "../../../content/site/docs-archive";
+import { quickstart02Nav, quickstart02Toc } from "../../../content/site/quickstart-0.2";
 ---
 
 <DocsPage
   title="mvmctl 0.2 documentation"
   description="Install mvmctl v0.2.0 and create your first microVM."
   canonicalPath={`${archivePath}/`}
-  items={[...archiveNav, ...makeArchiveNav(toc.filter(({ id }) => id !== "references"))]}
-  {toc}
+  items={[...quickstart02Nav, ...archiveNav.slice(1)]}
+  toc={quickstart02Toc}
 >
-  <DocsMarkdownArticle><Content /></DocsMarkdownArticle>
+  <DocsQuickstartArticle version="0.2" />
 </DocsPage>

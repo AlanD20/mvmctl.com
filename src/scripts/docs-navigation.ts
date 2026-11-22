@@ -1,6 +1,8 @@
 import { injectCopyButtons } from "./copy";
+import { addDocsHeadingLinks } from "./docs-heading-links";
 
 injectCopyButtons();
+addDocsHeadingLinks();
 
 const nav = document.querySelector<HTMLElement>(".right-toc");
 const links = Array.from(document.querySelectorAll<HTMLAnchorElement>(

@@ -55,12 +55,31 @@ import {
   debugMode,
   helpSection,
 } from "../../content/site/docs";
+import { quickstart02 } from "../../content/site/quickstart-0.2";
 import { getIcon } from "../../lib/icons";
 interface Props {
   guide?: "quickstart" | "reference" | "networking" | "guest-control" | "policies";
+  version?: "0.2" | "0.3";
 }
 
-const { guide = "quickstart" } = Astro.props;
+const { guide = "quickstart", version = "0.3" } = Astro.props;
+const archived = version === "0.2";
+const quickstart = archived ? quickstart02 : {
+  meta: docsMeta,
+  prerequisites,
+  distroPackages,
+  packageIntro: prerequisitesSubIntro,
+  installIntro,
+  installMethods,
+  installCallout,
+  hostInitIntro,
+  hostInitSections,
+  firstVmIntro,
+  firstVmSections,
+};
+const anchors = archived
+  ? { prerequisites: "before-you-begin", install: "install-mvm", host: "initialize-the-host", vm: "create-your-first-vm" }
+  : { prerequisites: "prerequisites", install: "install", host: "host-initialize", vm: "first-vm" };
 
 ---
 
@@ -69,20 +88,20 @@ const { guide = "quickstart" } = Astro.props;
   <!-- OVERVIEW -->
   <section id='overview' class='doc-section' data-anchor-title='Overview'>
     <p class='kicker'>mvmctl docs</p>
-    <h1>{docsMeta.title}</h1>
-    <p class='lead'>{docsMeta.intro}</p>
+    <h1>{quickstart.meta.title}</h1>
+    <p class='lead'>{quickstart.meta.intro}</p>
   </section>
 
   <!-- PREREQUISITES -->
-  <section id='prerequisites' class='doc-section' data-anchor-title='Before you begin'>
+  <section id={anchors.prerequisites} class='doc-section' data-anchor-title='Before you begin'>
     <h2>Before you begin</h2>
     <p set:html={prerequisitesIntro} />
     <ul>
-      {prerequisites.map((item) => <li set:html={item} />)}
+      {quickstart.prerequisites.map((item) => <li set:html={item} />)}
     </ul>
 
     <h3>System packages</h3>
-    <p set:html={prerequisitesSubIntro} />
+    <p set:html={quickstart.packageIntro} />
 
     <div class='terminal-shell' data-anim='docs-card-grid'>
       <div class='terminal-tabs' role='tablist' aria-label='Linux distro packages' data-anim='docs-package-tabs'>
@@ -102,24 +121,24 @@ const { guide = "quickstart" } = Astro.props;
       <div class='terminal-frame package-panels'>
         <div class='package-panel active' data-package-panel data-package-id='ubuntu' role='tabpanel'
           id='pkg-panel-ubuntu' aria-labelledby='pkg-tab-ubuntu'>
-          <CodeBlock lines={distroPackages.ubuntu.command} compact={true} />
+          <CodeBlock lines={quickstart.distroPackages.ubuntu.command} compact={true} />
         </div>
         <div class='package-panel' data-package-panel data-package-id='arch' role='tabpanel'
           id='pkg-panel-arch' aria-labelledby='pkg-tab-arch' hidden>
-          <CodeBlock lines={distroPackages.arch.command} compact={true} />
+          <CodeBlock lines={quickstart.distroPackages.arch.command} compact={true} />
         </div>
       </div>
     </div>
   </section>
 
   <!-- INSTALL -->
-  <section id='install' class='doc-section' data-anchor-title='Install mvm'>
+  <section id={anchors.install} class='doc-section' data-anchor-title='Install mvm'>
     <h2>Install mvm</h2>
-    <p set:html={installIntro} />
+    <p set:html={quickstart.installIntro} />
 
     <div class='terminal-shell' data-anim='docs-card-grid'>
       <div class='terminal-tabs' role='tablist' aria-label='Install options' data-anim='docs-install-tabs'>
-        {installMethods.map((method, index) => (
+        {quickstart.installMethods.map((method, index) => (
           <button class={`terminal-tab install-tab ${index === 0 ? "active" : ""}`} type='button' role='tab'
             aria-selected={index === 0 ? "true" : "false"}
             id={`docs-install-tab-${method.id}`}
@@ -131,7 +150,7 @@ const { guide = "quickstart" } = Astro.props;
         ))}
       </div>
       <div class='terminal-frame install-panels'>
-        {installMethods.map((method, index) => (
+        {quickstart.installMethods.map((method, index) => (
           <div class={`install-panel ${index === 0 ? "active" : ""}`}
             data-doc-install-panel data-doc-install-id={method.id}
             role='tabpanel' id={`docs-install-panel-${method.id}`}
@@ -144,15 +163,15 @@ const { guide = "quickstart" } = Astro.props;
       </div>
     </div>
 
-    <Callout text={installCallout} />
+    <Callout text={quickstart.installCallout} />
   </section>
 
   <!-- HOST INIT -->
-  <section id='host-initialize' class='doc-section' data-anchor-title='Initialize host'>
+  <section id={anchors.host} class='doc-section' data-anchor-title='Initialize host'>
     <h2>Initialize host</h2>
-    <p set:html={hostInitIntro} />
+    <p set:html={quickstart.hostInitIntro} />
 
-    {hostInitSections.map((section) => (
+    {quickstart.hostInitSections.map((section) => (
       <div class="sub-section">
         <h3>{section.title}</h3>
         {section.description ? <p set:html={section.description} /> : null}
@@ -167,7 +186,7 @@ const { guide = "quickstart" } = Astro.props;
   </section>
 
   <!-- UNINSTALL -->
-  <section id='uninstall' class='doc-section' data-anchor-title='Uninstall / reinstall'>
+  {!archived && <section id='uninstall' class='doc-section' data-anchor-title='Uninstall / reinstall'>
     <h2>Uninstall / reinstall</h2>
     {uninstallSections.map((section) => (
       <div class="sub-section">
@@ -179,14 +198,14 @@ const { guide = "quickstart" } = Astro.props;
         <Callout text={section.callout} />
       </div>
     ))}
-  </section>
+  </section>}
 
   <!-- FIRST VM -->
-  <section id='first-vm' class='doc-section' data-anchor-title='Create your first VM'>
+  <section id={anchors.vm} class='doc-section' data-anchor-title='Create your first VM'>
     <h2>Create your first VM</h2>
-    <p set:html={firstVmIntro} />
+    <p set:html={quickstart.firstVmIntro} />
 
-    {firstVmSections.map((section) => (
+    {quickstart.firstVmSections.map((section) => (
       <div class="sub-section">
         <h3>{section.title}</h3>
         <p set:html={section.description} />
@@ -198,6 +217,16 @@ const { guide = "quickstart" } = Astro.props;
     ))}
   </section>
 
+  {archived ? (
+    <section id="references" class="doc-section" data-anchor-title="References">
+      <h2>References</h2>
+      <ul>
+        <li><a href="/docs/0.2/reference/">Command reference</a></li>
+        <li><a href="/docs/0.2/env-spec/">Environment blueprint reference</a></li>
+        <li><a href="https://github.com/AlanD20/mvmctl/blob/v0.2.0/docs/TROUBLESHOOTING.md">Troubleshooting</a></li>
+      </ul>
+    </section>
+  ) : <>
   <section id="network-management" class="doc-section" data-anchor-title="Networking">
     <h2>Networking and policies</h2>
     <p><a href={`${docsVersionPath}/networking/`}>Create a network</a> or <a href={`${docsVersionPath}/policies/`}>grant traffic and exec access</a>.</p>
@@ -215,6 +244,7 @@ const { guide = "quickstart" } = Astro.props;
       </ul>
     </details>
   </section>
+  </>}
   </>}
   {guide === "reference" && <>
   <section id="reference-overview" class="doc-section">
@@ -584,10 +614,6 @@ const { guide = "quickstart" } = Astro.props;
 </article>
 
 <script>
-  import { faCheck, faCircleInfo, faLink } from "@fortawesome/free-solid-svg-icons";
-
-  const headingIcons = { check: faCheck, info: faCircleInfo, link: faLink };
-
   const initDocsTabs = () => {
     const packageTabs = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-package-tab]"));
     const packagePanels = Array.from(document.querySelectorAll<HTMLElement>("[data-package-panel]"));
@@ -606,60 +632,7 @@ const { guide = "quickstart" } = Astro.props;
     installTabs.forEach((tab) => { if (tab.dataset.tabsBound === "true") return; tab.dataset.tabsBound = "true"; tab.addEventListener("click", () => { if (tab.dataset.docInstallTarget) activateInstall(tab.dataset.docInstallTarget); }); });
   };
 
-  const initHeadingAnchors = () => {
-    const setHeadingIcon = (slot: HTMLElement, iconName: "link" | "check" | "info") => {
-      const [width, height, , , pathData] = headingIcons[iconName].icon;
-      const pathList = Array.isArray(pathData) ? pathData : [pathData];
-      while (slot.firstChild) slot.removeChild(slot.firstChild);
-      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      svg.setAttribute("viewBox", `0 0 ${width} ${height}`); svg.setAttribute("width", "12"); svg.setAttribute("height", "12"); svg.setAttribute("fill", "currentColor"); svg.setAttribute("aria-hidden", "true");
-      pathList.forEach((d) => { const p = document.createElementNS("http://www.w3.org/2000/svg", "path"); p.setAttribute("d", d); svg.appendChild(p); });
-      slot.appendChild(svg);
-    };
-    let announcer = document.getElementById("heading-copy-status");
-    if (!(announcer instanceof HTMLParagraphElement)) {
-      announcer = document.createElement("p"); announcer.id = "heading-copy-status"; announcer.className = "sr-only";
-      announcer.setAttribute("aria-live", "polite"); announcer.setAttribute("aria-atomic", "true"); document.body.appendChild(announcer);
-    }
-    const addCopyButton = (heading: HTMLElement, targetId: string, label: string) => {
-      if (heading.dataset.headingCopyBound === "true") return;
-      heading.dataset.headingCopyBound = "true";
-      const wrap = document.createElement("span"); wrap.className = "heading-anchor-wrap";
-      const btn = document.createElement("button"); btn.type = "button"; btn.className = "heading-anchor-btn";
-      btn.setAttribute("aria-label", `Copy link to ${label}`);
-      const icon = document.createElement("span"); icon.className = "heading-anchor-icon";
-      setHeadingIcon(icon, "link"); btn.appendChild(icon);
-      btn.addEventListener("click", async () => {
-        const link = `${window.location.origin}${window.location.pathname.startsWith("/docs") ? window.location.pathname : "/docs/"}#${targetId}`;
-        try {
-          if (!window.isSecureContext) throw new Error("Clipboard requires secure context");
-          if (!navigator.clipboard) throw new Error("Clipboard unavailable");
-          await navigator.clipboard.writeText(link);
-          setHeadingIcon(icon, "check"); btn.classList.add("copied"); announcer.textContent = `Copied link to ${label}.`;
-        } catch { setHeadingIcon(icon, "info"); btn.classList.add("failed"); announcer.textContent = `Could not copy link to ${label}.`; }
-        setTimeout(() => { setHeadingIcon(icon, "link"); btn.classList.remove("copied", "failed"); }, 1100);
-      });
-      wrap.appendChild(btn); heading.appendChild(wrap);
-    };
-
-    /* Add copy buttons to section-level headings (h1/h2 inside .doc-section) */
-    Array.from(document.querySelectorAll<HTMLElement>(".doc-section[id]")).forEach((section) => {
-      const heading = section.querySelector<HTMLElement>("h1, h2, h3");
-      if (!heading) return;
-      addCopyButton(heading, section.id, section.dataset.anchorTitle ?? section.id);
-    });
-
-    /* Add copy buttons to standalone h3[id] elements (sub-section anchors) */
-    Array.from(document.querySelectorAll<HTMLElement>("h3[id]")).forEach((h3) => {
-      addCopyButton(h3, h3.id, h3.textContent?.trim() ?? h3.id);
-    });
-  };
-
-  const init = () => { initDocsTabs(); initHeadingAnchors(); };
-  let frame = 0;
-  const schedule = () => { if (frame) cancelAnimationFrame(frame); frame = requestAnimationFrame(() => { frame = 0; init(); }); };
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", schedule, { once: true }); else schedule();
-  if (!document.documentElement.dataset.docsQuickstartBound) { document.documentElement.dataset.docsQuickstartBound = "true"; document.addEventListener("astro:page-load", schedule); }
+  initDocsTabs();
 </script>
 
 <style>
