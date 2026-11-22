@@ -1,11 +1,9 @@
 import {
   animateMicroInteractions,
-  docsEntrance,
   injectCopyButtons,
   revealCode,
   revealGroup,
   revealUtilityHooks,
-  setupDocsAnchorOffsets,
   setupDocsSpy,
   setupNavWrapScroll,
   setupScrollProgress,
@@ -16,7 +14,6 @@ export const initDocsAnimations = () => {
   const state = setupMotion();
 
   if (!state.disabled) {
-    docsEntrance();
     revealGroup("[data-anim='section-head']", 14);
     revealGroup("[data-anim='docs-card']", 16);
     revealGroup("[data-anim='docs-notice']", 10);
@@ -28,7 +25,6 @@ export const initDocsAnimations = () => {
 
   injectCopyButtons();
   setupDocsSpy();
-  setupDocsAnchorOffsets();
   setupScrollProgress();
   setupNavWrapScroll();
 };

@@ -23,6 +23,7 @@ type MotionState =
 
 const hoverCleanups: HoverCleanup[] = [];
 let motionDisabled = false;
+let cleanupDocsSpy: (() => void) | undefined;
 
 const shouldReduceMotion = () => {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -202,7 +203,6 @@ export const setupDocsSpy = () => {
     return;
   }
 
-  const isNestedLink = (link: HTMLAnchorElement) => link.classList.contains("nested");
   const getThreshold = () => getAnchorOffset() + 80;
 
   const scrollRightNav = (link: HTMLAnchorElement) => {
@@ -267,78 +267,23 @@ export const setupDocsSpy = () => {
     });
   };
 
-  let ticking = false;
-  const onScroll = () => {
-    if (!ticking) {
-      requestAnimationFrame(() => {
-        updateSpy();
-        ticking = false;
-      });
-      ticking = true;
-    }
-  };
-
-  window.addEventListener("scroll", onScroll, { passive: true });
-  updateSpy(); // Initial call
-
-  /* Handle hash-based navigation on load */
-  const activateFromHash = () => {
-    const hash = window.location.hash.replace("#", "");
-    if (!hash) return;
-    const el = document.getElementById(hash);
-    if (!el) return;
-
-    links.forEach((link) => {
-      const target = link.getAttribute("href")?.replace("#", "");
-      if (target === hash) {
-        link.classList.add("active");
-        scrollRightNav(link);
-      }
+  let frame = 0;
+  const scheduleSpy = () => {
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      updateSpy();
     });
   };
 
-  window.setTimeout(activateFromHash, 180);
-};
-
-export const setupDocsAnchorOffsets = () => {
-  const links = Array.from(
-    document.querySelectorAll<HTMLAnchorElement>("[data-docs-left-link], [data-docs-toc-link]"),
-  );
-
-  links.forEach((link) => {
-    if (link.dataset.anchorBound === "true") {
-      return;
-    }
-
-    link.dataset.anchorBound = "true";
-    link.addEventListener("click", (event) => {
-      const href = link.getAttribute("href");
-      if (!href || !href.startsWith("#")) {
-        return;
-      }
-
-      const id = href.slice(1);
-      const section = id ? document.getElementById(id) : null;
-      if (!section) {
-        return;
-      }
-
-      event.preventDefault();
-
-      if (id === "overview") {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        window.history.pushState(null, "", "#overview");
-        return;
-      }
-
-      /* Read the section's own scroll-margin-top so JS matches CSS exactly */
-      const smt = getComputedStyle(section).scrollMarginTop;
-      const offset = smt ? parseFloat(smt) : 76;
-      const top = section.getBoundingClientRect().top + window.scrollY - offset;
-      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-      window.history.pushState(null, "", `#${id}`);
-    });
-  });
+  window.addEventListener("scroll", scheduleSpy, { passive: true });
+  window.addEventListener("hashchange", scheduleSpy);
+  cleanupDocsSpy = () => {
+    window.removeEventListener("scroll", scheduleSpy);
+    window.removeEventListener("hashchange", scheduleSpy);
+    cancelAnimationFrame(frame);
+  };
+  updateSpy();
 };
 
 export const animateInstallTabs = () => {
@@ -590,6 +535,8 @@ export const setupLandingNavSpy = () => {
 };
 
 export const clearMotionListeners = () => {
+  cleanupDocsSpy?.();
+  cleanupDocsSpy = undefined;
   hoverCleanups.forEach(({ element, onEnter, onLeave }) => {
     element.removeEventListener("mouseenter", onEnter);
     element.removeEventListener("mouseleave", onLeave);
@@ -615,12 +562,6 @@ export const heroEntrance = () => {
   playReveal("[data-anim='hero-actions']", { y: 10, duration: 450, delay: 320 });
   playReveal("[data-anim='hero-panel']", { x: 20, y: 0, duration: 580, delay: 280 });
   playReveal("[data-anim='hero-metrics'] article", { y: 10, duration: 350, delay: 360, stagger: 80 });
-};
-
-export const docsEntrance = () => {
-  playReveal("[data-anim='docs-sidebar']", { x: -16, y: 0, duration: 450, delay: 60 });
-  playReveal("[data-anim='docs-right-toc']", { x: 16, y: 0, duration: 420, delay: 80 });
-  playReveal("[data-anim='docs-main']", { y: 16, duration: 520, delay: 130 });
 };
 
 export const revealUtilityHooks = () => {

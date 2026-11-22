@@ -12,7 +12,7 @@ interface Props {
 const { canonicalPath, items = docsNav } = Astro.props;
 ---
 
-<aside class="left-nav" data-anim="docs-sidebar">
+<aside class="left-nav">
   <DocsVersionSelector {canonicalPath} />
   <nav aria-label="Documentation sections">
     <ul>

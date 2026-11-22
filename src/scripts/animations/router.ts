@@ -117,7 +117,9 @@ const runRouteAnimations = () => {
     window.setTimeout(() => scrollToSection("install"), 90);
   }
 
-  scrollToHash();
+  if (!path.startsWith("/docs")) {
+    scrollToHash();
+  }
   bindAnchorOffsetScroll();
 
   window.requestAnimationFrame(() => {

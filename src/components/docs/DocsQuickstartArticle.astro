@@ -64,7 +64,7 @@ const { guide = "quickstart" } = Astro.props;
 
 ---
 
-<article class='article' data-anim='docs-main'>
+<article class='article'>
   {guide === "quickstart" && <>
   <!-- OVERVIEW -->
   <section id='overview' class='doc-section' data-anchor-title='Overview'>
@@ -664,18 +664,9 @@ const { guide = "quickstart" } = Astro.props;
   .doc-section {
     position: relative;
     border-bottom: none;
-    scroll-margin-top: calc(var(--header-height) + 3rem);
     padding: 0.5rem 0;
   }
 
-  #overview {
-    scroll-margin-top: 0;
-  }
-
-  /* h3 anchors (lifecycle sub-sections, resource types) need scroll room too */
-  h3[id] {
-    scroll-margin-top: calc(var(--header-height) + 3rem);
-  }
   .doc-section::after {
     content: "";
     display: block;
