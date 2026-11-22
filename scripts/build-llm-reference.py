@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the public 0.3 LLM reference and checksum from the pinned mvmctl Git revision."""
+"""Refresh the public references from their pinned mvmctl Git revisions."""
 
 import argparse
 import hashlib
@@ -13,6 +13,11 @@ SOURCE = "a402f6d6f00414b90f5fe7f6c86a52a44c095b0e"
 REPOSITORY = "https://github.com/AlanD20/mvmctl"
 SITE = Path(__file__).resolve().parents[1]
 VERSION = "0.3"
+ARCHIVE_SOURCE = "eff98faf289585bf6d4ba2dba6f425490a61b7b0"
+ARCHIVE_MANUALS = {
+    "docs/REFERENCES.md": "commands.md",
+    "docs/ENV_SPEC_REFERENCE.md": "environment.md",
+}
 
 INTRO = """# mvmctl 0.3 — full command and environment reference
 
@@ -134,9 +139,34 @@ def render(repo):
     return (intro + provenance + "\n---\n\n" + commands.rstrip() + "\n\n---\n\n" + blueprints).encode("utf-8")
 
 
+ARCHIVE_UTILITY_COMMANDS = b"""### General commands
+
+| Command | Description |
+|---------|-------------|
+| `mvm`, `mvm --help` | Show root help. |
+| `mvm help [COMMAND...]` | Show help for a command path. |
+| `mvm version`, `mvm --version` | Show the installed version. |
+| `mvm completion bash`, `mvm completion zsh`, `mvm completion fish` | Write shell completion to standard output. |
+
+"""
+
+
+def archived_manuals(repo):
+    archive = SITE / "src" / "content" / "reference" / "0.2"
+    for source, filename in ARCHIVE_MANUALS.items():
+        manual = subprocess.check_output(["git", "-C", str(repo), "show", f"{ARCHIVE_SOURCE}:{source}"])
+        if filename == "commands.md":
+            manual = manual.replace(b"](#mvm-snapshot)", b"](#mvm-snapshot-alias-ss)")
+            manual = manual.replace(b"](ENV_SPEC_REFERENCE.md)", b"](/docs/0.2/env-spec/)")
+            manual = manual.replace(b"### Selectors\n", ARCHIVE_UTILITY_COMMANDS + b"### Selectors\n", 1)
+            manual = manual.replace(b"- [Selectors](#selectors)", b"- [General commands](#general-commands)\n- [Selectors](#selectors)", 1)
+            manual = manual.replace(b"- [mvm env](#mvm-env)", b"- [mvm self-update](#mvm-self-update)\n- [mvm env](#mvm-env)", 1)
+        yield archive / filename, manual
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mvmctl_checkout", type=Path, help=f"path to a Git checkout containing {SOURCE}")
+    parser.add_argument("mvmctl_checkout", type=Path, help="path to a Git checkout containing both pinned revisions")
     parser.add_argument("--check", action="store_true", help="verify the committed reference and checksum")
     args = parser.parse_args()
 
@@ -145,6 +175,7 @@ def main():
     outputs = {
         SITE / "src" / "content" / "reference" / VERSION / "llm.txt": reference,
         SITE / "public" / "docs" / VERSION / "llm.txt.sha256": checksum,
+        **dict(archived_manuals(args.mvmctl_checkout)),
     }
     for path, content in outputs.items():
         if args.check:

@@ -10,6 +10,8 @@ const currentVersion = docsVersions.find(({ path }) => canonicalPath.startsWith(
 if (!currentVersion) {
   throw new Error(`No documentation version registered for ${canonicalPath}`);
 }
+const currentGuide = canonicalPath.slice(currentVersion.path.length);
+const sharedGuide = currentGuide === "/reference/" || currentGuide === "/env-spec/" ? currentGuide : "/";
 ---
 
 <details class="version-selector">
@@ -21,7 +23,7 @@ if (!currentVersion) {
     {docsVersions.map((version) => (
       <li>
         <a
-          href={version === currentVersion ? canonicalPath : `${version.path}/`}
+          href={version === currentVersion ? canonicalPath : `${version.path}${sharedGuide}`}
           aria-current={version === currentVersion ? "page" : undefined}
         >
           {version.label}

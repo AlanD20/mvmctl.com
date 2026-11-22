@@ -1,7 +1,7 @@
 ---
 import Icon from "../ui/Icon.astro";
 import DocsVersionSelector from "./DocsVersionSelector.astro";
-import { docsNav, type DocsNavItem } from "../../content/site/docs";
+import { docsNav, docsVersions, type DocsNavItem } from "../../content/site/docs";
 import { getIcon } from "../../lib/icons";
 
 interface Props {
@@ -10,11 +10,12 @@ interface Props {
 }
 
 const { canonicalPath, items = docsNav } = Astro.props;
+const currentVersion = docsVersions.find(({ path }) => canonicalPath.startsWith(`${path}/`));
 ---
 
 <aside class="left-nav">
   <DocsVersionSelector {canonicalPath} />
-  <a class="ai-reference" href="/llm.txt">AI reference (llm.txt)</a>
+  {currentVersion && <a class="ai-reference" href={`${currentVersion.path}/llm.txt`}>AI reference (llm.txt)</a>}
   <nav aria-label="Documentation sections">
     <ul>
       {items.map((item) => {

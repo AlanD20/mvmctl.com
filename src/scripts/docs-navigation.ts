@@ -1,6 +1,16 @@
 import { injectCopyButtons } from "./copy";
 
-injectCopyButtons();
+for (const pre of document.querySelectorAll(".archived-manual pre")) {
+  if (!pre.querySelector("code")) continue;
+  const wrapper = document.createElement("div");
+  wrapper.className = "archive-code";
+  const actions = document.createElement("div");
+  actions.className = "code-top-actions";
+  pre.replaceWith(wrapper);
+  wrapper.append(actions, pre);
+}
+
+injectCopyButtons(".code-wrap, .archive-code");
 
 const nav = document.querySelector<HTMLElement>(".right-toc");
 const links = Array.from(document.querySelectorAll<HTMLAnchorElement>(
@@ -12,12 +22,17 @@ const headings = new Map(sections.map((section) => [
   Array.from(section.querySelectorAll<HTMLElement>("h3[id]")).reverse(),
 ]));
 const firstSection = sections[sections.length - 1];
+const archiveHeadings = Array.from(document.querySelectorAll<HTMLElement>(
+  ".archived-manual :is(h2, h3)[id]",
+)).reverse();
 
 const updateNavigation = () => {
   const threshold = (document.querySelector(".site-header")?.getBoundingClientRect().bottom ?? 80) + 60;
   const isAboveThreshold = (element: HTMLElement) => element.getBoundingClientRect().top <= threshold;
   const section = sections.find(isAboveThreshold) ?? firstSection;
-  const heading = section && headings.get(section)?.find(isAboveThreshold);
+  const heading = section
+    ? headings.get(section)?.find(isAboveThreshold)
+    : archiveHeadings.find(isAboveThreshold);
 
   let activeTocLink: HTMLAnchorElement | undefined;
   for (const link of links) {

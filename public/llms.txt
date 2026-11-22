@@ -1,19 +1,15 @@
 # mvmctl
 
-> mvmctl manages Firecracker microVMs on Linux with KVM. The public 0.3 documentation covers a prerelease and environment blueprint schema version `"1"`.
+> mvmctl manages Firecracker microVMs on Linux with KVM. Choose the reference that matches your `mvm --version` output. The environment blueprint's schema version is separate from the mvmctl release version.
 
-## Complete reference
+## Versioned references
 
-- [Full command and environment reference](https://mvmctl.aland20.com/llm.txt): Operator guidance, CLI commands, configuration, environment blueprint directives, and examples.
-- [Versioned 0.3 reference](https://mvmctl.aland20.com/docs/0.3/llm.txt): The 0.3 edition of the full reference.
-- [SHA-256 checksum](https://mvmctl.aland20.com/docs/0.3/llm.txt.sha256): Integrity check for the 0.3 edition.
+- [0.2 reference](https://mvmctl.aland20.com/docs/0.2/llm.txt): Quickstart, complete command manual, and environment blueprint manual for v0.2.0.
+- [0.3 prerelease reference](https://mvmctl.aland20.com/docs/0.3/llm.txt): Operator guidance, command reference, and environment blueprint directives for the 0.3 prerelease.
+- [0.3 reference checksum](https://mvmctl.aland20.com/docs/0.3/llm.txt.sha256): SHA-256 checksum for the 0.3 text file.
 
 ## Guides
 
-- [0.3 quickstart](https://mvmctl.aland20.com/docs/0.3/)
-- [Command guide](https://mvmctl.aland20.com/docs/0.3/reference/)
-- [Environment blueprint guide](https://mvmctl.aland20.com/docs/0.3/env-spec/)
-- [Networking](https://mvmctl.aland20.com/docs/0.3/networking/)
-- [Policies](https://mvmctl.aland20.com/docs/0.3/policies/)
-- [Guest Control](https://mvmctl.aland20.com/docs/0.3/guest-control/)
+- [0.2 docs](https://mvmctl.aland20.com/docs/0.2/): Install and first VM for the v0.2.0 release.
+- [0.3 prerelease docs](https://mvmctl.aland20.com/docs/0.3/): Install and first VM for the 0.3 prerelease.
 - [GitHub releases](https://github.com/AlanD20/mvmctl/releases)

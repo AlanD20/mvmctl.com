@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
-import reference from "../content/reference/0.3/llm.txt?raw";
+import index from "../../public/llms.txt?raw";
 
-export const GET: APIRoute = () => new Response(reference, {
+export const GET: APIRoute = () => new Response(index, {
   headers: { "Content-Type": "text/plain; charset=utf-8" },
 });

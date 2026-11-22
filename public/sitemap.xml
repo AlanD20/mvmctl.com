@@ -42,4 +42,16 @@
   <url>
     <loc>https://mvmctl.aland20.com/docs/0.3/llm.txt</loc>
   </url>
+  <url>
+    <loc>https://mvmctl.aland20.com/docs/0.2/</loc>
+  </url>
+  <url>
+    <loc>https://mvmctl.aland20.com/docs/0.2/reference/</loc>
+  </url>
+  <url>
+    <loc>https://mvmctl.aland20.com/docs/0.2/env-spec/</loc>
+  </url>
+  <url>
+    <loc>https://mvmctl.aland20.com/docs/0.2/llm.txt</loc>
+  </url>
 </urlset>

@@ -40,6 +40,7 @@ export const docsVersionPath = "/docs/0.3";
 
 export const docsVersions = [
   { label: "0.3", path: docsVersionPath, prerelease: true },
+  { label: "0.2", path: "/docs/0.2", prerelease: false },
 ] as const;
 
 export const policyGuideLinks: readonly DocsNavItem[] = [

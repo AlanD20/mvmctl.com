@@ -35,8 +35,11 @@ pnpm preview
 - `/features` → redirects to `/feature`
 - `/install` → landing, auto-scroll to install section
 - `/docs/` → default documentation and quickstart
+- `/docs/0.2/` → v0.2.0 quickstart, command reference, and environment specification
 - `/docs/0.3/` → versioned 0.3 quickstart, command reference, and guides
 - `/docs/0.3/env-spec/` → environment specification for 0.3
+- `/llm.txt` and `/llms.txt` → index of the versioned plain-text references
+- `/docs/<version>/llm.txt` → complete command and environment reference for that version
 - `/install.sh` → checksum-verified 0.3.x binary installer
 - `/uninstall.sh` → confirmed administrator uninstall launcher
 - `/scripts/0.3.0/` → pinned uninstall Python sources and provenance
@@ -48,6 +51,10 @@ Use a major/minor path such as `/docs/0.3/` for each documented release series. 
 Keep earlier version URLs available when the default changes. Mark prerelease series in `docsVersions` and
 pin installation examples to the version they describe. After publication, update the series status and point
 the default docs to the latest stable version. The environment file's `version` identifies its schema.
+
+Regenerate the archived 0.2 manuals and the 0.3 plain-text reference with
+`python3 scripts/build-llm-reference.py /path/to/mvmctl`. Add `--check` to verify the checked-in files
+against their pinned mvmctl revisions.
 
 ## Project structure
 
@@ -64,7 +71,7 @@ src/
 ## Notes
 
 - The navbar and docs anchor scrolling are offset-aware to account for the sticky header height.
-- Page-level animations and interactions are initialized through `src/scripts/animations/router.ts`.
+- Landing page animations use `src/scripts/animations/router.ts`. Documentation uses `src/scripts/docs-navigation.ts`.
 
 ## Contributing
 
