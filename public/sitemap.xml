@@ -33,4 +33,13 @@
   <url>
     <loc>https://mvmctl.aland20.com/docs/0.3/env-spec/</loc>
   </url>
+  <url>
+    <loc>https://mvmctl.aland20.com/llms.txt</loc>
+  </url>
+  <url>
+    <loc>https://mvmctl.aland20.com/llm.txt</loc>
+  </url>
+  <url>
+    <loc>https://mvmctl.aland20.com/docs/0.3/llm.txt</loc>
+  </url>
 </urlset>
