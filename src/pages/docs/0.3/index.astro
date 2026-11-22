@@ -1,0 +1,14 @@
+---
+import DocsPage from "../../../components/docs/DocsPage.astro";
+import DocsQuickstartArticle from "../../../components/docs/DocsQuickstartArticle.astro";
+import { docsQuickstartToc, docsVersionPath } from "../../../content/site/docs";
+---
+
+<DocsPage
+  title="mvmctl 0.3 documentation"
+  description="Install mvmctl 0.3, set up the host, and create your first microVM."
+  canonicalPath={`${docsVersionPath}/`}
+  toc={docsQuickstartToc}
+>
+  <DocsQuickstartArticle />
+</DocsPage>

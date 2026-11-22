@@ -34,11 +34,19 @@ pnpm preview
 - `/feature` → landing, auto-scroll to features
 - `/features` → redirects to `/feature`
 - `/install` → landing, auto-scroll to install section
-- `/docs/` → documentation (quickstart)
-- `/docs/env-spec/` → environment specification reference
+- `/docs/` → default documentation and quickstart
+- `/docs/0.3/` → versioned 0.3 quickstart, command reference, and guides
+- `/docs/0.3/env-spec/` → environment specification for 0.3
 - `/install.sh` → checksum-verified 0.3.x binary installer
 - `/uninstall.sh` → confirmed administrator uninstall launcher
 - `/scripts/0.3.0/` → pinned uninstall Python sources and provenance
+
+## Documentation versions
+
+Use a major/minor path such as `/docs/0.3/` for each documented release series. Keep earlier version URLs
+available when the default changes. During prerelease, label the guide and pin installation examples to the
+version they describe. Once the release is published, remove the prerelease label and point the default docs
+to the latest stable version. The environment file's `version` identifies its schema.
 
 ## Project structure
 

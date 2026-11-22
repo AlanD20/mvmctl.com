@@ -16,13 +16,21 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://mvmctl.aland20.com/docs/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://mvmctl.aland20.com/docs/0.3/</loc>
   </url>
   <url>
-    <loc>https://mvmctl.aland20.com/docs/api/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <loc>https://mvmctl.aland20.com/docs/0.3/reference/</loc>
+  </url>
+  <url>
+    <loc>https://mvmctl.aland20.com/docs/0.3/networking/</loc>
+  </url>
+  <url>
+    <loc>https://mvmctl.aland20.com/docs/0.3/policies/</loc>
+  </url>
+  <url>
+    <loc>https://mvmctl.aland20.com/docs/0.3/guest-control/</loc>
+  </url>
+  <url>
+    <loc>https://mvmctl.aland20.com/docs/0.3/env-spec/</loc>
   </url>
 </urlset>

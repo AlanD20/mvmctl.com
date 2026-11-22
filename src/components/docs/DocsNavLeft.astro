@@ -1,6 +1,6 @@
 ---
 import Icon from "../ui/Icon.astro";
-import { docsNav, type DocsNavItem } from "../../content/site/docs";
+import { docsNav, docsVersionPath, type DocsNavItem } from "../../content/site/docs";
 import { getIcon } from "../../lib/icons";
 
 interface Props {
@@ -11,7 +11,7 @@ const { items = docsNav } = Astro.props;
 ---
 
 <aside class="left-nav" data-anim="docs-sidebar">
-  <p class="title">Getting started</p>
+  <p class="title"><a href={`${docsVersionPath}/`}>mvmctl 0.3 · prerelease</a></p>
   <nav aria-label="Documentation sections">
     <ul>
       {items.map((item) => {

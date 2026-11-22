@@ -1,0 +1,50 @@
+---
+import DocsPage from "../../../components/docs/DocsPage.astro";
+import DocsQuickstartArticle from "../../../components/docs/DocsQuickstartArticle.astro";
+import { docsGuideNav, docsReferenceNav, docsReferenceToc, docsVersionPath, guestControlSections, type TocItem } from "../../../content/site/docs";
+
+export function getStaticPaths() {
+  return [
+    { params: { guide: "reference" }, props: {
+      title: "Command reference", description: "VM commands, resources, configuration and troubleshooting.",
+      toc: docsReferenceToc,
+    } },
+    { params: { guide: "networking" }, props: {
+      title: "Networking", description: "Create and manage mvmctl networks.",
+      toc: [{ id: "network-management", label: "Networking" }],
+    } },
+    { params: { guide: "policies" }, props: {
+      title: "Policies and labels", description: "Grant traffic and guest exec access using live VM labels.",
+      toc: [
+        { id: "policy-overview", label: "Policies and labels" },
+        { id: "exact-policies", label: "Exact grants" },
+        { id: "label-traffic", label: "Allow traffic with labels" },
+        { id: "label-exec", label: "Allow guest exec" },
+      ],
+    } },
+    { params: { guide: "guest-control" }, props: {
+      title: "Guest Control and floating IPs", description: "Reserve floating IPs and delegate guest operations.",
+      toc: [
+        { id: "guest-control", label: "Guest Control and floating IPs" },
+        ...guestControlSections.map(({ id, title }) => ({ id, label: title })),
+      ],
+    } },
+  ];
+}
+
+interface Props {
+  title: string;
+  description: string;
+  toc: readonly TocItem[];
+}
+
+const { title, description, toc } = Astro.props;
+const { guide } = Astro.params;
+if (guide !== "reference" && guide !== "networking" && guide !== "policies" && guide !== "guest-control") {
+  throw new Error("Unknown mvmctl documentation guide");
+}
+---
+
+<DocsPage title={`${title} · mvmctl 0.3`} {description} canonicalPath={`${docsVersionPath}/${guide}/`} items={guide === "reference" ? [...docsGuideNav, ...docsReferenceNav] : docsGuideNav} {toc}>
+  <DocsQuickstartArticle {guide} />
+</DocsPage>

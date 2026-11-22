@@ -33,10 +33,25 @@ export type TocItem = {
 export const docsMeta = {
   title: "mvmctl 0.3.0 documentation",
   intro:
-    "Install mvmctl, create your first microVM, and manage networks, storage and environments. These docs cover the upcoming 0.3.0 release, which requires a clean installation and fresh managed state.",
+    "This guide covers the upcoming 0.3.0 release. If you are coming from 0.2.x, follow the clean-install instructions and start with fresh managed state.",
 } as const;
 
-export const docsNav: readonly DocsNavItem[] = [
+export const docsVersionPath = "/docs/0.3";
+
+export const policyGuideLinks: readonly DocsNavItem[] = [
+  { href: `${docsVersionPath}/networking/`, label: "Networking", icon: "network" },
+  { href: `${docsVersionPath}/policies/`, label: "Policies and labels", icon: "terminal" },
+  { href: `${docsVersionPath}/guest-control/`, label: "Guest Control and floating IPs", icon: "network" },
+];
+
+export const docsGuideNav: readonly DocsNavItem[] = [
+  { href: `${docsVersionPath}/`, label: "Install and first VM", icon: "book" },
+  ...policyGuideLinks,
+  { href: `${docsVersionPath}/reference/`, label: "Command reference", icon: "terminal" },
+  { href: `${docsVersionPath}/env-spec/`, label: "Environment spec", icon: "terminal" },
+];
+
+const docsAllNav: readonly DocsNavItem[] = [
   { id: "overview", label: "Overview", icon: "book" },
   { id: "prerequisites", label: "Before you begin", icon: "chip" },
   { id: "install", label: "Install mvm", icon: "download" },
@@ -90,15 +105,15 @@ export const docsNav: readonly DocsNavItem[] = [
     label: "Volumes",
     icon: "archive",
   },
-  { id: "network-management", label: "Networks", icon: "network" },
+  ...policyGuideLinks,
   { id: "configuration", label: "Configuration", icon: "gear" },
   { id: "dependencies", label: "Dependencies", icon: "chip" },
   { id: "cloud-init", label: "Cloud-Init", icon: "layers" },
   { id: "troubleshooting", label: "Troubleshooting", icon: "spanner" },
-  { href: "/docs/env-spec/", label: "Env spec reference", icon: "terminal" },
+  { href: `${docsVersionPath}/env-spec/`, label: "Env spec reference", icon: "terminal" },
 ] as const;
 
-export const docsQuickstartToc: readonly TocItem[] = [
+const docsAllToc: readonly TocItem[] = [
   { id: "overview", label: "Overview" },
   { id: "prerequisites", label: "Before you begin" },
   { id: "install", label: "Install mvm" },
@@ -124,6 +139,7 @@ export const docsQuickstartToc: readonly TocItem[] = [
   { id: "resource-management-key", label: "SSH keys", level: 3 },
   { id: "resource-management-volume", label: "Volumes", level: 3 },
   { id: "network-management", label: "Networks" },
+  { id: "guest-control", label: "Guest Control & floating IPs" },
   { id: "configuration", label: "Configuration" },
   { id: "shell-completion", label: "Shell Completion" },
   { id: "self-update", label: "Self-Update" },
@@ -131,6 +147,17 @@ export const docsQuickstartToc: readonly TocItem[] = [
   { id: "cloud-init", label: "Cloud-Init" },
   { id: "troubleshooting", label: "Troubleshooting" },
 ] as const;
+
+const quickstartSections = new Set(["overview", "prerequisites", "install", "host-initialize", "uninstall", "first-vm"]);
+const guideSections = new Set(["network-management", "guest-control"]);
+
+export const docsQuickstartToc = docsAllToc.filter(({ id }) => quickstartSections.has(id));
+export const docsReferenceToc = docsAllToc.filter(({ id }) => !quickstartSections.has(id) && !guideSections.has(id));
+export const docsReferenceNav = docsAllNav.filter(({ id }) => id && !quickstartSections.has(id));
+export const docsNav: readonly DocsNavItem[] = [
+  ...docsAllNav.filter(({ id }) => id && quickstartSections.has(id)),
+  ...docsGuideNav.slice(1),
+];
 
 /* ───────────────────────────────────────────────────────────────
    PREREQUISITES
@@ -938,6 +965,15 @@ export const networkSections = [
     callout: "The host can reach a guest service at its VM address when the service listens on the guest interface and the host firewall permits it. Guest 127.0.0.1 is private to that VM; host-to-VM access does not need an mvm traffic policy.",
   },
   {
+    title: "Reconcile or remove a network",
+    description: "Use sync to reconcile managed network state. Remove attached VMs before removing their network.",
+    code: ["mvm network sync", "mvm network rm mynet"],
+    callout: "Conflicting or changed firewall state is refused rather than overwritten. Do not flush unrelated firewall rules to make setup pass.",
+  },
+];
+
+export const exactPolicySections = [
+  {
     title: "Allow traffic between VMs",
     description: "Traffic between managed VMs is denied by default, even on the same network. For existing VMs named client and server, allow only the destination port you need:",
     code: ["mvm policy traffic create --from-vm client --to-vm server --protocol tcp --port 8080", "mvm policy traffic ls"],
@@ -955,17 +991,87 @@ export const networkSections = [
     code: ["mvm policy exec create client server app", "mvm exec client --allow-vm-exec -- mvm-agent remote --user app server -- whoami", "mvm policy exec ls"],
     callout: "Exec works across same-network, cross-network and networkless VMs. The source kernel must support SO_PEERPIDFD; the stock Firecracker CI kernel lacks it. Use a capable custom kernel. Reverse requests need their own policy.",
   },
-  {
-    title: "Reconcile or remove a network",
-    description: "Use sync to reconcile managed network state. Remove attached VMs before removing their network.",
-    code: ["mvm network sync", "mvm network rm mynet"],
-    callout: "Conflicting or changed firewall state is refused rather than overwritten. Do not flush unrelated firewall rules to make setup pass.",
-  },
 ];
 
 /* ───────────────────────────────────────────────────────────────
    CONFIGURATION
    ─────────────────────────────────────────────────────────────── */
+
+export const guestControlIntro =
+  "A floating IP reserves one private IPv4 address in a managed network, separate from a VM's primary address. Guest Control lets an explicitly delegated guest claim that address for itself, renew a finite lease and release it. Clients keep the same destination when ownership moves.";
+
+export const guestControlCallout =
+  "Host assignments persist until release, transfer or VM stop. Guest assignments use finite leases. A stored delegation does not mean the guest is connected. The full Kubernetes HA workflow has not been tested end to end; no failover time is promised.";
+
+export const guestControlSections = [
+  {
+    id: "floating-ip-reserve",
+    title: "Reserve an address",
+    description: "For an existing managed network named cluster, allocate an available address. Add --ip 10.25.0.100 to request that exact address when it belongs to the network's subnet. Allocation excludes the gateway, network and broadcast addresses, VM primary reservations (including stopped VMs), and other floating IPs.",
+    code: [
+      "mvm floating-ip create api --network cluster",
+      "mvm floating-ip inspect api --network cluster --json",
+      "mvm floating-ip ls --network cluster --long",
+    ],
+    callout: "Names are unique within a network. Resource selectors accept a name, full ID, unambiguous ID prefix or IPv4. Inspection returns the immutable ID and generation. Reusing a freed name or address creates a different resource. Omit --network to select the default network.",
+  },
+  {
+    id: "floating-ip-host",
+    title: "Assign ownership from the host",
+    description: "For eligible running VMs controller-1 and controller-2 in cluster, associate an unowned reservation, explicitly transfer it, or release it. Host assignments persist until release, transfer or VM stop and need neither a delegation nor a renewal loop. Guest leases always remain finite. Transfer fences the old owner before admitting the new one; association cannot replace an owner.",
+    code: [
+      "mvm floating-ip associate api controller-1 --network cluster",
+      "mvm floating-ip transfer api controller-2 --network cluster",
+      "mvm floating-ip release api --network cluster",
+      "mvm floating-ip inspect api --network cluster --json",
+    ],
+    callout: "Optional --generation N binds an earlier observation; omission observes the current generation before compare-and-swap. Persistent ownership with zero remaining lease is not expired. Successful release reports absent after fencing; unowned inspection reports unobserved, which is not absence proof. Inspection does not contact the guest or establish alias readiness. Association and transfer wait for exact guest alias acknowledgment. An error can follow kernel commit without rollback: inspect ownership before deciding whether to retry.",
+  },
+  {
+    id: "floating-ip-delegate",
+    title: "Delegate exact methods",
+    description: "For an eligible running VM named controller-1 in cluster, grant each needed method separately. Association and renewal require an explicit positive whole-second Go duration, such as 10s or 1m. Inspect and release forbid a lease. The 10s values below are examples, not defaults.",
+    code: [
+      "mvm floating-ip delegation grant api --network cluster --vm controller-1 --method inspect",
+      "mvm floating-ip delegation grant api --network cluster --vm controller-1 --method associate --lease 10s",
+      "mvm floating-ip delegation grant api --network cluster --vm controller-1 --method renew --lease 10s",
+      "mvm floating-ip delegation grant api --network cluster --vm controller-1 --method release",
+      "mvm floating-ip delegation ls api --network cluster --long",
+    ],
+    callout: "Each grant binds the exact resource, method and current VM incarnation under the same operator and network. It does not claim the address or renew ownership. Restart and restore do not transfer grants to a new incarnation. A guest cannot allocate resources, create grants, select another owner or run arbitrary host commands. Revoking a grant fences only ownership it sustained; unrelated revocation leaves an operator assignment intact. A current release grant for the owning VM can explicitly release its persistent assignment.",
+  },
+  {
+    id: "floating-ip-guest",
+    title: "Request ownership from guest root",
+    description: "Run mvm-agent control floating-ip as guest root. Its root-only local socket is /run/mvm-agent/control.sock. Every application with guest-root access can exercise the VM's grants. The forms below are syntax: replace RESOURCE_ID with the full lowercase 32-character resource ID and N with the generation returned by a fresh inspect.",
+    code: [
+      "mvm-agent control floating-ip inspect RESOURCE_ID",
+      "mvm-agent control floating-ip associate --generation N RESOURCE_ID",
+      "mvm-agent control floating-ip renew --generation N RESOURCE_ID",
+      "mvm-agent control floating-ip release --generation N RESOURCE_ID",
+    ],
+    callout: "JSON results contain resource_id, ipv4, generation, ownership (unassociated, self or other), lifetime and lease_remaining_ms. A persistent lifetime with zero remaining lease is not expired; guest renewal cannot extend or convert it. Inspect before each decision. Association cannot evict a healthy owner; renew only while the local service is healthy. A conflict, timeout or outcome_unknown requires inspection before another mutation. Ownership changes advance the generation; renewal retains it. Remaining finite time is measured at the host, not restarted by response delivery.",
+  },
+  {
+    id: "floating-ip-traffic",
+    title: "Allow service traffic separately",
+    description: "Delegation grants no client access. For existing client, api and cluster resources, allow only the required service port. Choose one VM source or, alternatively, the selected source network's VMs. The exact floating destination follows its active owner, stays dormant while unassociated, and does not expose the owner's primary address or other aliases.",
+    code: [
+      "mvm policy traffic create --from-vm client --to-floating-ip api --to-network cluster --protocol tcp --port 6443",
+      "# Alternative source scope:",
+      "mvm policy traffic create --from-network cluster --to-floating-ip api --to-network cluster --protocol tcp --port 6443",
+      "mvm policy traffic ls --json",
+    ],
+    callout: "--to-network selects the floating reservation's network (default network when omitted); it is invalid for other destinations. Inspect or remove a floating-IP traffic policy using its policy ID, --to-floating-ip and the boolean --from-vm or --from-network family flag. A --to-vm policy follows that VM's admitted addresses instead. Host-originated access still depends on host routing and firewall rules; floating-address delivery fencing still applies.",
+  },
+  {
+    id: "floating-ip-remove",
+    title: "Revoke and remove resources",
+    description: "Stop lease controllers and release ownership before removing their resources. Use the complete lowercase 32-character grant ID from the grant list with mvm floating-ip delegation inspect GRANT_ID --network cluster or mvm floating-ip delegation revoke GRANT_ID --network cluster. These commands do not accept prefixes. Revocation fences ownership sustained by that exact grant, can finish after the VM stops, and cannot reactivate the revoked ID. Remove obsolete service policies, then the reservation:",
+    code: ["mvm floating-ip rm api --network cluster"],
+    callout: "--force skips confirmation, not ownership checks. Ordinary network removal requires floating reservations to be removed first. VM stop, deletion and restore fence secondary authority. Host reboot restores neither finite nor persistent ownership. Version 1 environment declarations retain exact resource and grant IDs for retries and cleanup; see the <a href='/docs/env-spec/#env-spec-floating-ip'>environment reference</a>.",
+  },
+] as const;
 
 export const configSections = [
   {

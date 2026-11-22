@@ -6,6 +6,9 @@ import Icon from "../ui/Icon.astro";
 import {
   distroPackages,
   docsMeta,
+  docsVersionPath,
+  docsReferenceToc,
+  exactPolicySections,
   installMethods,
   prerequisites,
   troubleshooting,
@@ -30,6 +33,9 @@ import {
   keySections,
   volumeSections,
   networkSections,
+  guestControlIntro,
+  guestControlCallout,
+  guestControlSections,
   configSections,
   shellCompletionSections,
   dependencySections,
@@ -51,9 +57,16 @@ import {
   helpSection,
 } from "../../content/site/docs";
 import { getIcon } from "../../lib/icons";
+interface Props {
+  guide?: "quickstart" | "reference" | "networking" | "guest-control" | "policies";
+}
+
+const { guide = "quickstart" } = Astro.props;
+
 ---
 
 <article class='article' data-anim='docs-main'>
+  {guide === "quickstart" && <>
   <!-- OVERVIEW -->
   <section id='overview' class='doc-section' data-anchor-title='Overview'>
     <p class='kicker'>mvmctl docs</p>
@@ -188,6 +201,30 @@ import { getIcon } from "../../lib/icons";
     ))}
   </section>
 
+  <section id="network-management" class="doc-section" data-anchor-title="Networking">
+    <h2>Networking and policies</h2>
+    <p><a href={`${docsVersionPath}/networking/`}>Create a network</a> or <a href={`${docsVersionPath}/policies/`}>grant traffic and exec access</a>.</p>
+    <p id="guest-control"><a href={`${docsVersionPath}/guest-control/`}>Manage floating IPs with Guest Control</a>.</p>
+  </section>
+  <section class="doc-section">
+    <h2>Command reference</h2>
+    <p>Find VM flags, asset commands, configuration and troubleshooting in the <a href={`${docsVersionPath}/reference/`}>command reference</a>.</p>
+    <details>
+      <summary>Jump to a command reference section</summary>
+      <ul>
+        {docsReferenceToc.map(({ id, label }) => (
+          <li id={id}><a href={`${docsVersionPath}/reference/#${id}`}>{label}</a></li>
+        ))}
+      </ul>
+    </details>
+  </section>
+  </>}
+  {guide === "reference" && <>
+  <section id="reference-overview" class="doc-section">
+    <p class="kicker">mvmctl 0.3</p>
+    <h1>Command reference</h1>
+    <p><a href={`${docsVersionPath}/`}>Install mvmctl or create your first VM</a>.</p>
+  </section>
   <!-- VM CREATE -->
   <section id='vm-create' class='doc-section' data-anchor-title='mvm vm create'>
     <h2>mvm vm create</h2>
@@ -363,9 +400,12 @@ import { getIcon } from "../../lib/icons";
     ))}
   </section>
 
+  </>}
+  {guide === "networking" && <>
   <!-- NETWORK -->
   <section id='network-management' class='doc-section' data-anchor-title='Network Management'>
-    <h2>Network Management</h2>
+    <p class="kicker">mvmctl 0.3</p>
+    <h1>Networking</h1>
     <p set:html={networkIntro} />
 
     {networkSections.map((s) => (
@@ -378,6 +418,73 @@ import { getIcon } from "../../lib/icons";
     ))}
   </section>
 
+  </>}
+  {guide === "guest-control" && <>
+  <section id='guest-control' class='doc-section' data-anchor-title='Guest Control & Floating IPs'>
+    <p class="kicker">mvmctl 0.3</p>
+    <h1>Guest Control and floating IPs</h1>
+    <p>{guestControlIntro}</p>
+    <Callout text={guestControlCallout} />
+    <p>Guest operations use authenticated vsock. The host kernel blocks traffic to and from an expired address even if the guest still has the alias configured.</p>
+    {guestControlSections.map((s) => (
+      <div class="sub-section">
+        <h3 id={s.id}>{s.title}</h3>
+        <p>{s.description}</p>
+        <div class='inline-block' data-anim='docs-card'><CodeBlock lines={s.code} compact={true} /></div>
+        <Callout text={s.callout} />
+      </div>
+    ))}
+  </section>
+
+  </>}
+  {guide === "policies" && <>
+  <section id="policy-overview" class="doc-section" data-anchor-title="Policies and labels">
+    <p class="kicker">mvmctl 0.3</p>
+    <h1>Policies and labels</h1>
+    <p>VM-to-VM traffic requires an explicit grant, even on the same network. Traffic policies allow TCP or UDP. Exec policies allow a source VM to run a command as one non-root user on the destination via vsock.</p>
+  </section>
+  <section id="exact-policies" class="doc-section" data-anchor-title="Exact grants">
+    <h2>Exact grants</h2>
+    {exactPolicySections.map((s) => (
+      <div class="sub-section">
+        <h3>{s.title}</h3>
+        <p>{s.description}</p>
+        <CodeBlock lines={s.code} compact={true} />
+        <Callout text={s.callout} />
+      </div>
+    ))}
+  </section>
+  <section id="label-traffic" class="doc-section" data-anchor-title="Allow traffic with labels">
+    <h2>Allow traffic with labels</h2>
+    <p>Assume <code>client</code> and <code>api</code> are managed VMs and the API listens on its guest IP on TCP 8443. Inspect each VM for its label revision. The example uses revision 0 for VMs whose labels have never been set.</p>
+    <CodeBlock compact={true} lines={[
+      "mvm vm labels inspect client",
+      "mvm vm labels inspect api",
+      "mvm vm labels set client --revision 0 role=client",
+      "mvm vm labels set api --revision 0 role=api",
+      "mvm policy traffic labels create --from-label role=client --to-label role=api --protocol tcp --port 8443",
+    ]} />
+    <p>Repeat a label flag to require every key-value pair. Selectors match only VMs owned by the operator. You can use an exact VM on one side of a label traffic rule.</p>
+    <p>To revoke access, replace the client’s labels using its current revision. The change applies to established flows. Other grants can still allow the traffic.</p>
+    <CodeBlock compact={true} lines={[
+      "mvm vm labels set client --revision 1 role=idle",
+      "mvm policy traffic labels ls",
+      "mvm policy traffic labels rm POLICY_ID",
+    ]} />
+    <p>Label updates replace the full map. Include any labels you want to keep.</p>
+  </section>
+  <section id="label-exec" class="doc-section" data-anchor-title="Allow guest exec">
+    <h2>Allow guest exec</h2>
+    <p>Create a directional grant for an existing non-root account on the destination. Opt in on the source command.</p>
+    <CodeBlock compact={true} lines={[
+      "mvm policy exec create --from-label role=client --to-vm api --user app",
+      "mvm exec client --allow-vm-exec -- mvm-agent remote --user app api -- id",
+    ]} />
+    <p>Use this with a client that still has <code>role=client</code>. New exec requests use current labels. A command that was already admitted can finish.</p>
+    <p><a href={`${docsVersionPath}/env-spec/#env-spec-traffic-policy`}>Use selectors in an environment spec</a> or see the <a href="https://github.com/AlanD20/mvmctl/tree/0.3.0-release/examples/workflows/simple-k8s-cluster-ha">Kubernetes HA example</a>.</p>
+  </section>
+  </>}
+  {guide === "reference" && <>
   <!-- CONFIGURATION -->
   <section id='configuration' class='doc-section' data-anchor-title='Configuration'>
     <h2>Configuration</h2>
@@ -476,6 +583,7 @@ import { getIcon } from "../../lib/icons";
       {helpSection.items.map((item) => <li set:html={item} />)}
     </ul>
   </section>
+</>}
 </article>
 
 <script>

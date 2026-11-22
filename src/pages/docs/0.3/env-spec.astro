@@ -1,0 +1,16 @@
+---
+import DocsPage from "../../../components/docs/DocsPage.astro";
+import DocsEnvSpecArticle from "../../../components/docs/DocsEnvSpecArticle.astro";
+import { docsVersionPath } from "../../../content/site/docs";
+import { envSpecNav, envSpecSections } from "../../../content/site/env-spec";
+---
+
+<DocsPage
+  title="Environment spec · mvmctl 0.3"
+  description="Environment workflow fields for mvmctl 0.3, including labels, policies, and cleanup."
+  canonicalPath={`${docsVersionPath}/env-spec/`}
+  items={envSpecNav}
+  toc={envSpecSections.map(({ id, title }) => ({ id, label: title }))}
+>
+  <DocsEnvSpecArticle />
+</DocsPage>
