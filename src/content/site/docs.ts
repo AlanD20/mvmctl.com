@@ -366,7 +366,7 @@ export const vmCreateExamples = [
     title: "Specific network and static IP",
     code: [
       "# First create a network",
-      "mvm network create isolated --subnet 10.0.0.0/24",
+      "mvm network create isolated --subnet 10.0.0.0/24 --uplink none",
       "",
       "# Then attach the VM with a fixed IP",
       "mvm vm create myvm --image ubuntu:24.04 --network isolated --ip 10.0.0.50",
@@ -855,14 +855,14 @@ export const kernelSections = [
 export const binarySections = [
   {
     title: "Firecracker and Jailer",
-    description: "VM launch in 0.3.0 requires the matching Firecracker/Jailer 1.17.0 pair. Pull them together and select the release as your default.",
-    code: ["mvm bin pull 1.17.0 --default", "mvm bin ls", "mvm bin ls --remote"],
+    description: "VM launch in 0.3.0 requires the matching Firecracker/Jailer 1.17.0 pair. Use a typed selector such as firecracker:1.17.0 to pull the pair and select the release as your default.",
+    code: ["mvm bin pull firecracker:1.17.0 --default", "mvm bin ls", "mvm bin ls --remote"],
     callout: "Other cached releases are not automatically eligible for launch. Use fresh snapshots with the required pair.",
   },
   {
     title: "Remove an unused release",
-    description: "Remove by release version after no VM retains it.",
-    code: ["mvm bin rm 1.17.0"],
+    description: "Remove an unused release by its exact type and version.",
+    code: ["mvm bin rm firecracker:1.17.0"],
     callout: "Force cannot override a live VM's release lease. Download the required pair again before launching another VM.",
   },
 ];
@@ -945,9 +945,18 @@ export const volumeSections = [
 export const networkSections = [
   {
     title: "Managed networks",
-    description: "Each VM runs in a separate network namespace. Networks provide private IPv4 addresses and optional NAT. mvmctl selects the uplink and manages nftables directly; there is no iptables backend or caller-selected host interface.",
+    description: "Each VM runs in a separate network namespace. Managed networks provide private IPv4 addresses and optional NAT. By default, mvmctl discovers the host’s IPv4 default-route interface.",
     code: ["mvm network create mynet --subnet 10.25.0.0/24", "mvm network ls", "mvm network inspect mynet"],
-    callout: "Use a private subnet that does not overlap your host routes. Kernel interface names are internal; use network names or IDs with the CLI.",
+    callout: "Choose a private subnet that does not overlap your host routes. Use network names or IDs to refer to managed networks.",
+  },
+  {
+    title: "Choose a NAT uplink",
+    description: "Use --uplink auto (the default), --uplink none to disable NAT, or name an existing IPv4 Ethernet, Wi-Fi, or bridge interface. mvmctl manages guest egress through the selected interface and preserves local and more-specific host routes.",
+    code: [
+      "mvm network create lab --subnet 172.27.0.0/24 --uplink br-lab --uplink-gateway 192.168.50.1",
+      "mvm network create isolated --subnet 172.28.0.0/24 --uplink none",
+    ],
+    callout: "Omit --uplink-gateway to use a default route on the selected interface. Without a next hop, guests can reach destinations already routed through that interface, such as its directly connected subnet.",
   },
   {
     title: "Connect a VM",
@@ -1000,9 +1009,9 @@ export const guestControlSections = [
     title: "Reserve an address",
     description: "For an existing managed network named cluster, allocate an available address. Add --ip 10.25.0.100 to request that exact address when it belongs to the network's subnet. Allocation excludes the gateway, network and broadcast addresses, VM primary reservations (including stopped VMs), and other floating IPs.",
     code: [
-      "mvm floating-ip create api --network cluster",
-      "mvm floating-ip inspect api --network cluster --json",
-      "mvm floating-ip ls --network cluster --long",
+      "mvm network floating-ip create api --network cluster",
+      "mvm network floating-ip inspect api --network cluster --json",
+      "mvm network floating-ip ls --network cluster --long",
     ],
     callout: "Names are unique within a network. Resource selectors accept a name, full ID, unambiguous ID prefix or IPv4. Inspection returns the immutable ID and generation. Reusing a freed name or address creates a different resource. Omit --network to select the default network.",
   },
@@ -1011,10 +1020,10 @@ export const guestControlSections = [
     title: "Assign ownership from the host",
     description: "For eligible running VMs controller-1 and controller-2 in cluster, associate an unowned reservation, explicitly transfer it, or release it. Host assignments persist until release, transfer or VM stop and need neither a delegation nor a renewal loop. Guest leases always remain finite. Transfer fences the old owner before admitting the new one; association cannot replace an owner.",
     code: [
-      "mvm floating-ip associate api controller-1 --network cluster",
-      "mvm floating-ip transfer api controller-2 --network cluster",
-      "mvm floating-ip release api --network cluster",
-      "mvm floating-ip inspect api --network cluster --json",
+      "mvm network floating-ip associate api controller-1 --network cluster",
+      "mvm network floating-ip transfer api controller-2 --network cluster",
+      "mvm network floating-ip release api --network cluster",
+      "mvm network floating-ip inspect api --network cluster --json",
     ],
     callout: "Optional --generation N binds an earlier observation; omission observes the current generation before compare-and-swap. Persistent ownership with zero remaining lease is not expired. Successful release reports absent after fencing; unowned inspection reports unobserved, which is not absence proof. Inspection does not contact the guest or establish alias readiness. Association and transfer wait for exact guest alias acknowledgment. An error can follow kernel commit without rollback: inspect ownership before deciding whether to retry.",
   },
@@ -1023,11 +1032,11 @@ export const guestControlSections = [
     title: "Delegate exact methods",
     description: "For an eligible running VM named controller-1 in cluster, grant each needed method separately. Association and renewal require an explicit positive whole-second Go duration, such as 10s or 1m. Inspect and release forbid a lease. The 10s values below are examples, not defaults.",
     code: [
-      "mvm floating-ip delegation grant api --network cluster --vm controller-1 --method inspect",
-      "mvm floating-ip delegation grant api --network cluster --vm controller-1 --method associate --lease 10s",
-      "mvm floating-ip delegation grant api --network cluster --vm controller-1 --method renew --lease 10s",
-      "mvm floating-ip delegation grant api --network cluster --vm controller-1 --method release",
-      "mvm floating-ip delegation ls api --network cluster --long",
+      "mvm network floating-ip delegation grant api --network cluster --vm controller-1 --method inspect",
+      "mvm network floating-ip delegation grant api --network cluster --vm controller-1 --method associate --lease 10s",
+      "mvm network floating-ip delegation grant api --network cluster --vm controller-1 --method renew --lease 10s",
+      "mvm network floating-ip delegation grant api --network cluster --vm controller-1 --method release",
+      "mvm network floating-ip delegation ls api --network cluster --long",
     ],
     callout: "Each grant binds the exact resource, method and current VM incarnation under the same operator and network. It does not claim the address or renew ownership. Restart and restore do not transfer grants to a new incarnation. A guest cannot allocate resources, create grants, select another owner or run arbitrary host commands. Revoking a grant fences only ownership it sustained; unrelated revocation leaves an operator assignment intact. A current release grant for the owning VM can explicitly release its persistent assignment.",
   },
@@ -1058,8 +1067,8 @@ export const guestControlSections = [
   {
     id: "floating-ip-remove",
     title: "Revoke and remove resources",
-    description: "Stop lease controllers and release ownership before removing their resources. Use the complete lowercase 32-character grant ID from the grant list with mvm floating-ip delegation inspect GRANT_ID --network cluster or mvm floating-ip delegation revoke GRANT_ID --network cluster. These commands do not accept prefixes. Revocation fences ownership sustained by that exact grant, can finish after the VM stops, and cannot reactivate the revoked ID. Remove obsolete service policies, then the reservation:",
-    code: ["mvm floating-ip rm api --network cluster"],
+    description: "Stop lease controllers and release ownership before removing their resources. Use the complete lowercase 32-character grant ID from the grant list with mvm network floating-ip delegation inspect GRANT_ID --network cluster or mvm network floating-ip delegation revoke GRANT_ID --network cluster. These commands do not accept prefixes. Revocation fences ownership sustained by that exact grant, can finish after the VM stops, and cannot reactivate the revoked ID. Remove obsolete service policies, then the reservation:",
+    code: ["mvm network floating-ip rm api --network cluster"],
     callout: "--force skips confirmation, not ownership checks. Ordinary network removal requires floating reservations to be removed first. VM stop, deletion and restore fence secondary authority. Host reboot restores neither finite nor persistent ownership. Version 1 environment declarations retain exact resource and grant IDs for retries and cleanup; see the <a href='/docs/env-spec/#env-spec-floating-ip'>environment reference</a>.",
   },
 ] as const;
@@ -1336,7 +1345,7 @@ export const troubleshooting = [
   },
   {
     problem: "Required Firecracker release is missing",
-    fix: ["mvm bin pull 1.17.0 --default", "mvm bin ls"],
+    fix: ["mvm bin pull firecracker:1.17.0 --default", "mvm bin ls"],
     note: "VM launch requires the matching Firecracker/Jailer 1.17.0 pair. Pulling an older release does not make it eligible for launch.",
   },
   {

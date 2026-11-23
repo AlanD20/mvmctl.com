@@ -9,7 +9,7 @@ import re
 import subprocess
 
 
-SOURCE = "a402f6d6f00414b90f5fe7f6c86a52a44c095b0e"
+SOURCE = "5426a788ce02d87a5c6e4dbb90d7854d2e38d8d1"
 REPOSITORY = "https://github.com/AlanD20/mvmctl"
 SITE = Path(__file__).resolve().parents[1]
 VERSION = "0.3"
